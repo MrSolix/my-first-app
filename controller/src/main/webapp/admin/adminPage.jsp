@@ -12,7 +12,7 @@
 <a href="${pageContext.request.contextPath}/admin/salary">
     <h3>Salary Page</h3>
 </a>
-<a href="${pageContext.request.contextPath}/admin/averageSalary">
+<a href="${pageContext.request.contextPath}/admin/average-salary">
     <h3>Average Salary Page</h3>
 </a>
 

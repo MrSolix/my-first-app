@@ -16,6 +16,7 @@ public class InitializeClass {
     public static final String ROLE_STUDENT = "STUDENT";
     public static final String ROLE_TEACHER = "TEACHER";
     public static final String ROLE_ADMIN = "ADMIN";
+    static Group group;
 
     static {
         personDAO = new PersonDAOImpl();
@@ -41,6 +42,8 @@ public class InitializeClass {
         Teacher teacher1 = new Teacher("teacher1", "123",
                 "Daniel", 45, ROLE_TEACHER);
 
+        group = new Group(13, teacher1, Arrays.asList(student, student1));
+
         teacher.setSalary(5000);
         teacher1.setSalary(3000);
         Finance.salaryHistory.put(teacher, new HashMap<>());
@@ -55,8 +58,6 @@ public class InitializeClass {
 
         Admin admin = new Admin("admin", "123",
                 "Administrator", 90, ROLE_ADMIN);
-
-        Group group = new Group(13, teacher, Arrays.asList(student, student1));
 
 
         personDAO.create(student.getUserName(), student);

@@ -6,6 +6,7 @@ import by.dutov.jee.people.Person;
 import by.dutov.jee.people.Teacher;
 import by.dutov.jee.utils.CommandServletUtils;
 
+import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
@@ -13,11 +14,11 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 
-@WebServlet("/admin/averageSalary")
+@WebServlet("/admin/average-salary")
 public class AverageSalaryServlet extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        CommandServletUtils.dispatcher(req, resp, "/admin/averageSalaryPage.jsp", false);
+        CommandServletUtils.dispatcher(req, resp, "/admin/averageSalaryPage.jsp", true);
     }
 
     @Override
@@ -25,7 +26,7 @@ public class AverageSalaryServlet extends HttpServlet {
         String userName = req.getParameter("userName");
         int minRange = -1;
         int maxRange = -1;
-        if (!req.getParameter("minRange").equals("") ||
+        if (!req.getParameter("minRange").equals("") &&
                 !req.getParameter("maxRange").equals("")) {
             minRange = Integer.parseInt(req.getParameter("minRange"));
             maxRange = Integer.parseInt(req.getParameter("maxRange"));

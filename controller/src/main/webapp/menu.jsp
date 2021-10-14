@@ -11,13 +11,13 @@
 ||
     </c:when>
     <c:when test="${loginedUser.role.equals(teacher)}">
-<a href="${pageContext.request.contextPath}/admin/teacher">
+<a href="${pageContext.request.contextPath}/teacher/teacher">
     Teacher Page
 </a>
 ||
     </c:when>
     <c:when test="${loginedUser.role.equals(student)}">
-<a href="${pageContext.request.contextPath}/admin/student">
+<a href="${pageContext.request.contextPath}/student/student">
     Student Page
 </a>
 ||
@@ -27,7 +27,7 @@
     Home Page
 </a>
 ||
-<a type="" href="${pageContext.request.contextPath}/userInfo">
+<a type="" href="${pageContext.request.contextPath}/user-info">
     User Info
 </a>
 ||

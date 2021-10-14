@@ -13,7 +13,18 @@ import java.io.IOException;
 public class AdminServlet extends HttpServlet {
 
     @Override
-    protected void service(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+    protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         CommandServletUtils.dispatcher(req, resp, "/admin/adminPage.jsp", true);
+
     }
+
+    @Override
+    protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+        doGet(req, resp);
+    }
+
+//    @Override
+//    protected void service(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+//        CommandServletUtils.dispatcher(req, resp, "/admin/adminPage.jsp", true);
+//    }
 }

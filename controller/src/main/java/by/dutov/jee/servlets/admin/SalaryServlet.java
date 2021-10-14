@@ -16,7 +16,7 @@ import java.io.IOException;
 public class SalaryServlet extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        CommandServletUtils.dispatcher(req, resp, "/admin/salaryPage.jsp", false);
+        CommandServletUtils.dispatcher(req, resp, "/admin/salaryPage.jsp", true);
     }
 
     @Override

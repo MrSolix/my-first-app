@@ -3,21 +3,13 @@ package by.dutov.jee.people;
 import java.util.Objects;
 
 public class Teacher extends Person {
-    private long numOfGroup;
+    private int numOfGroup;
     private double salary;
 
     public Teacher(String userName, String password, String name, int age, String role) {
         super(userName, password, name, age, role);
     }
 
-
-    public long getNumOfGroup() {
-        return numOfGroup;
-    }
-
-    public void setNumOfGroup(long numOfGroup) {
-        this.numOfGroup = numOfGroup;
-    }
 
     public double getSalary() {
         return salary;
@@ -31,6 +23,14 @@ public class Teacher extends Person {
         }
     }
 
+    public long getNumOfGroup() {
+        return numOfGroup;
+    }
+
+    public void setNumOfGroup(int numOfGroup) {
+        this.numOfGroup = numOfGroup;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -38,7 +38,7 @@ public class Teacher extends Person {
         if (!super.equals(o)) return false;
         Teacher teacher = (Teacher) o;
         return numOfGroup == teacher.numOfGroup &&
-                Objects.equals(salary, teacher.salary);
+                Double.compare(teacher.salary, salary) == 0;
     }
 
     @Override

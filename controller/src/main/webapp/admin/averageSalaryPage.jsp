@@ -8,7 +8,7 @@
 <body>
 <h1>Average Salary Page</h1>
 
-<form action="${pageContext.request.contextPath}/admin/averageSalary" method="post">
+<form action="${pageContext.request.contextPath}/admin/average-salary" method="post">
     <table>
         <tr>
             <td><b>Teacher UserName</b></td>
