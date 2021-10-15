@@ -14,6 +14,5 @@ public class TeacherAccessFilter implements Filter {
     public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain) throws IOException, ServletException {
         CommandServletUtils.filtredAccess((HttpServletRequest) request,
                 (HttpServletResponse) response, chain, "teacher");
-
     }
 }

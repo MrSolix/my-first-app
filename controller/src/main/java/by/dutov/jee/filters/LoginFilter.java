@@ -24,11 +24,12 @@ public class LoginFilter implements Filter {
         HttpServletResponse resp = (HttpServletResponse) servletResponse;
 
         Person loginedUser = AppUtils.getLoginedUser(req.getSession());
-        if (loginedUser == null){
+        if (loginedUser != null) {
+            filterChain.doFilter(req, resp);
+        } else {
             CommandServletUtils.dispatcher(req, resp,
                     "/login", true);
         }
-        filterChain.doFilter(req, resp);
     }
 
     @Override
