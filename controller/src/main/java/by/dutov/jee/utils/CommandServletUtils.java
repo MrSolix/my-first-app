@@ -1,6 +1,7 @@
 package by.dutov.jee.utils;
 
 import by.dutov.jee.people.Person;
+import lombok.extern.slf4j.Slf4j;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -11,8 +12,8 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 
+@Slf4j
 public class CommandServletUtils {
-    private static final Logger LOG = LoggerFactory.getLogger(CommandServletUtils.class);
 
     public static void errorMessage(HttpServletRequest req, String error, String nameAttribute) {
         req.setAttribute(nameAttribute, error);
@@ -29,12 +30,12 @@ public class CommandServletUtils {
     }
 
     public static void filtredAccess(HttpServletRequest request, HttpServletResponse response, FilterChain chain, String who) throws ServletException, IOException {
-        LOG.info("Worked {} filter", who);
+        log.info("Worked {} filter", who);
 
         Person loginedUser = AppUtils.getLoginedUser(request.getSession());
 
         if (loginedUser == null || !who.equalsIgnoreCase(loginedUser.getRole())) {
-            LOG.info("Access denied");
+            log.info("Access denied");
             CommandServletUtils.dispatcher(request, response,
                     "/home", true);
         }

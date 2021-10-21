@@ -1,19 +1,18 @@
 package by.dutov.jee.people;
 
-import java.util.Objects;
+import by.dutov.jee.encrypt.PasswordEncryptionService;
+import by.dutov.jee.group.Group;
+import lombok.Data;
+import lombok.EqualsAndHashCode;
 
+import java.security.NoSuchAlgorithmException;
+import java.security.spec.InvalidKeySpecException;
+
+@Data
+@EqualsAndHashCode(callSuper = true)
 public class Teacher extends Person {
-    private int numOfGroup;
+    private Group group;
     private double salary;
-
-    public Teacher(String userName, String password, String name, int age, String role) {
-        super(userName, password, name, age, role);
-    }
-
-
-    public double getSalary() {
-        return salary;
-    }
 
     public void setSalary(double salary) {
         if (salary >= 0) {
@@ -23,33 +22,35 @@ public class Teacher extends Person {
         }
     }
 
-    public long getNumOfGroup() {
-        return numOfGroup;
+    public Teacher withUserName(String userName){
+        setUserName(userName);
+        return this;
     }
 
-    public void setNumOfGroup(int numOfGroup) {
-        this.numOfGroup = numOfGroup;
+    public Teacher withPassword(String password){
+        addPassword(password, this);
+        return this;
     }
 
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        if (!super.equals(o)) return false;
-        Teacher teacher = (Teacher) o;
-        return numOfGroup == teacher.numOfGroup &&
-                Double.compare(teacher.salary, salary) == 0;
+    public Teacher withName(String name){
+        setName(name);
+        return this;
     }
 
-    @Override
-    public int hashCode() {
-        return Objects.hash(super.hashCode(), numOfGroup, salary);
+    public Teacher withAge(int age){
+        setAge(age);
+        return this;
+    }
+
+    public Teacher withRole(String role){
+        setRole(role);
+        return this;
     }
 
     @Override
     public String toString() {
         return "Teacher{" +
-                "groupId=" + numOfGroup +
+                "groupId=" + group.getNumOfGroup() +
                 "\n salary=" + getSalary() +
                 "\n" + super.toString() +
                 '}';
@@ -60,7 +61,7 @@ public class Teacher extends Person {
         return "Name: \"" + getName() +
                 "\"<br>Age: \"" + getAge() +
                 "\"<br>Role: \"" + getRole() +
-                "\"<br>Group №: " + getNumOfGroup() +
+                "\"<br>Group №: " + (group != null ? group.getNumOfGroup() : 0) +
                 "<br>Salary: " + getSalary();
     }
 }

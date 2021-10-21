@@ -3,46 +3,35 @@ package by.dutov.jee.group;
 
 import by.dutov.jee.people.Student;
 import by.dutov.jee.people.Teacher;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.util.List;
 
+@Data
+@NoArgsConstructor
 public class Group {
     private int numOfGroup;
     private Teacher teacher;
     private List<Student> students;
 
-    public Group(int numOfGroup, Teacher teacher, List<Student> students) {
-        this.numOfGroup = numOfGroup;
-        this.teacher = teacher;
-        this.students = students;
-        teacher.setNumOfGroup(numOfGroup);
-        for (Student s: students) {
-            s.setGroupNumbers(numOfGroup);
+    public Group withNumOfGroup(int numOfGroup) {
+        setNumOfGroup(numOfGroup);
+        return this;
+    }
+
+    public Group withTeacher(Teacher teacher) {
+        setTeacher(teacher);
+        teacher.setGroup(this);
+        return this;
+    }
+
+    public Group withStudents(List<Student> students) {
+        setStudents(students);
+        for (Student s : students) {
+            s.addGroups(this);
         }
-    }
-
-    public int getNumOfGroup() {
-        return numOfGroup;
-    }
-
-    public void setNumOfGroup(int numOfGroup) {
-        this.numOfGroup = numOfGroup;
-    }
-
-    public Teacher getTeacher() {
-        return teacher;
-    }
-
-    public void setTeacher(Teacher teacher) {
-        this.teacher = teacher;
-    }
-
-    public List<Student> getStudents() {
-        return students;
-    }
-
-    public void setStudents(List<Student> students) {
-        this.students = students;
+        return this;
     }
 
     @Override

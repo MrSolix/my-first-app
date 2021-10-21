@@ -1,9 +1,35 @@
 package by.dutov.jee.people;
 
+import lombok.Data;
+import lombok.EqualsAndHashCode;
+
+@Data
+@EqualsAndHashCode(callSuper = true)
 public class Admin extends Person{
 
-    public Admin(String login, String password, String name, int age, String role) {
-        super(login, password, name, age, role);
+    public Admin withUserName(String userName){
+        setUserName(userName);
+        return this;
+    }
+
+    public Admin withPassword(String password){
+        addPassword(password, this);
+        return this;
+    }
+
+    public Admin withName(String name){
+        setName(name);
+        return this;
+    }
+
+    public Admin withAge(int age){
+        setAge(age);
+        return this;
+    }
+
+    public Admin withRole(String role){
+        setRole(role);
+        return this;
     }
 
     @Override
