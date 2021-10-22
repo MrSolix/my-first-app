@@ -1,6 +1,7 @@
 package by.dutov.jee.encrypt;
 
 import by.dutov.jee.exceptions.HashException;
+import lombok.NonNull;
 
 import javax.crypto.SecretKeyFactory;
 import javax.crypto.spec.PBEKeySpec;

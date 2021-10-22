@@ -5,12 +5,12 @@ import by.dutov.jee.encrypt.PasswordEncryptionService;
 import by.dutov.jee.group.Group;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+import lombok.NoArgsConstructor;
 
-import java.security.NoSuchAlgorithmException;
-import java.security.spec.InvalidKeySpecException;
 import java.util.*;
 
 @Data
+@NoArgsConstructor
 @EqualsAndHashCode(callSuper = true)
 public class Student extends Person {
     private List<Group> groups;

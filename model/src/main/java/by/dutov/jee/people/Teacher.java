@@ -1,15 +1,15 @@
 package by.dutov.jee.people;
 
-import by.dutov.jee.encrypt.PasswordEncryptionService;
 import by.dutov.jee.group.Group;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+import lombok.NoArgsConstructor;
 
-import java.security.NoSuchAlgorithmException;
-import java.security.spec.InvalidKeySpecException;
+import java.util.Objects;
+
 
 @Data
-@EqualsAndHashCode(callSuper = true)
+@NoArgsConstructor
 public class Teacher extends Person {
     private Group group;
     private double salary;
@@ -47,13 +47,29 @@ public class Teacher extends Person {
         return this;
     }
 
+    public Teacher withSalary(double salary){
+        setSalary(salary);
+        return this;
+    }
+
+    public Teacher withGroup(Group group){
+        setGroup(group);
+        return this;
+    }
+
     @Override
-    public String toString() {
-        return "Teacher{" +
-                "groupId=" + group.getNumOfGroup() +
-                "\n salary=" + getSalary() +
-                "\n" + super.toString() +
-                '}';
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        if (!super.equals(o)) return false;
+        Teacher teacher = (Teacher) o;
+        return Double.compare(teacher.salary, salary) == 0 &&
+                Objects.equals(group, teacher.group);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(super.hashCode(), salary);
     }
 
     @Override

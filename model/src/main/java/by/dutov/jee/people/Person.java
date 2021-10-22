@@ -2,11 +2,13 @@ package by.dutov.jee.people;
 
 import by.dutov.jee.encrypt.PasswordEncryptionService;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 
 import java.security.NoSuchAlgorithmException;
 import java.security.spec.InvalidKeySpecException;
 
 @Data
+@EqualsAndHashCode
 public abstract class Person implements Printable {
     private static long ID = 1;
     private long id;

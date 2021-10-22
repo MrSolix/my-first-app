@@ -1,13 +1,11 @@
 package by.dutov.jee.servlets.admin;
 
-import by.dutov.jee.Finance;
+import by.dutov.jee.utils.Finance;
 import by.dutov.jee.dao.PersonRepositoryInMemory;
 import by.dutov.jee.people.Person;
 import by.dutov.jee.people.Teacher;
 import by.dutov.jee.utils.CommandServletUtils;
 import lombok.extern.slf4j.Slf4j;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
@@ -49,15 +47,16 @@ public class AverageSalaryServlet extends HttpServlet {
             log.info("person == null or person role != \"TEACHER\"");
             CommandServletUtils.errorMessage(req, "the teacher's login is incorrect"
                     , "errorStringInAvgSalaryPage");
-        } else if (minRange < 1 || maxRange > PersonRepositoryInMemory.CURRENT_MONTH ||
-        maxRange <= minRange) {
-            log.info("incorrect value in fields \"minRange\" or \"maxRange\"");
-            CommandServletUtils.errorMessage(req, "months are incorrect"
-                    , "errorMonthsInAvgSalaryPage");
         } else {
             double averageSalary = Finance.averageSalary(minRange, maxRange, (Teacher) person);
-            log.info("Average Salary = {}", averageSalary);
-            req.setAttribute("averageSalary", averageSalary);
+            if (averageSalary < 0) {
+                log.info("incorrect value in fields \"minRange\" or \"maxRange\"");
+                CommandServletUtils.errorMessage(req, "months are incorrect"
+                        , "errorMonthsInAvgSalaryPage");
+            } else {
+                log.info("Average Salary = {}", averageSalary);
+                req.setAttribute("averageSalary", averageSalary);
+            }
         }
         CommandServletUtils.dispatcher(req, resp, "/admin/averageSalaryPage.jsp", false);
     }

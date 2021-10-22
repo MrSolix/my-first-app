@@ -1,6 +1,5 @@
 package by.dutov.jee.dao;
 
-import by.dutov.jee.Finance;
 import by.dutov.jee.encrypt.PasswordEncryptionService;
 import by.dutov.jee.exceptions.HashException;
 import by.dutov.jee.group.Group;
@@ -8,6 +7,8 @@ import by.dutov.jee.people.Admin;
 import by.dutov.jee.people.Person;
 import by.dutov.jee.people.Student;
 import by.dutov.jee.people.Teacher;
+import by.dutov.jee.utils.Finance;
+import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
 
 import java.time.LocalDate;
@@ -20,7 +21,7 @@ import java.util.concurrent.ConcurrentHashMap;
 public class PersonRepositoryInMemory implements DAO<Person> {
 
     private static PersonRepositoryInMemory instance;
-    private Map<Long, Person> accounts = new ConcurrentHashMap<>();
+    private static Map<Long, Person> accounts = new ConcurrentHashMap<>();
     public static final int CURRENT_MONTH = LocalDate.now().getMonthValue();
     public static final String ROLE_STUDENT = "STUDENT";
     public static final String ROLE_TEACHER = "TEACHER";
@@ -42,7 +43,8 @@ public class PersonRepositoryInMemory implements DAO<Person> {
 
     @Override
     public void create(Person person) {
-        accounts.put(person.getId(), person);
+        if (person != null)
+            accounts.put(person.getId(), person);
     }
 
     @Override
