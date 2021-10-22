@@ -21,7 +21,7 @@ import java.util.concurrent.ConcurrentHashMap;
 public class PersonRepositoryInMemory implements DAO<Person> {
 
     private static PersonRepositoryInMemory instance;
-    private static Map<Long, Person> accounts = new ConcurrentHashMap<>();
+    private Map<Long, Person> accounts = new ConcurrentHashMap<>();
     public static final int CURRENT_MONTH = LocalDate.now().getMonthValue();
     public static final String ROLE_STUDENT = "STUDENT";
     public static final String ROLE_TEACHER = "TEACHER";
@@ -101,7 +101,7 @@ public class PersonRepositoryInMemory implements DAO<Person> {
         Student student1 = new Student()
                 .withUserName("student1")
                 .withPassword("123")
-                .withUserName("Gena")
+                .withName("Gena")
                 .withAge(22)
                 .withRole(ROLE_STUDENT);
 
