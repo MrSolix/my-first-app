@@ -8,6 +8,7 @@ import by.dutov.jee.people.Admin;
 import by.dutov.jee.people.Person;
 import by.dutov.jee.people.Student;
 import by.dutov.jee.people.Teacher;
+import lombok.extern.slf4j.Slf4j;
 
 import java.time.LocalDate;
 import java.util.Arrays;
@@ -15,10 +16,11 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
+@Slf4j
 public class PersonRepositoryInMemory implements DAO<Person> {
 
     private static PersonRepositoryInMemory instance;
-    private Map<String, Person> accounts = new ConcurrentHashMap<>();
+    private Map<Long, Person> accounts = new ConcurrentHashMap<>();
     public static final int CURRENT_MONTH = LocalDate.now().getMonthValue();
     public static final String ROLE_STUDENT = "STUDENT";
     public static final String ROLE_TEACHER = "TEACHER";
@@ -39,37 +41,48 @@ public class PersonRepositoryInMemory implements DAO<Person> {
     }
 
     @Override
-    public void create(String name, Person person) {
-        accounts.put(name, person);
+    public void create(Person person) {
+        accounts.put(person.getId(), person);
     }
 
     @Override
     public Person read(String name) {
-        return accounts.get(name);
+        for (Person person : accounts.values()) {
+            if (person.getUserName().equals(name)){
+                return person;
+            }
+        }
+        return null;
     }
 
     @Override
     public Person read(String name, String password) {
-        Person person = accounts.get(name);
+        Person person = read(name);
         PasswordEncryptionService instance = PasswordEncryptionService.getInstance();
         try {
             if (person != null && instance.authenticate(password, person.getPassword(), person.getSalt())){
                 return person;
             }
         } catch (HashException e) {
-            e.printStackTrace();
+            log.error("Authenticate error",e);
         }
         return null;
     }
 
     @Override
     public void update(String name, Person person) {
-        accounts.replace(name, person);
+        Person oldPerson = read(name);
+        if (oldPerson != null) {
+            accounts.replace(oldPerson.getId(), person);
+        }
     }
 
     @Override
     public void delete(String name) {
-        accounts.remove(name);
+        Person person = read(name);
+        if (person != null) {
+            accounts.remove(person.getId());
+        }
     }
 
     {
@@ -137,10 +150,10 @@ public class PersonRepositoryInMemory implements DAO<Person> {
                 .withRole(ROLE_ADMIN);
 
 
-        create(student.getUserName(), student);
-        create(student1.getUserName(), student1);
-        create(teacher.getUserName(), teacher);
-        create(teacher1.getUserName(), teacher1);
-        create(admin.getUserName(), admin);
+        create(student);
+        create(student1);
+        create(teacher);
+        create(teacher1);
+        create(admin);
     }
 }
