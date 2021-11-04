@@ -4,13 +4,18 @@ import by.dutov.jee.group.Group;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
+import lombok.ToString;
 
 import java.util.Objects;
 
 
 @Data
 @NoArgsConstructor
+@EqualsAndHashCode(callSuper = true)
+@ToString(callSuper = true)
 public class Teacher extends Person {
+    @ToString.Exclude
+    @EqualsAndHashCode.Exclude
     private Group group;
     private double salary;
 
@@ -22,6 +27,11 @@ public class Teacher extends Person {
         }
     }
 
+    public Teacher withId(Integer id){
+        setId(id);
+        return this;
+    }
+
     public Teacher withUserName(String userName){
         setUserName(userName);
         return this;
@@ -29,6 +39,16 @@ public class Teacher extends Person {
 
     public Teacher withPassword(String password){
         addPassword(password, this);
+        return this;
+    }
+
+    public Teacher withBytePass(byte[] pass){
+        setPassword(pass);
+        return this;
+    }
+
+    public Teacher withSalt(byte[] salt){
+        setSalt(salt);
         return this;
     }
 
@@ -42,7 +62,7 @@ public class Teacher extends Person {
         return this;
     }
 
-    public Teacher withRole(String role){
+    public Teacher withRole(Role role){
         setRole(role);
         return this;
     }
@@ -58,26 +78,11 @@ public class Teacher extends Person {
     }
 
     @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        if (!super.equals(o)) return false;
-        Teacher teacher = (Teacher) o;
-        return Double.compare(teacher.salary, salary) == 0 &&
-                Objects.equals(group, teacher.group);
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(super.hashCode(), salary);
-    }
-
-    @Override
     public String getInfo() {
         return "Name: \"" + getName() +
                 "\"<br>Age: \"" + getAge() +
                 "\"<br>Role: \"" + getRole() +
-                "\"<br>Group №: " + (group != null ? group.getNumOfGroup() : 0) +
+                "\"<br>Group №: " + (group != null ? group.getId() : 0) +
                 "<br>Salary: " + getSalary();
     }
 }

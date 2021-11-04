@@ -9,6 +9,11 @@ import lombok.NoArgsConstructor;
 @EqualsAndHashCode(callSuper = true)
 public class Admin extends Person{
 
+    public Admin withId(Integer id){
+        setId(id);
+        return this;
+    }
+
     public Admin withUserName(String userName){
         setUserName(userName);
         return this;
@@ -16,6 +21,16 @@ public class Admin extends Person{
 
     public Admin withPassword(String password){
         addPassword(password, this);
+        return this;
+    }
+
+    public Admin withBytePass(byte[] pass){
+        setPassword(pass);
+        return this;
+    }
+
+    public Admin withSalt(byte[] salt){
+        setSalt(salt);
         return this;
     }
 
@@ -29,7 +44,7 @@ public class Admin extends Person{
         return this;
     }
 
-    public Admin withRole(String role){
+    public Admin withRole(Role role){
         setRole(role);
         return this;
     }
@@ -45,6 +60,7 @@ public class Admin extends Person{
     public String getInfo() {
         return "Name: \"" + getName() +
                 "\"<br>Age: \"" + getAge() +
-                "\"<br>Role: \"" + getRole();
+                "\"<br>Role: \"" + getRole() +
+                "\"";
     }
 }

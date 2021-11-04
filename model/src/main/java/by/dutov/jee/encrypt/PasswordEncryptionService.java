@@ -1,8 +1,6 @@
 package by.dutov.jee.encrypt;
 
 import by.dutov.jee.exceptions.HashException;
-import lombok.NonNull;
-
 import javax.crypto.SecretKeyFactory;
 import javax.crypto.spec.PBEKeySpec;
 import java.security.NoSuchAlgorithmException;
@@ -13,7 +11,7 @@ import java.util.Arrays;
 
 public class PasswordEncryptionService {
 
-    private static PasswordEncryptionService instance;
+    private static volatile PasswordEncryptionService instance;
 
     public PasswordEncryptionService() {
     }

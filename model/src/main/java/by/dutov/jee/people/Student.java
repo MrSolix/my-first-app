@@ -1,18 +1,20 @@
 package by.dutov.jee.people;
 
 
-import by.dutov.jee.encrypt.PasswordEncryptionService;
 import by.dutov.jee.group.Group;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
+import lombok.ToString;
 
 import java.util.*;
 
 @Data
 @NoArgsConstructor
 @EqualsAndHashCode(callSuper = true)
+@ToString(callSuper = true)
 public class Student extends Person {
+    @ToString.Exclude
     private List<Group> groups;
     private Map<String, List<Integer>> grades;
 
@@ -21,45 +23,74 @@ public class Student extends Person {
         grades = new HashMap<>();
     }
 
-    public Student withUserName(String userName){
+    public Student withGroups(List<Group> groups){
+        setGroups(groups);
+        return this;
+    }
+
+    public Student withId(Integer id) {
+        setId(id);
+        return this;
+    }
+
+    public Student withUserName(String userName) {
         setUserName(userName);
         return this;
     }
 
-    public Student withPassword(String password){
+    public Student withPassword(String password) {
         addPassword(password, this);
         return this;
     }
 
-    public Student withName(String name){
+    public Student withBytePass(byte[] pass) {
+        setPassword(pass);
+        return this;
+    }
+
+    public Student withSalt(byte[] salt) {
+        setSalt(salt);
+        return this;
+    }
+
+    public Student withName(String name) {
         setName(name);
         return this;
     }
 
-    public Student withAge(int age){
+    public Student withAge(int age) {
         setAge(age);
         return this;
     }
 
-    public Student withRole(String role){
+    public Student withRole(Role role) {
         setRole(role);
         return this;
     }
 
-    public void addGroups(Group... groups){
-        this.groups.addAll(Arrays.asList(groups));
+    public Student addGroup(Group group) {
+        if (!groups.contains(group)) {
+            groups.add(group);
+        }
+        return this;
     }
 
-    public void addThemeAndGrades(String name, Integer... grades){
+    public Student withGrades(Map<String, List<Integer>> grades) {
+        this.grades = grades;
+        return this;
+    }
+
+    public void addThemeAndGrades(String name, Integer... grades) {
         this.grades.put(name, Arrays.asList(grades));
     }
 
-    @Override
-    public String toString() {
-        return "Student{" +
-                "groups=" + groups +
-                ", grades=" + grades +
-                super.toString();
+    public Student addGrade(String name, Integer grade) {
+        if (this.grades.containsKey(name)) {
+            this.grades.get(name).add(grade);
+        } else {
+            this.grades.put(name, Arrays.asList(grade));
+        }
+        return this;
     }
 
     @Override
@@ -71,12 +102,12 @@ public class Student extends Person {
                 "<br>Grades: " + stringOfGrades(grades);
     }
 
-    private String groupNumbersInString(){
+    private String groupNumbersInString() {
         String result = "";
         int count = 0;
-        for (Group group:groups) {
-            result += group.getNumOfGroup();
-            if (count != groups.size() - 1){
+        for (Group group : groups) {
+            result += group.getId();
+            if (count != groups.size() - 1) {
                 result += ", ";
             } else {
                 result += ";";
@@ -86,14 +117,14 @@ public class Student extends Person {
         return result;
     }
 
-    private String stringOfGrades(Map<String, List<Integer>> grades){
+    private String stringOfGrades(Map<String, List<Integer>> grades) {
         String result = "";
-        for (String s:grades.keySet()) {
+        for (String s : grades.keySet()) {
             result += "<br>&nbsp;&nbsp;&nbsp;&nbsp" + s + ": ";
             List<Integer> integers = grades.get(s);
             for (int i = 0; i < integers.size(); i++) {
                 result += integers.get(i);
-                if (i != integers.size() - 1){
+                if (i != integers.size() - 1) {
                     result += ", ";
                 } else {
                     result += ";";
@@ -102,4 +133,6 @@ public class Student extends Person {
         }
         return result;
     }
+
+
 }

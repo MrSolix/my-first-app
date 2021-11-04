@@ -1,27 +1,26 @@
 package by.dutov.jee.people;
 
+import by.dutov.jee.AbstractEntity;
 import by.dutov.jee.encrypt.PasswordEncryptionService;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+import lombok.NoArgsConstructor;
+import lombok.ToString;
 
 import java.security.NoSuchAlgorithmException;
 import java.security.spec.InvalidKeySpecException;
 
 @Data
-@EqualsAndHashCode
-public abstract class Person implements Printable {
-    private static long ID = 1;
-    private long id;
+@NoArgsConstructor
+@EqualsAndHashCode(callSuper = true)
+@ToString(callSuper = true)
+public abstract class Person extends AbstractEntity implements Printable {
     private String userName;
     private byte[] salt;
     private byte[] password;
     private String name;
     private int age;
-    private String role;
-
-    public Person() {
-        id = ID++;
-    }
+    private Role role;
 
     protected void addPassword(String password, Person person){
         PasswordEncryptionService instance = PasswordEncryptionService.getInstance();
@@ -37,14 +36,5 @@ public abstract class Person implements Printable {
                 e.printStackTrace();
             }
         }
-    }
-
-    @Override
-    public String toString() {
-        return "<br>person id=" + id +
-                "<br>name='" + name + '\'' +
-                "<br>age=" + age +
-                "<br>role=" + role +
-                '}';
     }
 }
