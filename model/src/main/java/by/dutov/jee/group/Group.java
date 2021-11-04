@@ -54,19 +54,4 @@ public class Group extends AbstractEntity {
         }
         return this;
     }
-
-//    @Override
-//    public boolean equals(Object o) {
-//        if (this == o) return true;
-//        if (o == null || getClass() != o.getClass()) return false;
-//        Group group = (Group) o;
-//        return numOfGroup == group.numOfGroup &&
-//                Objects.equals(teacher, group.teacher) &&
-//                Objects.equals(students, group.students);
-//    }
-//
-//    @Override
-//    public int hashCode() {
-//        return Objects.hash(numOfGroup, teacher, students);
-//    }
 }

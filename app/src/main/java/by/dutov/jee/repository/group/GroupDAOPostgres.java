@@ -6,9 +6,6 @@ import by.dutov.jee.people.Role;
 import by.dutov.jee.people.Student;
 import by.dutov.jee.people.Teacher;
 import by.dutov.jee.repository.RepositoryFactory;
-import by.dutov.jee.repository.person.StudentDAOPostgres;
-import by.dutov.jee.repository.person.TeacherDAOPostgres;
-import by.dutov.jee.utils.CloseClass;
 import lombok.extern.slf4j.Slf4j;
 
 import javax.sql.DataSource;
@@ -18,7 +15,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.*;
 
-import static by.dutov.jee.utils.CloseClass.*;
+import static by.dutov.jee.utils.CloseClass.closeQuietly;
 
 @Slf4j
 public class GroupDAOPostgres implements GroupDAO<Group> {
@@ -260,24 +257,5 @@ public class GroupDAOPostgres implements GroupDAO<Group> {
         }
         map.putIfAbsent(key, value);
         return map.get(key);
-    }
-
-    public static void main(String[] args) {
-        GroupDAOPostgres groupDAOPostgres = GroupDAOPostgres.getInstance(RepositoryFactory.getDataSource());
-//        Student student1 = new Student()
-//                .withUserName("test")
-//                .withPassword("test")
-//                .withName("test")
-//                .withAge(0)
-//                .withRole(Role.STUDENT);
-//        System.out.println(StudentRepositoryPostgres.getInstance(RepositoryFactory.getDataSource()).create(student1));
-//        System.out.println(StudentRepositoryPostgres.getInstance(RepositoryFactory.getDataSource()).delete("test"));
-//        System.out.println(RepositoryFactory.getDaoRepository().get("student"));
-//        System.out.println(groupDAOPostgres.saveStudentInGroup(groupDAOPostgres.get(6), (Student) RepositoryFactory.getDaoRepository().get("test")));
-//        groupDAOPostgres.set(6, (Student) PersonDAOPostgres.getInstance(RepositoryFactory.getDataSource()).get("test"));
-//        System.out.println(groupDAOPostgres.get(4));
-//        System.out.println(groupDAOPostgres.remove(9));
-//        System.out.println(StudentRepositoryPostgres.getInstance(RepositoryFactory.getDataSource()).readGrades("student"));
-        System.out.println(groupDAOPostgres.findAll());
     }
 }

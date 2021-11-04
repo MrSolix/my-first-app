@@ -4,7 +4,6 @@ import by.dutov.jee.exceptions.DataBaseException;
 import by.dutov.jee.group.Group;
 import by.dutov.jee.people.Role;
 import by.dutov.jee.people.Student;
-import by.dutov.jee.repository.RepositoryFactory;
 import by.dutov.jee.repository.group.GroupDAOPostgres;
 import lombok.extern.slf4j.Slf4j;
 
@@ -244,21 +243,5 @@ public class StudentDAOPostgres implements PersonDAO<Student> {
         }
         map.putIfAbsent(key, value);
         return map.get(key);
-    }
-
-    public static void main(String[] args) {
-        StudentDAOPostgres studentDAOPostgres = StudentDAOPostgres.getInstance(RepositoryFactory.getDataSource());
-//        Student student1 = new Student()
-//                .withUserName("test")
-//                .withPassword("test")
-//                .withName("test")
-//                .withAge(0)
-//                .withRole(Role.STUDENT);
-//        System.out.println(StudentDAOPostgres.getInstance(RepositoryFactory.getDataSource()).save(student1));
-//        System.out.println(StudentRepositoryPostgres.getInstance(RepositoryFactory.getDataSource()).delete("test"));
-//        System.out.println(RepositoryFactory.getDaoRepository().get("test"));
-//        System.out.println(studentDAOPostgres.findAll());
-        System.out.println(studentDAOPostgres.find(4).get().getGroups());
-//        System.out.println(StudentRepositoryPostgres.getInstance(RepositoryFactory.getDataSource()).readGrades("student"));
     }
 }

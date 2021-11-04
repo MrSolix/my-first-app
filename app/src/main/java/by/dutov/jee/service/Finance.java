@@ -4,15 +4,12 @@ import by.dutov.jee.people.Person;
 import by.dutov.jee.people.Teacher;
 import by.dutov.jee.repository.RepositoryFactory;
 import by.dutov.jee.repository.person.PersonDAO;
-import by.dutov.jee.repository.person.PersonPersonDAOInMemory;
-import by.dutov.jee.repository.person.StudentDAOPostgres;
 import by.dutov.jee.utils.CommandServletUtils;
 import lombok.extern.slf4j.Slf4j;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import javax.sql.DataSource;
 import java.io.IOException;
 import java.time.LocalDate;
 import java.util.HashMap;

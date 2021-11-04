@@ -2,10 +2,8 @@ package by.dutov.jee.repository.person;
 
 import by.dutov.jee.exceptions.DataBaseException;
 import by.dutov.jee.group.Group;
-import by.dutov.jee.people.Person;
 import by.dutov.jee.people.Role;
 import by.dutov.jee.people.Teacher;
-import by.dutov.jee.repository.RepositoryFactory;
 import by.dutov.jee.repository.group.GroupDAOPostgres;
 import lombok.extern.slf4j.Slf4j;
 
@@ -30,20 +28,13 @@ public class TeacherDAOPostgres implements PersonDAO<Teacher> {
             "join \"group\" g " +
             "on t.id = g.teacher_id ";
     //language=SQL
-    private static final String SELECT_GROUP_FOR_TEACHER = "select " +
-            "g.id g_id " +
-            "from \"group\" g " +
-            "join teacher t " +
-            "on t.id = g.teacher_id " +
-            "where t.";
-    //language=SQL
     private static final String WHERE_TEACHER_NAME = " where t.user_name = ? ";
     private static final String WHERE_TEACHER_ID = " where t.id = ? ";
     //language=SQL
     private static final String UPDATE_TEACHER = "update teacher t " +
             "set user_name = ?, password = ?, salt = ?, name = ?, age = ?, salary = ?" + WHERE_TEACHER_NAME;
     private static final String DELETE_TEACHER = "update \"group\" g set teacher_id = null " +
-            "where teacher_id = (select id from teacher t "+ WHERE_TEACHER_NAME +"); " +
+            "where teacher_id = (select id from teacher t " + WHERE_TEACHER_NAME + "); " +
             "delete from teacher t" + WHERE_TEACHER_NAME + ";";
     //language=SQL
     private static final String INSERT_TEACHER = "insert into teacher (user_name, password, salt, \"name\", age, salary)" +
@@ -198,7 +189,6 @@ public class TeacherDAOPostgres implements PersonDAO<Teacher> {
     }
 
 
-
     private List<Teacher> resultSetToTeachers(ResultSet rs) throws SQLException {
         Map<Integer, Teacher> teacherMap = new HashMap<>();
         Map<Integer, Group> groupMap = new HashMap<>();
@@ -229,29 +219,5 @@ public class TeacherDAOPostgres implements PersonDAO<Teacher> {
         }
         map.putIfAbsent(key, value);
         return map.get(key);
-    }
-
-
-
-    public static void main(String[] args) {
-//        Teacher teacher = new Teacher()
-//                .withUserName("test")
-//                .withPassword("test")
-//                .withName("test")
-//                .withAge(0)
-//                .withRole(Role.TEACHER)
-//                .withSalary(80000);
-//        System.out.println(TeacherDAOPostgres.getInstance(RepositoryFactory.getDataSource()).save(teacher));
-//        System.out.println(StudentRepositoryPostgres.getInstance(RepositoryFactory.getDataSource()).delete("test"));
-//        System.out.println(TeacherDAOPostgres.getInstance(RepositoryFactory.getDataSource()).set("2", new Teacher()
-//        .withUserName("2")
-//        .withPassword("2")
-//        .withName("2")
-//        .withAge(2)
-//        .withSalary(100)));
-        final TeacherDAOPostgres instance = TeacherDAOPostgres.getInstance(RepositoryFactory.getDataSource());
-//        System.out.println(instance.remove("test"));
-        System.out.println(instance.findAll());
-//        System.out.println(StudentRepositoryPostgres.getInstance(RepositoryFactory.getDataSource()).readGrades("student"));
     }
 }

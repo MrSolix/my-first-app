@@ -1,9 +1,6 @@
 package by.dutov.jee.utils;
 
-import by.dutov.jee.repository.person.StudentDAOPostgres;
 import lombok.extern.slf4j.Slf4j;
-
-import javax.sql.DataSource;
 
 @Slf4j
 public class CloseClass {

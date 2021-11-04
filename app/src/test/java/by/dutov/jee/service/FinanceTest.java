@@ -2,14 +2,13 @@ package by.dutov.jee.service;
 
 import by.dutov.jee.people.Role;
 import by.dutov.jee.people.Teacher;
-import by.dutov.jee.service.Finance;
 import org.junit.Before;
 import org.junit.Test;
 
 import java.time.LocalDate;
-import java.util.HashMap;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 
 public class FinanceTest {
     private Teacher teacher;

@@ -1,8 +1,5 @@
 package by.dutov.jee.servlets.admin;
 
-import by.dutov.jee.repository.RepositoryFactory;
-import by.dutov.jee.people.Person;
-import by.dutov.jee.people.Teacher;
 import by.dutov.jee.service.Finance;
 import by.dutov.jee.utils.CommandServletUtils;
 import lombok.extern.slf4j.Slf4j;
@@ -13,7 +10,6 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
-import java.util.Optional;
 
 @Slf4j
 @WebServlet("/admin/salary")

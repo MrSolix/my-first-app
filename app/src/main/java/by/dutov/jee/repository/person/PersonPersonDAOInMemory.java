@@ -7,7 +7,6 @@ import by.dutov.jee.people.*;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.*;
-import java.util.concurrent.ConcurrentHashMap;
 
 @Slf4j
 public class PersonPersonDAOInMemory implements PersonDAO<Person> {
@@ -19,10 +18,10 @@ public class PersonPersonDAOInMemory implements PersonDAO<Person> {
         //singleton
     }
 
-    public static PersonPersonDAOInMemory getInstance(){
-        if (instance == null){
-            synchronized (PersonPersonDAOInMemory.class){
-                if (instance == null){
+    public static PersonPersonDAOInMemory getInstance() {
+        if (instance == null) {
+            synchronized (PersonPersonDAOInMemory.class) {
+                if (instance == null) {
                     instance = new PersonPersonDAOInMemory();
                 }
             }
@@ -42,7 +41,7 @@ public class PersonPersonDAOInMemory implements PersonDAO<Person> {
     @Override
     public Optional<? extends Person> find(String name) {
         for (Person person : accounts.values()) {
-            if (person.getUserName().equals(name)){
+            if (person.getUserName().equals(name)) {
                 return Optional.of(person);
             }
         }
@@ -56,7 +55,7 @@ public class PersonPersonDAOInMemory implements PersonDAO<Person> {
 
     public Optional<Person> find(String name, String password) {
         for (Person person : accounts.values()) {
-            if (person.getUserName().equals(name)){
+            if (person.getUserName().equals(name)) {
                 try {
                     if (PasswordEncryptionService.getInstance().authenticate(password, person.getPassword(), person.getSalt())) {
                         return Optional.of(person);
@@ -99,8 +98,8 @@ public class PersonPersonDAOInMemory implements PersonDAO<Person> {
                 .withAge(21)
                 .withRole(Role.STUDENT);
 
-        student.addThemeAndGrades("Math", 9,7,6,8);
-        student.addThemeAndGrades("English", 6,5,7,4,8);
+        student.addThemeAndGrades("Math", 9, 7, 6, 8);
+        student.addThemeAndGrades("English", 6, 5, 7, 4, 8);
 
         Student student1 = new Student()
                 .withId(2)
@@ -110,8 +109,8 @@ public class PersonPersonDAOInMemory implements PersonDAO<Person> {
                 .withAge(22)
                 .withRole(Role.STUDENT);
 
-        student1.addThemeAndGrades("Math", 5,4,6,7);
-        student1.addThemeAndGrades("English", 9,7,8,6,9);
+        student1.addThemeAndGrades("Math", 5, 4, 6, 7);
+        student1.addThemeAndGrades("English", 9, 7, 8, 6, 9);
 
         Teacher teacher = new Teacher()
                 .withId(3)

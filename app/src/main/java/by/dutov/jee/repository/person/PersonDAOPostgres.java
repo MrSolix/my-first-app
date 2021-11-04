@@ -48,23 +48,6 @@ public class PersonDAOPostgres implements PersonDAO<Person> {
         return null;
     }
 
-    public boolean savePerson(Person person, PreparedStatement ps) throws SQLException {
-        String userName = person.getUserName();
-        byte[] password = person.getPassword();
-        byte[] salt = person.getSalt();
-        String name = person.getName();
-        int age = person.getAge();
-        ps.setString(1, userName);
-        ps.setBytes(2, password);
-        ps.setBytes(3, salt);
-        ps.setString(4, name);
-        ps.setInt(5, age);
-        if (person instanceof Teacher) {
-            ps.setDouble(6, ((Teacher) person).getSalary());
-        }
-        return ps.executeUpdate() > 0;
-    }
-
     @Override
     public Optional<? extends Person> find(String name) {
         Optional<Student> student = studentInstance.find(name);
@@ -79,20 +62,16 @@ public class PersonDAOPostgres implements PersonDAO<Person> {
     }
 
     @Override
-    public Optional<Person> find(Integer id) {
+    public Optional<? extends Person> find(Integer id) {
         Optional<Student> student = studentInstance.find(id);
         if (student.isPresent()) {
-            return Optional.of(student.get());
+            return student;
         }
         Optional<Teacher> teacher = teacherInstance.find(id);
         if (teacher.isPresent()) {
-            return Optional.of(teacher.get());
+            return teacher;
         }
-        Optional<Admin> admin = adminInstance.find(id);
-        if (admin.isPresent()) {
-            return Optional.of(admin.get());
-        }
-        return Optional.empty();
+        return adminInstance.find(id);
     }
 
     @Override
@@ -107,21 +86,6 @@ public class PersonDAOPostgres implements PersonDAO<Person> {
             return adminInstance.update(name, (Admin) person);
         }
         return null;
-    }
-
-    public boolean setPerson(String userName, Person person, PreparedStatement ps) throws SQLException {
-        ps.setString(1, person.getUserName());
-        ps.setBytes(2, person.getPassword());
-        ps.setBytes(3, person.getSalt());
-        ps.setString(4, person.getName());
-        ps.setInt(5, person.getAge());
-        if (person instanceof Teacher) {
-            ps.setDouble(6, ((Teacher) person).getSalary());
-            ps.setString(7, userName);
-        } else {
-            ps.setString(6, userName);
-        }
-        return ps.executeUpdate() > 0;
     }
 
     @Override
@@ -147,6 +111,6 @@ public class PersonDAOPostgres implements PersonDAO<Person> {
 
     @Override
     public List<Person> findAll() {
-        return null;
+        throw new UnsupportedOperationException();
     }
 }
