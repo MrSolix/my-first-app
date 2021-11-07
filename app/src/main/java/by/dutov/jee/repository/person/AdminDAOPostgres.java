@@ -174,6 +174,11 @@ public class AdminDAOPostgres implements PersonDAO<Admin> {
         return result;
     }
 
+    @Override
+    public List<Admin> findAll(Role role) {
+        throw new UnsupportedOperationException();
+    }
+
     private List<Admin> resultSetToAdmins(ResultSet rs) throws SQLException {
         Map<Integer, Admin> adminMap = new HashMap<>();
         while (rs.next()) {

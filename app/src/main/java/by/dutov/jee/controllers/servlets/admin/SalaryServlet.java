@@ -1,4 +1,4 @@
-package by.dutov.jee.servlets.admin;
+package by.dutov.jee.controllers.servlets.admin;
 
 import by.dutov.jee.service.Finance;
 import by.dutov.jee.utils.CommandServletUtils;

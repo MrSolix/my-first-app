@@ -1,4 +1,4 @@
-package by.dutov.jee.servlets;
+package by.dutov.jee.controllers.servlets;
 
 import by.dutov.jee.utils.CommandServletUtils;
 import lombok.extern.slf4j.Slf4j;
@@ -10,12 +10,12 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 
 @Slf4j
-@WebServlet("/home")
-public class HomeServlet extends HttpServlet {
+@WebServlet("/user-info")
+public class UserInfoServlet extends HttpServlet {
 
     @Override
     protected void service(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        log.info("Entered Home Page");
-        CommandServletUtils.dispatcher(req, resp, "/homePage.jsp", true);
+        log.info("Entered User Info Page");
+        CommandServletUtils.dispatcher(req, resp, "/userInfoPage.jsp", true);
     }
 }

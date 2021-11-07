@@ -1,4 +1,4 @@
-package by.dutov.jee.servlets;
+package by.dutov.jee.controllers.servlets;
 
 import by.dutov.jee.service.LoginService;
 import by.dutov.jee.utils.CommandServletUtils;

@@ -175,6 +175,11 @@ public class TeacherDAOPostgres implements PersonDAO<Teacher> {
     }
 
     @Override
+    public List<Teacher> findAll(Role role) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
     public List<Teacher> findAll() {
         List<Teacher> result;
         try (Connection con = dataSource.getConnection();

@@ -6,6 +6,7 @@ import lombok.extern.slf4j.Slf4j;
 import javax.sql.DataSource;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -107,6 +108,16 @@ public class PersonDAOPostgres implements PersonDAO<Person> {
             return person;
         }
         return null;
+    }
+
+    @Override
+    public List<? extends Person> findAll(Role role) {
+        if (Role.STUDENT.equals(role)){
+            return studentInstance.findAll();
+        } else if (Role.TEACHER.equals(role)){
+            return teacherInstance.findAll();
+        }
+        return new ArrayList<>();
     }
 
     @Override

@@ -1,4 +1,4 @@
-package by.dutov.jee.servlets;
+package by.dutov.jee.controllers.servlets;
 
 import lombok.extern.slf4j.Slf4j;
 

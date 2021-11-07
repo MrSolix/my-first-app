@@ -2,6 +2,9 @@ package by.dutov.jee.people;
 
 
 import by.dutov.jee.group.Group;
+import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonIdentityInfo;
+import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
@@ -13,8 +16,10 @@ import java.util.*;
 @NoArgsConstructor
 @EqualsAndHashCode(callSuper = true)
 @ToString(callSuper = true)
+@JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property = "id")
 public class Student extends Person {
     @ToString.Exclude
+//    @JsonBackReference
     private List<Group> groups;
     private Map<String, List<Integer>> grades;
 

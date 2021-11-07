@@ -4,6 +4,7 @@ import by.dutov.jee.exceptions.DataBaseException;
 import by.dutov.jee.group.Group;
 import by.dutov.jee.people.Role;
 import by.dutov.jee.people.Student;
+import by.dutov.jee.repository.RepositoryFactory;
 import by.dutov.jee.repository.group.GroupDAOPostgres;
 import lombok.extern.slf4j.Slf4j;
 
@@ -194,6 +195,11 @@ public class StudentDAOPostgres implements PersonDAO<Student> {
         return result;
     }
 
+    @Override
+    public List<Student> findAll(Role role) {
+        throw new UnsupportedOperationException();
+    }
+
     private List<Student> resultSetToStudents(ResultSet rs) throws SQLException {
         Map<Integer, Student> studentMap = new HashMap<>();
         Map<Integer, Group> groupMap = new HashMap<>();
@@ -210,7 +216,7 @@ public class StudentDAOPostgres implements PersonDAO<Student> {
                     .withBytePass(rs.getBytes(S_PASS))
                     .withSalt(rs.getBytes(S_SALT))
                     .withRole(Role.STUDENT)
-                    .addGroup(putIfAbsentAndReturn(groupMap, gId, GroupDAOPostgres.getInstance(dataSource).find(gId).get())));
+                    .addGroup(putIfAbsentAndReturn(groupMap, gId, GroupDAOPostgres.getInstance(dataSource).find(gId).orElse(null))));
 
             studentMap.computeIfPresent(sId, (id, student) -> student.addGroup(groupMap.get(gId)));
         }

@@ -7,6 +7,7 @@ import by.dutov.jee.people.*;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Slf4j
 public class PersonPersonDAOInMemory implements PersonDAO<Person> {
@@ -85,8 +86,21 @@ public class PersonPersonDAOInMemory implements PersonDAO<Person> {
     }
 
     @Override
+    public List<? extends Person> findAll(Role role) {
+        return accounts.values()
+                .stream()
+                .filter(value -> value.getRole().equals(role))
+                .collect(Collectors.toCollection(ArrayList::new));
+    }
+
+    @Override
     public List<Person> findAll() {
-        throw new UnsupportedOperationException();
+        return accounts.isEmpty() ? new ArrayList<>() : new ArrayList<>(accounts.values());
+    }
+
+    public static void main(String[] args) {
+        final PersonPersonDAOInMemory instance = PersonPersonDAOInMemory.getInstance();
+        System.out.println(instance.findAll(Role.ADMIN));
     }
 
     {

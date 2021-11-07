@@ -1,7 +1,8 @@
-package by.dutov.jee.servlets.student;
+package by.dutov.jee.controllers.servlets.teacher;
 
 import by.dutov.jee.utils.CommandServletUtils;
-import lombok.extern.slf4j.Slf4j;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
@@ -10,13 +11,13 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 
-@Slf4j
-@WebServlet("/student/student")
-public class StudentServlet extends HttpServlet {
+@WebServlet("/teacher/teacher")
+public class TeacherServlet extends HttpServlet {
+    private static final Logger LOG = LoggerFactory.getLogger(TeacherServlet.class);
 
     @Override
     protected void service(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        log.info("Entered Student Page");
-        CommandServletUtils.dispatcher(req, resp, "/student/studentPage.jsp", true);
+        LOG.info("Entered Teacher Page");
+        CommandServletUtils.dispatcher(req, resp, "/teacher/teacherPage.jsp", true);
     }
 }
