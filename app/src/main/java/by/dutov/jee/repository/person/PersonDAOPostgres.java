@@ -4,14 +4,12 @@ import by.dutov.jee.people.*;
 import lombok.extern.slf4j.Slf4j;
 
 import javax.sql.DataSource;
-import java.sql.PreparedStatement;
-import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
 @Slf4j
-public class PersonDAOPostgres implements PersonDAO<Person> {
+public class PersonDAOPostgres extends PersonDAO<Person> {
     private static volatile PersonDAOPostgres instance;
     private final StudentDAOPostgres studentInstance;
     private final TeacherDAOPostgres teacherInstance;
@@ -33,6 +31,11 @@ public class PersonDAOPostgres implements PersonDAO<Person> {
             }
         }
         return instance;
+    }
+
+    @Override
+    void sqlForFind(String sql) {
+
     }
 
     @Override
@@ -76,15 +79,15 @@ public class PersonDAOPostgres implements PersonDAO<Person> {
     }
 
     @Override
-    public Person update(String name, Person person) {
+    public Person update(Integer id, Person person) {
         if (person instanceof Student) {
-            return studentInstance.update(name, (Student) person);
+            return studentInstance.update(id, (Student) person);
         }
         if (person instanceof Teacher) {
-            return teacherInstance.update(name, (Teacher) person);
+            return teacherInstance.update(id, (Teacher) person);
         }
         if (person instanceof Admin) {
-            return adminInstance.update(name, (Admin) person);
+            return adminInstance.update(id, (Admin) person);
         }
         return null;
     }
@@ -102,19 +105,11 @@ public class PersonDAOPostgres implements PersonDAO<Person> {
         return adminInstance.remove((Admin) person);
     }
 
-    public Person removePerson(Person person, PreparedStatement ps) throws SQLException {
-        ps.setString(1, person.getUserName());
-        if (ps.executeUpdate() > 0) {
-            return person;
-        }
-        return null;
-    }
-
     @Override
     public List<? extends Person> findAll(Role role) {
-        if (Role.STUDENT.equals(role)){
+        if (Role.STUDENT.equals(role)) {
             return studentInstance.findAll();
-        } else if (Role.TEACHER.equals(role)){
+        } else if (Role.TEACHER.equals(role)) {
             return teacherInstance.findAll();
         }
         return new ArrayList<>();
@@ -123,5 +118,10 @@ public class PersonDAOPostgres implements PersonDAO<Person> {
     @Override
     public List<Person> findAll() {
         throw new UnsupportedOperationException();
+    }
+
+    @Override
+    String[] aliases() {
+        return new String[0];
     }
 }

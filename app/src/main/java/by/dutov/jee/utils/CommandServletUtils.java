@@ -3,6 +3,7 @@ package by.dutov.jee.utils;
 import by.dutov.jee.people.Person;
 import lombok.extern.slf4j.Slf4j;
 
+import javax.servlet.DispatcherType;
 import javax.servlet.FilterChain;
 import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletException;
@@ -17,13 +18,16 @@ public class CommandServletUtils {
         req.setAttribute(nameAttribute, error);
     }
 
-    public static void dispatcher(HttpServletRequest req, HttpServletResponse resp, String path, boolean type) throws ServletException, IOException {
+    public static void dispatcher(HttpServletRequest req, HttpServletResponse resp, String path, DispatcherType type) throws ServletException, IOException {
         RequestDispatcher dispatcher = req.getServletContext()
                 .getRequestDispatcher(path);
-        if (type) {
-            dispatcher.forward(req, resp);
-        } else {
-            dispatcher.include(req, resp);
+        switch (type) {
+            case FORWARD:
+                dispatcher.forward(req, resp);
+                break;
+            case INCLUDE:
+                dispatcher.include(req, resp);
+                break;
         }
     }
 
@@ -35,7 +39,7 @@ public class CommandServletUtils {
         if (loginedUser == null || !who.equalsIgnoreCase(loginedUser.getRole().toString())) {
             log.info("Access denied");
             CommandServletUtils.dispatcher(request, response,
-                    "/home", true);
+                    "/home", DispatcherType.FORWARD);
         }
         chain.doFilter(request, response);
     }

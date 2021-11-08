@@ -1,4 +1,4 @@
-package by.dutov.jee.exceptions;
+package by.dutov.jee.service.exceptions;
 
 public class PasswordException extends RuntimeException {
     public PasswordException(String message) {

@@ -1,33 +1,40 @@
 package by.dutov.jee.repository.person;
 
-import by.dutov.jee.encrypt.PasswordEncryptionService;
-import by.dutov.jee.exceptions.HashException;
+import by.dutov.jee.service.encrypt.PasswordEncryptionService;
+import by.dutov.jee.service.exceptions.HashException;
 import by.dutov.jee.group.Group;
 import by.dutov.jee.people.*;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
 @Slf4j
-public class PersonPersonDAOInMemory implements PersonDAO<Person> {
+public class PersonDAOInMemory extends PersonDAO<Person> {
 
-    private static volatile PersonPersonDAOInMemory instance;
-    private Map<Integer, Person> accounts = new HashMap<>();
+    private static volatile PersonDAOInMemory instance;
+    private Map<Integer, Person> accounts;
 
-    public PersonPersonDAOInMemory() {
+    public PersonDAOInMemory() {
+        accounts = new ConcurrentHashMap<>();
         //singleton
     }
 
-    public static PersonPersonDAOInMemory getInstance() {
+    public static PersonDAOInMemory getInstance() {
         if (instance == null) {
-            synchronized (PersonPersonDAOInMemory.class) {
+            synchronized (PersonDAOInMemory.class) {
                 if (instance == null) {
-                    instance = new PersonPersonDAOInMemory();
+                    instance = new PersonDAOInMemory();
                 }
             }
         }
         return instance;
+    }
+
+    @Override
+    void sqlForFind(String sql) {
+        throw new UnsupportedOperationException();
     }
 
     @Override
@@ -70,8 +77,8 @@ public class PersonPersonDAOInMemory implements PersonDAO<Person> {
     }
 
     @Override
-    public Person update(String name, Person person) {
-        Optional<? extends Person> oldPerson = find(name);
+    public Person update(Integer id, Person person) {
+        Optional<? extends Person> oldPerson = find(id);
         return oldPerson.map(value -> accounts.replace(value.getId(), person)).orElse(null);
     }
 
@@ -98,9 +105,9 @@ public class PersonPersonDAOInMemory implements PersonDAO<Person> {
         return accounts.isEmpty() ? new ArrayList<>() : new ArrayList<>(accounts.values());
     }
 
-    public static void main(String[] args) {
-        final PersonPersonDAOInMemory instance = PersonPersonDAOInMemory.getInstance();
-        System.out.println(instance.findAll(Role.ADMIN));
+    @Override
+    String[] aliases() {
+        return new String[0];
     }
 
     {

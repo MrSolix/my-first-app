@@ -1,6 +1,6 @@
-package by.dutov.jee.encrypt;
+package by.dutov.jee.service.encrypt;
 
-import by.dutov.jee.exceptions.HashException;
+import by.dutov.jee.service.exceptions.HashException;
 import javax.crypto.SecretKeyFactory;
 import javax.crypto.spec.PBEKeySpec;
 import java.security.NoSuchAlgorithmException;

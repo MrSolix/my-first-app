@@ -1,7 +1,7 @@
-package by.dutov.jee.encrypt;
+package encrypt;
 
-import by.dutov.jee.exceptions.HashException;
-import junit.framework.Assert;
+import by.dutov.jee.service.encrypt.PasswordEncryptionService;
+import by.dutov.jee.service.exceptions.HashException;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.Test;
 

@@ -4,6 +4,7 @@ import by.dutov.jee.utils.CommandServletUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.servlet.DispatcherType;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
@@ -18,6 +19,6 @@ public class TeacherServlet extends HttpServlet {
     @Override
     protected void service(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         LOG.info("Entered Teacher Page");
-        CommandServletUtils.dispatcher(req, resp, "/teacher/teacherPage.jsp", true);
+        CommandServletUtils.dispatcher(req, resp, "/teacher/teacherPage.jsp", DispatcherType.FORWARD);
     }
 }

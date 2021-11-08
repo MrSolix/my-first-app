@@ -3,6 +3,7 @@ package by.dutov.jee.filters;
 import by.dutov.jee.people.Person;
 import by.dutov.jee.utils.AppUtils;
 import by.dutov.jee.utils.CommandServletUtils;
+import by.dutov.jee.utils.DataBaseUtils;
 
 import javax.servlet.*;
 import javax.servlet.annotation.WebFilter;
@@ -28,7 +29,7 @@ public class LoginFilter implements Filter {
             filterChain.doFilter(req, resp);
         } else {
             CommandServletUtils.dispatcher(req, resp,
-                    "/login", true);
+                    "/login", DispatcherType.FORWARD);
         }
     }
 

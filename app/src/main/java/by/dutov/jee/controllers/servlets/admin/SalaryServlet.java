@@ -4,6 +4,7 @@ import by.dutov.jee.service.Finance;
 import by.dutov.jee.utils.CommandServletUtils;
 import lombok.extern.slf4j.Slf4j;
 
+import javax.servlet.DispatcherType;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
@@ -18,7 +19,7 @@ public class SalaryServlet extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         log.info("Entered Salary Page");
-        CommandServletUtils.dispatcher(req, resp, "/admin/salaryPage.jsp", true);
+        CommandServletUtils.dispatcher(req, resp, "/admin/salaryPage.jsp", DispatcherType.FORWARD);
     }
 
     @Override
@@ -28,7 +29,7 @@ public class SalaryServlet extends HttpServlet {
         log.info("userName = {}", userName);
         log.info("Get person from db");
         Finance.getInstance().getSalary(req, resp, userName);
-        CommandServletUtils.dispatcher(req, resp, "/admin/salaryPage.jsp", false);
+        CommandServletUtils.dispatcher(req, resp, "/admin/salaryPage.jsp", DispatcherType.INCLUDE);
     }
 
 }

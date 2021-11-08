@@ -1,6 +1,6 @@
 package by.dutov.jee.repository;
 
-import by.dutov.jee.exceptions.ApplicationException;
+import by.dutov.jee.service.exceptions.ApplicationException;
 import lombok.extern.slf4j.Slf4j;
 
 import javax.sql.DataSource;
@@ -47,7 +47,9 @@ public class RepositoryDataSource implements DataSource {
 
     @Override
     public Connection getConnection() throws SQLException {
-        return DriverManager.getConnection(this.uri, this.user, this.password);
+        Connection con = DriverManager.getConnection(this.uri, this.user, this.password);
+        con.setAutoCommit(false);
+        return con;
     }
 
     @Override

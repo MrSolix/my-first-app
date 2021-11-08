@@ -11,6 +11,8 @@
     <modules>
         <module>app</module>
         <module>model</module>
+        <module>adjacent</module>
+        <module>service</module>
     </modules>
 
     <properties>

@@ -4,6 +4,7 @@ import by.dutov.jee.service.LoginService;
 import by.dutov.jee.utils.CommandServletUtils;
 import lombok.extern.slf4j.Slf4j;
 
+import javax.servlet.DispatcherType;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
@@ -17,7 +18,7 @@ public class LoginServlet extends HttpServlet {
 
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        CommandServletUtils.dispatcher(req, resp, "/loginPage.jsp", true);
+        CommandServletUtils.dispatcher(req, resp, "/loginPage.jsp", DispatcherType.FORWARD);
     }
 
     @Override

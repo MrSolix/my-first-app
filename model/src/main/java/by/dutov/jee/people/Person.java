@@ -1,7 +1,7 @@
 package by.dutov.jee.people;
 
 import by.dutov.jee.AbstractEntity;
-import by.dutov.jee.encrypt.PasswordEncryptionService;
+import by.dutov.jee.service.encrypt.PasswordEncryptionService;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;

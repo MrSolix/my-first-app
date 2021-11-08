@@ -1,14 +1,15 @@
 package by.dutov.jee.service;
 
-import by.dutov.jee.encrypt.PasswordEncryptionService;
-import by.dutov.jee.exceptions.HashException;
-import by.dutov.jee.exceptions.PasswordException;
+import by.dutov.jee.service.encrypt.PasswordEncryptionService;
+import by.dutov.jee.service.exceptions.HashException;
+import by.dutov.jee.service.exceptions.PasswordException;
 import by.dutov.jee.people.Person;
 import by.dutov.jee.repository.RepositoryFactory;
 import by.dutov.jee.utils.AppUtils;
 import by.dutov.jee.utils.CommandServletUtils;
 import lombok.extern.slf4j.Slf4j;
 
+import javax.servlet.DispatcherType;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -55,19 +56,19 @@ public class LoginService {
             String errorMessage = "Invalid UserName or Password";
 
             req.setAttribute("errorMessage", errorMessage);
-            CommandServletUtils.dispatcher(req, resp, "/loginPage.jsp", false);
+            CommandServletUtils.dispatcher(req, resp, "/loginPage.jsp", DispatcherType.INCLUDE);
         } else if (AppUtils.getLoginedUser(req.getSession()) != null) {
             log.info("already logged in");
             String loginedError = "You need logouted";
 
             req.setAttribute("loginedError", loginedError);
 
-            CommandServletUtils.dispatcher(req, resp, "/loginPage.jsp", false);
+            CommandServletUtils.dispatcher(req, resp, "/loginPage.jsp", DispatcherType.INCLUDE);
         } else {
             log.info("successful login");
             AppUtils.storeLoginedUser(req.getSession(), person.get());
 
-            CommandServletUtils.dispatcher(req, resp, "/homePage.jsp", true);
+            CommandServletUtils.dispatcher(req, resp, "/homePage.jsp", DispatcherType.FORWARD);
         }
     }
 }

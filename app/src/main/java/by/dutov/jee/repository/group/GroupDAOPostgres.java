@@ -1,11 +1,10 @@
 package by.dutov.jee.repository.group;
 
-import by.dutov.jee.exceptions.DataBaseException;
 import by.dutov.jee.group.Group;
 import by.dutov.jee.people.Role;
 import by.dutov.jee.people.Student;
 import by.dutov.jee.people.Teacher;
-import by.dutov.jee.repository.RepositoryFactory;
+import by.dutov.jee.service.exceptions.DataBaseException;
 import lombok.extern.slf4j.Slf4j;
 
 import javax.sql.DataSource;
@@ -15,10 +14,11 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.*;
 
-import static by.dutov.jee.utils.CloseClass.closeQuietly;
+import static by.dutov.jee.utils.DataBaseUtils.closeQuietly;
+import static by.dutov.jee.utils.DataBaseUtils.rollBack;
 
 @Slf4j
-public class GroupDAOPostgres implements GroupDAO<Group> {
+public class GroupDAOPostgres extends GroupDAO<Group> {
     //language=SQL
     private static final String SELECT_GROUP_ALL_FIELDS = "select " +
             "g.id g_id, " +
@@ -43,15 +43,19 @@ public class GroupDAOPostgres implements GroupDAO<Group> {
     //language=SQL
     private static final String WHERE_ID = " where g.id = ?;";
     //language=SQL
-    private static final String WHERE_GROUP_ID = " where gs.group_id = ?;";
+    private static final String WHERE_GROUP_ID = " where gs.group_id = ? ";
     //language=SQL
     private static final String UPDATE_GROUP = "update \"group\" g set teacher_id = ?" + WHERE_ID;
     //language=SQL
-    private static final String UPDATE_STUDENT_IN_GROUP = "update group_student gs set group_id = ?, student_id = ?" + WHERE_GROUP_ID;
+    private static final String UPDATE_STUDENT_IN_GROUP = "update group_student gs set group_id = ?, student_id = ?" + WHERE_GROUP_ID +
+            "and gs.student_id = ?;";
     //language=SQL
     private static final String DELETE_GROUP = "delete from \"group\" g " + WHERE_ID;
     //language=SQL
-    private static final String DELETE_STUDENT_IN_GROUP = "delete from group_student gs";
+    private static final String DELETE_STUDENT_IN_GROUP = "delete from group_student gs where gs.group_id isnull";
+    //language=SQL
+    private static final String UPDATE_STUDENT_IN_GROUP_FOR_DELETE = "update group_student gs " +
+            "set group_id = null, student_id = null" + WHERE_GROUP_ID + ";";
     //language=SQL
     private static final String SELECT_GROUP = SELECT_GROUP_ALL_FIELDS + WHERE_ID;
     public static final String G_ID = "g_id";
@@ -97,120 +101,182 @@ public class GroupDAOPostgres implements GroupDAO<Group> {
     }
 
     public boolean saveStudentInGroup(Group group, Student student) {
-        return (group.getId() == null || student.getId() == null) ? insertStudentInGroup(group, student) : updateStudentInGroup(group, student);
+        return (find(group.getId()).isEmpty())
+                ? insertStudentInGroup(group, student)
+                : updateStudentInGroup(group, student);
     }
 
     private Group insert(Group group) {
+        Connection con = null;
+        PreparedStatement ps = null;
         ResultSet rs = null;
-        try (Connection con = dataSource.getConnection();
-             PreparedStatement ps = con.prepareStatement(INSERT_GROUP)) {
+        try {
+            con = dataSource.getConnection();
+            ps = con.prepareStatement(INSERT_GROUP);
             ps.setInt(1, group.getTeacher().getId());
             rs = ps.executeQuery();
             if (rs.next()) {
+                con.commit();
                 return group.withId(rs.getInt(POSITION_ID));
             }
+            rollBack(con);
             return null;
         } catch (SQLException e) {
+            rollBack(con);
             log.error(e.getMessage());
             throw new DataBaseException(e);
         } finally {
-            closeQuietly(rs);
+            closeQuietly(rs, ps, con);
         }
     }
 
     private boolean insertStudentInGroup(Group group, Student student) {
-        try (Connection con = dataSource.getConnection();
-             PreparedStatement ps = con.prepareStatement(INSERT_STUDENT_IN_GROUP)) {
+        Connection con = null;
+        PreparedStatement ps = null;
+        try {
+            con = dataSource.getConnection();
+            ps = con.prepareStatement(INSERT_STUDENT_IN_GROUP);
             ps.setInt(1, group.getId());
             ps.setInt(2, student.getId());
-            return ps.executeUpdate() > 0;
+            if (ps.executeUpdate() > 0) {
+                con.commit();
+                return true;
+            }
+            rollBack(con);
+            return false;
         } catch (SQLException e) {
+            rollBack(con);
             log.error(e.getMessage());
             throw new DataBaseException(e);
+        } finally {
+            closeQuietly(ps, con);
         }
     }
 
     @Override
     public Optional<Group> find(Integer id) {
-        List<Group> result;
+        Connection con = null;
+        PreparedStatement ps = null;
         ResultSet rs = null;
-        try (Connection con = dataSource.getConnection();
-             PreparedStatement ps = con.prepareStatement(SELECT_GROUP)) {
+        try {
+            con = dataSource.getConnection();
+            ps = con.prepareStatement(SELECT_GROUP);
             ps.setInt(1, id);
             rs = ps.executeQuery();
-            result = resultSetToGroup(rs);
+            List<Group> groups = resultSetToGroup(rs);
+            if (!(groups.isEmpty())) {
+                con.commit();
+                return groups.stream().findAny();
+            }
+            rollBack(con);
+            return Optional.empty();
+
         } catch (SQLException e) {
+            rollBack(con);
             log.error(e.getMessage());
             throw new DataBaseException(e);
         } finally {
-            closeQuietly(rs);
+            closeQuietly(rs, ps, con);
         }
-        return result.stream().findAny();
     }
 
     @Override
     public Group update(Integer id, Group group) {
-        try (Connection con = dataSource.getConnection();
-             PreparedStatement ps = con.prepareStatement(UPDATE_GROUP)) {
+        Connection con = null;
+        PreparedStatement ps = null;
+        try {
+            con = dataSource.getConnection();
+            ps = con.prepareStatement(UPDATE_GROUP);
             ps.setInt(1, group.getTeacher().getId());
             ps.setInt(2, id);
             if (ps.executeUpdate() > 0) {
+                con.commit();
                 return group;
             }
+            rollBack(con);
             return null;
         } catch (SQLException e) {
-            e.printStackTrace();
+            rollBack(con);
+            log.error(e.getMessage());
             throw new DataBaseException(e);
+        } finally {
+            closeQuietly(ps, con);
         }
     }
 
     public boolean updateStudentInGroup(Group group, Student student) {
-        try (Connection con = dataSource.getConnection();
-             PreparedStatement ps = con.prepareStatement(UPDATE_STUDENT_IN_GROUP)) {
+        Connection con = null;
+        PreparedStatement ps = null;
+        try {
+            con = dataSource.getConnection();
+            ps = con.prepareStatement(UPDATE_STUDENT_IN_GROUP);
             ps.setInt(1, group.getId());
             ps.setInt(2, student.getId());
             ps.setInt(3, group.getId());
-            return ps.executeUpdate() > 0;
+            ps.setInt(4, student.getId());
+            if (ps.executeUpdate() > 0) {
+                con.commit();
+                return true;
+            }
+            rollBack(con);
+            return false;
         } catch (SQLException e) {
-            e.printStackTrace();
+            rollBack(con);
+            log.error(e.getMessage());
             throw new DataBaseException(e);
+        } finally {
+            closeQuietly(ps, con);
         }
     }
 
     @Override
     public Group remove(Group group) {
-        try (Connection con = dataSource.getConnection();
-             PreparedStatement ps = con.prepareStatement(DELETE_GROUP)) {
-            ps.setInt(1, group.getId());
-            removeStudentInGroup(group.getId());
+        Connection con = null;
+        PreparedStatement ps1 = null;
+        PreparedStatement ps2 = null;
+        PreparedStatement ps3 = null;
+        try {
+            con = dataSource.getConnection();
+            ps1 = con.prepareStatement(UPDATE_STUDENT_IN_GROUP_FOR_DELETE);
+            ps2 = con.prepareStatement(DELETE_STUDENT_IN_GROUP);
+            ps3 = con.prepareStatement(DELETE_GROUP);
+            ps1.setInt(1, group.getId());
+            ps3.setInt(1, group.getId());
+            if (!(ps1.executeUpdate() > 0)
+                    || !(ps2.executeUpdate() > 0)
+                    || !(ps3.executeUpdate() > 0)) {
+                rollBack(con);
+                return null;
+            }
+            con.commit();
             return group;
         } catch (SQLException e) {
+            rollBack(con);
             log.error(e.getMessage());
             throw new DataBaseException(e);
-        }
-    }
-
-    public boolean removeStudentInGroup(Integer id) {
-        try (Connection con = dataSource.getConnection();
-             PreparedStatement ps = con.prepareStatement(DELETE_STUDENT_IN_GROUP + WHERE_GROUP_ID)) {
-            ps.setInt(1, id);
-            return ps.executeUpdate() > 0;
-        } catch (SQLException e) {
-            log.error(e.getMessage());
-            throw new DataBaseException(e);
+        } finally {
+            closeQuietly(ps3, ps2, ps1, con);
         }
     }
 
     @Override
     public List<Group> findAll() {
         List<Group> result;
-        try (Connection con = dataSource.getConnection();
-             PreparedStatement ps = con.prepareStatement(SELECT_GROUP_ALL_FIELDS);
-             ResultSet rs = ps.executeQuery()) {
+        Connection con = null;
+        PreparedStatement ps = null;
+        ResultSet rs = null;
+        try {
+            con = dataSource.getConnection();
+            ps = con.prepareStatement(SELECT_GROUP_ALL_FIELDS);
+            rs = ps.executeQuery();
             result = resultSetToGroup(rs);
+            con.commit();
         } catch (SQLException e) {
+            rollBack(con);
             log.error(e.getMessage());
             throw new DataBaseException(e);
+        } finally {
+            closeQuietly(rs, ps, con);
         }
         return result;
     }

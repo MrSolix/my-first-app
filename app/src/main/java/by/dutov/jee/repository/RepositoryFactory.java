@@ -2,7 +2,7 @@ package by.dutov.jee.repository;
 
 import by.dutov.jee.people.Person;
 import by.dutov.jee.repository.person.PersonDAO;
-import by.dutov.jee.repository.person.PersonPersonDAOInMemory;
+import by.dutov.jee.repository.person.PersonDAOInMemory;
 import by.dutov.jee.repository.person.PersonDAOPostgres;
 import lombok.extern.slf4j.Slf4j;
 
@@ -43,7 +43,7 @@ public class RepositoryFactory {
                 return PersonDAOPostgres.getInstance(dataSource);
             case MEMORY:
             default:
-                return PersonPersonDAOInMemory.getInstance();
+                return PersonDAOInMemory.getInstance();
         }
     }
 

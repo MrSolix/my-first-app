@@ -1,10 +1,10 @@
 package by.dutov.jee.repository.person;
 
-import by.dutov.jee.exceptions.DataBaseException;
 import by.dutov.jee.group.Group;
 import by.dutov.jee.people.Role;
 import by.dutov.jee.people.Teacher;
 import by.dutov.jee.repository.group.GroupDAOPostgres;
+import by.dutov.jee.service.exceptions.DataBaseException;
 import lombok.extern.slf4j.Slf4j;
 
 import javax.sql.DataSource;
@@ -14,12 +14,13 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.*;
 
-import static by.dutov.jee.utils.CloseClass.closeQuietly;
+import static by.dutov.jee.utils.DataBaseUtils.closeQuietly;
+import static by.dutov.jee.utils.DataBaseUtils.rollBack;
 
 @Slf4j
-public class TeacherDAOPostgres implements PersonDAO<Teacher> {
+public class TeacherDAOPostgres extends PersonDAO<Teacher> {
     //language=SQL
-    private static final String SELECT_TEACHER = "select " +
+    public static final String SELECT_TEACHER = "select " +
             "t.id t_id, t.user_name t_user_name, " +
             "t.password t_pass, t.salt t_salt, " +
             "t.name t_name, t.age t_age, " +
@@ -28,21 +29,22 @@ public class TeacherDAOPostgres implements PersonDAO<Teacher> {
             "join \"group\" g " +
             "on t.id = g.teacher_id ";
     //language=SQL
-    private static final String WHERE_TEACHER_NAME = " where t.user_name = ? ";
-    private static final String WHERE_TEACHER_ID = " where t.id = ? ";
+    public static final String WHERE_TEACHER_NAME = " where t.user_name = ? ";
+    public static final String WHERE_TEACHER_ID = " where t.id = ? ";
     //language=SQL
-    private static final String UPDATE_TEACHER = "update teacher t " +
-            "set user_name = ?, password = ?, salt = ?, name = ?, age = ?, salary = ?" + WHERE_TEACHER_NAME;
-    private static final String DELETE_TEACHER = "update \"group\" g set teacher_id = null " +
-            "where teacher_id = (select id from teacher t " + WHERE_TEACHER_NAME + "); " +
-            "delete from teacher t" + WHERE_TEACHER_NAME + ";";
+    public static final String UPDATE_TEACHER = "update teacher t " +
+            "set user_name = ?, password = ?, salt = ?, name = ?, age = ?, salary = ?" + WHERE_TEACHER_ID;
+    public static final String DELETE_TEACHER = "delete from teacher t" + WHERE_TEACHER_NAME + ";";
     //language=SQL
-    private static final String INSERT_TEACHER = "insert into teacher (user_name, password, salt, \"name\", age, salary)" +
+    public static final String UPDATE_TEACHER_FOR_DELETE = "update \"group\" g set teacher_id = null " +
+            "where teacher_id = (select id from teacher t " + WHERE_TEACHER_NAME + "); ";
+    //language=SQL
+    public static final String INSERT_TEACHER = "insert into teacher (user_name, password, salt, \"name\", age, salary)" +
             " values (?, ?, ?, ?, ?, ?) returning id;";
     //language=SQL
-    private static final String SELECT_TEACHER_BY_NAME = SELECT_TEACHER + WHERE_TEACHER_NAME;
-    private static final String SELECT_TEACHER_BY_ID = SELECT_TEACHER + WHERE_TEACHER_ID;
-    private static final int POSITION_ID = 1;
+    public static final String SELECT_TEACHER_BY_NAME = SELECT_TEACHER + WHERE_TEACHER_NAME;
+    public static final String SELECT_TEACHER_BY_ID = SELECT_TEACHER + WHERE_TEACHER_ID;
+    public static final int POSITION_ID = 1;
     public static final String T_ID = "t_id";
     public static final String G_ID = "g_id";
     public static final String T_NAME = "t_name";
@@ -73,14 +75,22 @@ public class TeacherDAOPostgres implements PersonDAO<Teacher> {
     }
 
     @Override
+    void sqlForFind(String sql) {
+
+    }
+
+    @Override
     public Teacher save(Teacher teacher) {
-        return teacher.getId() == null ? insert(teacher) : update(teacher.getUserName(), teacher);
+        return teacher.getId() == null ? insert(teacher) : update(teacher.getId(), teacher);
     }
 
     private Teacher insert(Teacher teacher) {
+        Connection con = null;
+        PreparedStatement ps = null;
         ResultSet rs = null;
-        try (Connection con = dataSource.getConnection();
-             PreparedStatement ps = con.prepareStatement(INSERT_TEACHER)) {
+        try {
+            con = dataSource.getConnection();
+            ps = con.prepareStatement(INSERT_TEACHER);
             ps.setString(1, teacher.getUserName());
             ps.setBytes(2, teacher.getPassword());
             ps.setBytes(3, teacher.getSalt());
@@ -89,88 +99,127 @@ public class TeacherDAOPostgres implements PersonDAO<Teacher> {
             ps.setDouble(6, teacher.getSalary());
             rs = ps.executeQuery();
             if (rs.next()) {
+                con.commit();
                 return teacher.withId(rs.getInt(POSITION_ID));
             }
+            rollBack(con);
             return null;
         } catch (SQLException e) {
+            rollBack(con);
             log.error(e.getMessage());
             throw new DataBaseException(e);
         } finally {
-            closeQuietly(rs);
+            closeQuietly(rs, ps, con);
         }
     }
 
     @Override
     public Optional<Teacher> find(String name) {
         List<Teacher> result;
+        Connection con = null;
+        PreparedStatement ps = null;
         ResultSet rs = null;
-        try (Connection con = dataSource.getConnection();
-             PreparedStatement ps = con.prepareStatement(SELECT_TEACHER_BY_NAME)) {
+        try {
+            con = dataSource.getConnection();
+            ps = con.prepareStatement(SELECT_TEACHER_BY_NAME);
             ps.setString(1, name);
             rs = ps.executeQuery();
             result = resultSetToTeachers(rs);
+            if (!result.isEmpty()) {
+                con.commit();
+                return result.stream().findAny();
+            }
+            rollBack(con);
+            return Optional.empty();
         } catch (SQLException e) {
+            rollBack(con);
             log.error(e.getMessage());
             throw new DataBaseException(e);
         } finally {
-            closeQuietly(rs);
+            closeQuietly(rs, ps, con);
         }
-        return result.stream().findAny();
     }
 
     @Override
     public Optional<Teacher> find(Integer id) {
         List<Teacher> result;
+        Connection con = null;
+        PreparedStatement ps = null;
         ResultSet rs = null;
-        try (Connection con = dataSource.getConnection();
-             PreparedStatement ps = con.prepareStatement(SELECT_TEACHER_BY_ID)) {
+        try {
+            con = dataSource.getConnection();
+            ps = con.prepareStatement(SELECT_TEACHER_BY_ID);
             ps.setInt(1, id);
             rs = ps.executeQuery();
             result = resultSetToTeachers(rs);
+            if (!result.isEmpty()) {
+                con.commit();
+                return result.stream().findAny();
+            }
+            rollBack(con);
+            return Optional.empty();
         } catch (SQLException e) {
+            rollBack(con);
             log.error(e.getMessage());
             throw new DataBaseException(e);
         } finally {
-            closeQuietly(rs);
+            closeQuietly(rs, ps, con);
         }
-        return result.stream().findAny();
     }
 
     @Override
-    public Teacher update(String name, Teacher teacher) {
-        try (Connection con = dataSource.getConnection();
-             PreparedStatement ps = con.prepareStatement(UPDATE_TEACHER)) {
+    public Teacher update(Integer id, Teacher teacher) {
+        Connection con = null;
+        PreparedStatement ps = null;
+        try {
+            con = dataSource.getConnection();
+            ps = con.prepareStatement(UPDATE_TEACHER);
             ps.setString(1, teacher.getUserName());
             ps.setBytes(2, teacher.getPassword());
             ps.setBytes(3, teacher.getSalt());
             ps.setString(4, teacher.getName());
             ps.setInt(5, teacher.getAge());
             ps.setDouble(6, teacher.getSalary());
-            ps.setString(7, name);
+            ps.setInt(7, id);
             if (ps.executeUpdate() > 0) {
+                con.commit();
                 return teacher;
             }
+            rollBack(con);
             return null;
         } catch (SQLException e) {
-            e.printStackTrace();
+            rollBack(con);
+            log.error(e.getMessage());
             throw new DataBaseException(e);
+        } finally {
+            closeQuietly(ps, con);
         }
     }
 
 
     @Override
     public Teacher remove(Teacher teacher) {
-        try (Connection con = dataSource.getConnection();
-             PreparedStatement ps = con.prepareStatement(DELETE_TEACHER)) {
-            ps.setString(1, teacher.getUserName());
-            ps.setString(2, teacher.getUserName());
-            if (ps.executeUpdate() > 0) {
-                return teacher;
+        Connection con = null;
+        PreparedStatement ps1 = null;
+        PreparedStatement ps2 = null;
+        try {
+            con = dataSource.getConnection();
+            ps1 = con.prepareStatement(UPDATE_TEACHER_FOR_DELETE);
+            ps2 = con.prepareStatement(DELETE_TEACHER);
+            ps1.setString(1, teacher.getUserName());
+            ps2.setString(1, teacher.getUserName());
+            if (!(ps1.executeUpdate() > 0) || !(ps2.executeUpdate() > 0)) {
+                rollBack(con);
+                return null;
             }
-            return null;
+            con.commit();
+            return teacher;
         } catch (SQLException e) {
+            rollBack(con);
             log.error(e.getMessage());
             throw new DataBaseException(e);
+        } finally {
+            closeQuietly(ps2, ps1, con);
         }
     }
 
@@ -182,15 +231,32 @@ public class TeacherDAOPostgres implements PersonDAO<Teacher> {
     @Override
     public List<Teacher> findAll() {
         List<Teacher> result;
-        try (Connection con = dataSource.getConnection();
-             PreparedStatement ps = con.prepareStatement(SELECT_TEACHER);
-             ResultSet rs = ps.executeQuery()) {
+        Connection con = null;
+        PreparedStatement ps = null;
+        ResultSet rs = null;
+        try {
+            con = dataSource.getConnection();
+            ps = con.prepareStatement(SELECT_TEACHER);
+            rs = ps.executeQuery();
             result = resultSetToTeachers(rs);
+            if (!result.isEmpty()) {
+                con.commit();
+                return result;
+            }
+            rollBack(con);
+            return result;
         } catch (SQLException e) {
+            rollBack(con);
             log.error(e.getMessage());
             throw new DataBaseException(e);
+        } finally {
+            closeQuietly(rs, ps, con);
         }
-        return result;
+    }
+
+    @Override
+    String[] aliases() {
+        return new String[]{G_ID, T_ID, T_USER_NAME, T_PASS, T_SALT, T_NAME, T_AGE, Role.getStrByType(Role.TEACHER), T_SALARY};
     }
 
 
@@ -208,9 +274,9 @@ public class TeacherDAOPostgres implements PersonDAO<Teacher> {
                     .withUserName(rs.getString(T_USER_NAME))
                     .withBytePass(rs.getBytes(T_PASS))
                     .withSalt(rs.getBytes(T_SALT))
-                    .withSalary(rs.getDouble(T_SALARY))
                     .withRole(Role.TEACHER)
-                    .withGroup(putIfAbsentAndReturn(groupMap, gId, GroupDAOPostgres.getInstance(dataSource).find(gId).get())));
+                    .withSalary(rs.getDouble(T_SALARY))
+                    .withGroup(putIfAbsentAndReturn(groupMap, gId, GroupDAOPostgres.getInstance(dataSource).find(gId).orElse(null))));
 
             teacherMap.computeIfPresent(tId, (id, teacher) -> teacher.withGroup(groupMap.get(gId)));
         }

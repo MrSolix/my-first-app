@@ -20,12 +20,13 @@ import java.util.Optional;
 public class Finance {
     private static final Map<Teacher, Map<Integer, Double>> salaryHistory;
     private static final int CURRENT_MONTH = LocalDate.now().getMonthValue();
-    private static final PersonDAO<Person> DAO_REPOSITORY = RepositoryFactory.getDaoRepository();
+    private static PersonDAO<Person> daoRepository;
     private static volatile Finance instance;
     private static final String MIN_RANGE = "minRange";
     private static final String MAX_RANGE = "maxRange";
 
     public Finance() {
+        daoRepository = RepositoryFactory.getDaoRepository();
         //singleton
     }
 
@@ -46,8 +47,8 @@ public class Finance {
 
     static {
         salaryHistory = new HashMap<>();
-        final Optional<? extends Person> teacher = DAO_REPOSITORY.find("teacher");
-        final Optional<? extends Person> teacher1 = DAO_REPOSITORY.find("teacher1");
+        final Optional<? extends Person> teacher = daoRepository.find("teacher");
+        final Optional<? extends Person> teacher1 = daoRepository.find("teacher1");
         if (teacher.isPresent() && teacher1.isPresent()) {
             for (int i = 1; i < 11; i++) {
                 Finance.getInstance().saveSalary((Teacher) teacher.get(), i, i * 110.0);
@@ -61,20 +62,20 @@ public class Finance {
     public double averageSalary(int minRange, int maxRange, Teacher teacher) {
         int rangeCount = maxRange - minRange + 1;
         double avgSal = 0.0;
-        if (minRange >= 1 && maxRange <= CURRENT_MONTH
-                && rangeCount > 0) {
-            if (salaryHistory.containsKey(teacher)) {
-                Map<Integer, Double> integerDoubleMap = salaryHistory.get(teacher);
-                for (int i = 1; i <= rangeCount; i++) {
-                    avgSal += integerDoubleMap.get(i);
-                }
-            } else {
-                return -1;
-            }
-        } else {
+        if (!(minRange >= 1 && maxRange <= CURRENT_MONTH
+                && rangeCount > 0) && !salaryHistory.containsKey(teacher)) {
             return -1;
         }
+        avgSal = getAvgSal(teacher, rangeCount, avgSal);
         return avgSal / rangeCount;
+    }
+
+    private double getAvgSal(Teacher teacher, int rangeCount, double avgSal) {
+        Map<Integer, Double> integerDoubleMap = salaryHistory.get(teacher);
+        for (int i = 1; i <= rangeCount; i++) {
+            avgSal += integerDoubleMap.get(i);
+        }
+        return avgSal;
     }
 
     public void saveSalary(Teacher teacher, Integer month, Double salary) {
@@ -85,7 +86,7 @@ public class Finance {
     }
 
     public void getSalary(HttpServletRequest req, HttpServletResponse resp, String userName) throws ServletException, IOException {
-        Optional<? extends Person> person = DAO_REPOSITORY.find(userName);
+        Optional<? extends Person> person = daoRepository.find(userName);
         if (person.isEmpty() || !"teacher".equalsIgnoreCase(person.get().getRole().toString())) {
             log.info("person == null or person role != \"TEACHER\"");
             String errorString = "the teacher's login is incorrect";
@@ -106,7 +107,7 @@ public class Finance {
         }
         log.info("userName = {}, minRange = {}, maxRange = {}", userName, minRange, maxRange);
 
-        Optional<? extends Person> person = DAO_REPOSITORY.find(userName);
+        Optional<? extends Person> person = daoRepository.find(userName);
         log.info("Get person from db");
 
         if (person.isEmpty() || !"teacher".equalsIgnoreCase(person.get().getRole().toString())) {

@@ -1,10 +1,9 @@
 package by.dutov.jee.repository.person;
 
 
-import by.dutov.jee.exceptions.DataBaseException;
 import by.dutov.jee.people.Admin;
-import by.dutov.jee.people.Person;
 import by.dutov.jee.people.Role;
+import by.dutov.jee.service.exceptions.DataBaseException;
 import lombok.extern.slf4j.Slf4j;
 
 import javax.sql.DataSource;
@@ -14,10 +13,11 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.*;
 
-import static by.dutov.jee.utils.CloseClass.closeQuietly;
+import static by.dutov.jee.utils.DataBaseUtils.closeQuietly;
+import static by.dutov.jee.utils.DataBaseUtils.rollBack;
 
 @Slf4j
-public class AdminDAOPostgres implements PersonDAO<Admin> {
+public class AdminDAOPostgres extends PersonDAO<Admin> {
     //language=SQL
     private static final String SELECT_ADMIN = "select " +
             "a.id a_id, " +
@@ -33,7 +33,7 @@ public class AdminDAOPostgres implements PersonDAO<Admin> {
             " values (?, ?, ?, ?, ?) returning id;";
     //language=SQL
     private static final String UPDATE_ADMIN = "update admin a " +
-            "set user_name = ?, password = ?, salt = ?, name = ?, age = ?" + WHERE_ADMIN_NAME;
+            "set user_name = ?, password = ?, salt = ?, name = ?, age = ?" + WHERE_ADMIN_ID;
     //language=SQL
     private static final String DELETE_ADMIN = "delete from admin a" + WHERE_ADMIN_NAME;
     //language=SQL
@@ -67,50 +67,76 @@ public class AdminDAOPostgres implements PersonDAO<Admin> {
     }
 
     @Override
+    void sqlForFind(String sql) {
+
+    }
+
+    @Override
     public Admin save(Admin admin) {
-        return admin.getId() == null ? insert(admin) : update(admin.getUserName(), admin);
+        return admin.getId() == null ? insert(admin) : update(admin.getId(), admin);
     }
 
     @Override
     public Optional<Admin> find(String name) {
         List<Admin> result;
+        Connection con = null;
+        PreparedStatement ps = null;
         ResultSet rs = null;
-        try (Connection con = dataSource.getConnection();
-             PreparedStatement ps = con.prepareStatement(SELECT_ADMIN_BY_NAME)) {
+        try {
+            con = dataSource.getConnection();
+            ps = con.prepareStatement(SELECT_ADMIN_BY_NAME);
             ps.setString(1, name);
             rs = ps.executeQuery();
             result = resultSetToAdmins(rs);
+            if (!result.isEmpty()) {
+                con.commit();
+                return result.stream().findAny();
+            }
+            rollBack(con);
+            return Optional.empty();
         } catch (SQLException e) {
+            rollBack(con);
             log.error(e.getMessage());
             throw new DataBaseException(e);
         } finally {
-            closeQuietly(rs);
+            closeQuietly(rs, ps, con);
         }
-        return result.stream().findAny();
     }
 
     @Override
     public Optional<Admin> find(Integer id) {
         List<Admin> result;
+        Connection con = null;
+        PreparedStatement ps = null;
         ResultSet rs = null;
-        try (Connection con = dataSource.getConnection();
-             PreparedStatement ps = con.prepareStatement(SELECT_ADMIN_BY_ID)) {
+        try {
+            con = dataSource.getConnection();
+            ps = con.prepareStatement(SELECT_ADMIN_BY_ID);
             ps.setInt(1, id);
             rs = ps.executeQuery();
             result = resultSetToAdmins(rs);
+            if (!result.isEmpty()) {
+                con.commit();
+                return result.stream().findAny();
+            }
+            rollBack(con);
+            return Optional.empty();
         } catch (SQLException e) {
+            rollBack(con);
             log.error(e.getMessage());
             throw new DataBaseException(e);
         } finally {
-            closeQuietly(rs);
+            closeQuietly(rs, ps, con);
         }
-        return result.stream().findAny();
     }
 
     private Admin insert(Admin admin) {
+        Connection con = null;
+        PreparedStatement ps = null;
         ResultSet rs = null;
-        try (Connection con = dataSource.getConnection();
-             PreparedStatement ps = con.prepareStatement(INSERT_ADMIN)) {
+        try {
+            con = dataSource.getConnection();
+            ps = con.prepareStatement(INSERT_ADMIN);
             ps.setString(1, admin.getUserName());
             ps.setBytes(2, admin.getPassword());
             ps.setBytes(3, admin.getSalt());
@@ -118,60 +144,98 @@ public class AdminDAOPostgres implements PersonDAO<Admin> {
             ps.setInt(5, admin.getAge());
             rs = ps.executeQuery();
             if (rs.next()) {
+                con.commit();
                 return admin.withId(rs.getInt(POSITION_ID));
             }
+            rollBack(con);
             return null;
         } catch (SQLException e) {
+            rollBack(con);
             log.error(e.getMessage());
             throw new DataBaseException(e);
         } finally {
-            closeQuietly(rs);
+            closeQuietly(rs, ps, con);
         }
     }
 
     @Override
-    public Admin update(String name, Admin admin) {
-        try (Connection con = dataSource.getConnection();
-             PreparedStatement ps = con.prepareStatement(UPDATE_ADMIN)) {
+    public Admin update(Integer id, Admin admin) {
+        Connection con = null;
+        PreparedStatement ps = null;
+        try {
+            con = dataSource.getConnection();
+            ps = con.prepareStatement(UPDATE_ADMIN);
             ps.setString(1, admin.getUserName());
             ps.setBytes(2, admin.getPassword());
             ps.setBytes(3, admin.getSalt());
             ps.setString(4, admin.getName());
             ps.setInt(5, admin.getAge());
-            ps.setString(6, name);
+            ps.setInt(6, id);
             if (ps.executeUpdate() > 0) {
+                con.commit();
                 return admin;
             }
+            rollBack(con);
             return null;
         } catch (SQLException e) {
-            e.printStackTrace();
+            rollBack(con);
+            log.error(e.getMessage());
             throw new DataBaseException(e);
         }
     }
 
     @Override
     public Admin remove(Admin admin) {
-        try (Connection con = dataSource.getConnection();
-             PreparedStatement ps = con.prepareStatement(DELETE_ADMIN)) {
-            return (Admin) PersonDAOPostgres.getInstance(dataSource).removePerson(admin, ps);
+        Connection con = null;
+        PreparedStatement ps = null;
+        try {
+            con = dataSource.getConnection();
+            ps = con.prepareStatement(DELETE_ADMIN);
+            ps.setString(1, admin.getUserName());
+            if (ps.executeUpdate() > 0) {
+                con.commit();
+                return admin;
+            }
+            rollBack(con);
+            return null;
         } catch (SQLException e) {
+            rollBack(con);
             log.error(e.getMessage());
             throw new DataBaseException(e);
+        } finally {
+            closeQuietly(ps, con);
         }
     }
 
     @Override
     public List<Admin> findAll() {
         List<Admin> result;
-        try (Connection con = dataSource.getConnection();
-             PreparedStatement ps = con.prepareStatement(SELECT_ADMIN);
-             ResultSet rs = ps.executeQuery()) {
+        Connection con = null;
+        PreparedStatement ps = null;
+        ResultSet rs = null;
+        try {
+            con = dataSource.getConnection();
+            ps = con.prepareStatement(SELECT_ADMIN);
+            rs = ps.executeQuery();
             result = resultSetToAdmins(rs);
+            if (!result.isEmpty()) {
+                con.commit();
+                return result;
+            }
+            rollBack(con);
+            return result;
         } catch (SQLException e) {
+            rollBack(con);
             log.error(e.getMessage());
             throw new DataBaseException(e);
+        } finally {
+            closeQuietly(rs, ps, con);
         }
-        return result;
+    }
+
+    @Override
+    String[] aliases() {
+        return new String[0];
     }
 
     @Override

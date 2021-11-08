@@ -1,4 +1,4 @@
-package by.dutov.jee.exceptions;
+package by.dutov.jee.service.exceptions;
 
 public class HashException extends Exception{
 
