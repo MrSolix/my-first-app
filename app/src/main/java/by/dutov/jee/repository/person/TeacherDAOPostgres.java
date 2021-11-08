@@ -12,7 +12,12 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.concurrent.ConcurrentHashMap;
 
 import static by.dutov.jee.utils.DataBaseUtils.closeQuietly;
 import static by.dutov.jee.utils.DataBaseUtils.rollBack;
@@ -261,8 +266,8 @@ public class TeacherDAOPostgres extends PersonDAO<Teacher> {
 
 
     private List<Teacher> resultSetToTeachers(ResultSet rs) throws SQLException {
-        Map<Integer, Teacher> teacherMap = new HashMap<>();
-        Map<Integer, Group> groupMap = new HashMap<>();
+        Map<Integer, Teacher> teacherMap = new ConcurrentHashMap<>();
+        Map<Integer, Group> groupMap = new ConcurrentHashMap<>();
         while (rs.next()) {
             final int tId = rs.getInt(T_ID);
             final int gId = rs.getInt(G_ID);

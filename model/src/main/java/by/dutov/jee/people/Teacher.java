@@ -1,7 +1,6 @@
 package by.dutov.jee.people;
 
 import by.dutov.jee.group.Group;
-import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonIdentityInfo;
 import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 import lombok.Data;

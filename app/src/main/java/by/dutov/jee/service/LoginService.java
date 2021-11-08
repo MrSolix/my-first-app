@@ -1,10 +1,10 @@
 package by.dutov.jee.service;
 
+import by.dutov.jee.people.Person;
+import by.dutov.jee.repository.RepositoryFactory;
 import by.dutov.jee.service.encrypt.PasswordEncryptionService;
 import by.dutov.jee.service.exceptions.HashException;
 import by.dutov.jee.service.exceptions.PasswordException;
-import by.dutov.jee.people.Person;
-import by.dutov.jee.repository.RepositoryFactory;
 import by.dutov.jee.utils.AppUtils;
 import by.dutov.jee.utils.CommandServletUtils;
 import lombok.extern.slf4j.Slf4j;

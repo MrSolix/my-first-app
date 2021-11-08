@@ -15,6 +15,7 @@ import java.time.LocalDate;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
+import java.util.concurrent.ConcurrentHashMap;
 
 @Slf4j
 public class Finance {
@@ -46,7 +47,7 @@ public class Finance {
     }
 
     static {
-        salaryHistory = new HashMap<>();
+        salaryHistory = new ConcurrentHashMap<>();
         final Optional<? extends Person> teacher = daoRepository.find("teacher");
         final Optional<? extends Person> teacher1 = daoRepository.find("teacher1");
         if (teacher.isPresent() && teacher1.isPresent()) {

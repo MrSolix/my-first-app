@@ -1,6 +1,10 @@
 package by.dutov.jee.repository.person;
 
-import by.dutov.jee.people.*;
+import by.dutov.jee.people.Admin;
+import by.dutov.jee.people.Person;
+import by.dutov.jee.people.Role;
+import by.dutov.jee.people.Student;
+import by.dutov.jee.people.Teacher;
 import lombok.extern.slf4j.Slf4j;
 
 import javax.sql.DataSource;

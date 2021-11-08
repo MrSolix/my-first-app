@@ -1,12 +1,21 @@
 package by.dutov.jee.repository.person;
 
+import by.dutov.jee.group.Group;
+import by.dutov.jee.people.Admin;
+import by.dutov.jee.people.Person;
+import by.dutov.jee.people.Role;
+import by.dutov.jee.people.Student;
+import by.dutov.jee.people.Teacher;
 import by.dutov.jee.service.encrypt.PasswordEncryptionService;
 import by.dutov.jee.service.exceptions.HashException;
-import by.dutov.jee.group.Group;
-import by.dutov.jee.people.*;
+import by.dutov.jee.service.exceptions.PasswordException;
 import lombok.extern.slf4j.Slf4j;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
@@ -70,6 +79,7 @@ public class PersonDAOInMemory extends PersonDAO<Person> {
                     }
                 } catch (HashException e) {
                     log.error(e.getMessage(), e);
+                    throw new PasswordException(e);
                 }
             }
         }

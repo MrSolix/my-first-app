@@ -12,7 +12,12 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.concurrent.ConcurrentHashMap;
 
 import static by.dutov.jee.utils.DataBaseUtils.closeQuietly;
 import static by.dutov.jee.utils.DataBaseUtils.rollBack;
@@ -94,6 +99,7 @@ public class StudentDAOPostgres extends PersonDAO<Student> {
     void sqlForFind(String sql) throws SQLException {
         Connection con = dataSource.getConnection();
         PreparedStatement ps = con.prepareStatement(sql);
+        //TODO доделать паттерн
     }
 
     @Override
@@ -274,8 +280,8 @@ public class StudentDAOPostgres extends PersonDAO<Student> {
     }
 
     private List<Student> resultSetToStudents(ResultSet rs) throws SQLException {
-        Map<Integer, Student> studentMap = new HashMap<>();
-        Map<Integer, Group> groupMap = new HashMap<>();
+        Map<Integer, Student> studentMap = new ConcurrentHashMap<>();
+        Map<Integer, Group> groupMap = new ConcurrentHashMap<>();
         while (rs.next()) {
             final int sId = rs.getInt(S_ID);
             final int gId = rs.getInt(G_ID);
@@ -306,7 +312,7 @@ public class StudentDAOPostgres extends PersonDAO<Student> {
             ps = con.prepareStatement(SELECT_GRADES + WHERE_STUDENT_NAME);
             ps.setString(1, name);
             rs = ps.executeQuery();
-            Map<String, List<Integer>> grades = new HashMap<>();
+            Map<String, List<Integer>> grades = new ConcurrentHashMap<>();
             while (rs.next()) {
                 final String t_name = rs.getString(T_NAME);
                 final int g_grade = rs.getInt(G_GRADE);

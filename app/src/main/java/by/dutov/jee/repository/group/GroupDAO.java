@@ -1,7 +1,5 @@
 package by.dutov.jee.repository.group;
 
-import by.dutov.jee.people.Student;
-
 import java.util.List;
 import java.util.Optional;
 
