@@ -14,10 +14,10 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.concurrent.ConcurrentHashMap;
 
 import static by.dutov.jee.utils.DataBaseUtils.closeQuietly;
 import static by.dutov.jee.utils.DataBaseUtils.rollBack;
@@ -287,9 +287,9 @@ public class GroupDAOPostgres extends GroupDAO<Group> {
     }
 
     private List<Group> resultSetToGroup(ResultSet rs) throws SQLException {
-        Map<Integer, Student> studentMap = new HashMap<>();
-        Map<Integer, Teacher> teacherMap = new HashMap<>();
-        Map<Integer, Group> groupMap = new HashMap<>();
+        Map<Integer, Student> studentMap = new ConcurrentHashMap<>();
+        Map<Integer, Teacher> teacherMap = new ConcurrentHashMap<>();
+        Map<Integer, Group> groupMap = new ConcurrentHashMap<>();
         while (rs.next()) {
             final int gId = rs.getInt(G_ID);
             final int sId = rs.getInt(S_ID);
