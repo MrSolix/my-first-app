@@ -12,10 +12,11 @@ import static org.junit.Assert.assertNotNull;
 
 public class FinanceTest {
     private Teacher teacher;
-    private final Finance finance = Finance.getInstance();
+    private Finance finance;
 
     @Before
-    public void setUp() throws Exception {
+    public void setUp() {
+        finance = Finance.getInstance();
         teacher = new Teacher()
                 .withId(90)
                 .withUserName("teacher")

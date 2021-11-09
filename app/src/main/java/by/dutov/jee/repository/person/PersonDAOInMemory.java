@@ -6,9 +6,6 @@ import by.dutov.jee.people.Person;
 import by.dutov.jee.people.Role;
 import by.dutov.jee.people.Student;
 import by.dutov.jee.people.Teacher;
-import by.dutov.jee.service.encrypt.PasswordEncryptionService;
-import by.dutov.jee.service.exceptions.HashException;
-import by.dutov.jee.service.exceptions.PasswordException;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.ArrayList;
@@ -23,10 +20,9 @@ import java.util.stream.Collectors;
 public class PersonDAOInMemory extends PersonDAO<Person> {
 
     private static volatile PersonDAOInMemory instance;
-    private Map<Integer, Person> accounts;
+    private final Map<Integer, Person> accounts;
 
     public PersonDAOInMemory() {
-        accounts = new ConcurrentHashMap<>();
         //singleton
     }
 
@@ -42,8 +38,8 @@ public class PersonDAOInMemory extends PersonDAO<Person> {
     }
 
     @Override
-    void sqlForFind(String sql) {
-        throw new UnsupportedOperationException();
+    String[] sqlMethods() {
+        return new String[0];
     }
 
     @Override
@@ -68,22 +64,6 @@ public class PersonDAOInMemory extends PersonDAO<Person> {
     @Override
     public Optional<Person> find(Integer id) {
         return Optional.ofNullable(accounts.get(id));
-    }
-
-    public Optional<Person> find(String name, String password) {
-        for (Person person : accounts.values()) {
-            if (person.getUserName().equals(name)) {
-                try {
-                    if (PasswordEncryptionService.getInstance().authenticate(password, person.getPassword(), person.getSalt())) {
-                        return Optional.of(person);
-                    }
-                } catch (HashException e) {
-                    log.error(e.getMessage(), e);
-                    throw new PasswordException(e);
-                }
-            }
-        }
-        return Optional.empty();
     }
 
     @Override
@@ -116,11 +96,18 @@ public class PersonDAOInMemory extends PersonDAO<Person> {
     }
 
     @Override
+    Map<String, List<Integer>> getGrades(String name) {
+        return null;
+    }
+
+    @Override
     String[] aliases() {
         return new String[0];
     }
 
     {
+        accounts = new ConcurrentHashMap<>();
+
         Student student = new Student()
                 .withId(1)
                 .withUserName("student")

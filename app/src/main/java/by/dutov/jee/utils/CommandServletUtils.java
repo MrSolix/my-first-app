@@ -36,7 +36,7 @@ public class CommandServletUtils {
 
         Person loginedUser = AppUtils.getLoginedUser(request.getSession());
 
-        if (loginedUser == null || !who.equalsIgnoreCase(loginedUser.getRole().toString())) {
+        if (loginedUser == null || !loginedUser.getRole().getType().equals(who)) {
             log.info("Access denied");
             CommandServletUtils.dispatcher(request, response,
                     "/home", DispatcherType.FORWARD);

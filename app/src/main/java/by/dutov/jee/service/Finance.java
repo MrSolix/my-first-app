@@ -27,7 +27,6 @@ public class Finance {
     private static final String MAX_RANGE = "maxRange";
 
     public Finance() {
-        daoRepository = RepositoryFactory.getDaoRepository();
         //singleton
     }
 
@@ -47,6 +46,7 @@ public class Finance {
     }
 
     static {
+        daoRepository = RepositoryFactory.getDaoRepository();
         salaryHistory = new ConcurrentHashMap<>();
         final Optional<? extends Person> teacher = daoRepository.find("teacher");
         final Optional<? extends Person> teacher1 = daoRepository.find("teacher1");
@@ -60,20 +60,22 @@ public class Finance {
         }
     }
 
-    public double averageSalary(int minRange, int maxRange, Teacher teacher) {
+    public double averageSalary(Integer minRange, Integer maxRange, Teacher teacher) {
         int rangeCount = maxRange - minRange + 1;
         double avgSal = 0.0;
-        if (!(minRange >= 1 && maxRange <= CURRENT_MONTH
-                && rangeCount > 0) && !salaryHistory.containsKey(teacher)) {
+        if (minRange < 1 || maxRange > CURRENT_MONTH
+                || rangeCount <= 0
+                || teacher == null
+                || !salaryHistory.containsKey(teacher)) {
             return -1;
         }
-        avgSal = getAvgSal(teacher, rangeCount, avgSal);
+        avgSal = getAvgSal(teacher, minRange, maxRange, avgSal);
         return avgSal / rangeCount;
     }
 
-    private double getAvgSal(Teacher teacher, int rangeCount, double avgSal) {
+    private double getAvgSal(Teacher teacher, int minRange, int maxRange, double avgSal) {
         Map<Integer, Double> integerDoubleMap = salaryHistory.get(teacher);
-        for (int i = 1; i <= rangeCount; i++) {
+        for (int i = minRange; i <= maxRange; i++) {
             avgSal += integerDoubleMap.get(i);
         }
         return avgSal;
@@ -88,7 +90,7 @@ public class Finance {
 
     public void getSalary(HttpServletRequest req, HttpServletResponse resp, String userName) throws ServletException, IOException {
         Optional<? extends Person> person = daoRepository.find(userName);
-        if (person.isEmpty() || !"teacher".equalsIgnoreCase(person.get().getRole().toString())) {
+        if (person.isEmpty() || !"teacher".equals(person.get().getRole().getType())) {
             log.info("person == null or person role != \"TEACHER\"");
             String errorString = "the teacher's login is incorrect";
             req.setAttribute("errorStringInSalaryPage", errorString);
@@ -111,13 +113,13 @@ public class Finance {
         Optional<? extends Person> person = daoRepository.find(userName);
         log.info("Get person from db");
 
-        if (person.isEmpty() || !"teacher".equalsIgnoreCase(person.get().getRole().toString())) {
+        if (person.isEmpty() || !"teacher".equals(person.get().getRole().getType())) {
             log.info("person == null or person role != \"TEACHER\"");
             CommandServletUtils.errorMessage(req, "the teacher's login is incorrect"
                     , "errorStringInAvgSalaryPage");
         } else {
             double averageSalary = averageSalary(minRange, maxRange, (Teacher) person.get());
-            if (averageSalary < 0) {
+            if (averageSalary <= 0) {
                 log.info("incorrect value in fields \"minRange\" or \"maxRange\"");
                 CommandServletUtils.errorMessage(req, "months are incorrect"
                         , "errorMonthsInAvgSalaryPage");

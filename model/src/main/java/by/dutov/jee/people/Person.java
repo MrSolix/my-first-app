@@ -2,10 +2,12 @@ package by.dutov.jee.people;
 
 import by.dutov.jee.AbstractEntity;
 import by.dutov.jee.service.encrypt.PasswordEncryptionService;
+import by.dutov.jee.service.exceptions.PasswordException;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
+import lombok.extern.slf4j.Slf4j;
 
 import java.security.NoSuchAlgorithmException;
 import java.security.spec.InvalidKeySpecException;
@@ -14,6 +16,7 @@ import java.security.spec.InvalidKeySpecException;
 @NoArgsConstructor
 @EqualsAndHashCode(callSuper = true)
 @ToString(callSuper = true)
+@Slf4j
 public abstract class Person extends AbstractEntity implements Printable {
     private String userName;
     private byte[] salt;
@@ -33,7 +36,8 @@ public abstract class Person extends AbstractEntity implements Printable {
                 person.setSalt(salt);
                 person.setPassword(encryptedPassword);
             } catch (NoSuchAlgorithmException | InvalidKeySpecException e) {
-                e.printStackTrace();
+                log.error(e.getMessage());
+                throw new PasswordException(e);
             }
         }
     }

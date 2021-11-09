@@ -11,7 +11,7 @@ import java.util.Properties;
 
 @Slf4j
 public class RepositoryFactory {
-    private static final RepositoryTypes TYPE;
+    public static final RepositoryTypes TYPE;
     private static RepositoryDataSource dataSource;
 
     static {
