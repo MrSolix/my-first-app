@@ -1,66 +1,104 @@
 package by.dutov.jee.people;
 
 
-import java.util.*;
+import by.dutov.jee.group.Group;
+import com.fasterxml.jackson.annotation.JsonIdentityInfo;
+import com.fasterxml.jackson.annotation.ObjectIdGenerators;
+import lombok.Data;
+import lombok.EqualsAndHashCode;
+import lombok.NoArgsConstructor;
+import lombok.ToString;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+@Data
+@NoArgsConstructor
+@EqualsAndHashCode(callSuper = true)
+@ToString(callSuper = true)
+@JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property = "id")
 public class Student extends Person {
-    private Set<Integer> groupNumbers;
+    @ToString.Exclude
+//    @JsonBackReference
+    private List<Group> groups;
     private Map<String, List<Integer>> grades;
 
     {
-        groupNumbers = new HashSet<>();
+        groups = new ArrayList<>();
         grades = new HashMap<>();
     }
 
-    public Student(String login, String password, String name, int age, String role) {
-        super(login, password, name, age, role);
+    public Student withGroups(List<Group> groups){
+        setGroups(groups);
+        return this;
     }
 
-    public Set<Integer> getGroupNumbers() {
-        return groupNumbers;
+    public Student withId(Integer id) {
+        setId(id);
+        return this;
     }
 
-    public void setGroupNumbers(Integer... groupNumbers) {
-        this.groupNumbers.addAll(Arrays.asList(groupNumbers));
+    public Student withUserName(String userName) {
+        setUserName(userName);
+        return this;
     }
 
-    public void addThemeAndGrades(String name, Integer... grades){
+    public Student withPassword(String password) {
+        addPassword(password, this);
+        return this;
+    }
+
+    public Student withBytePass(byte[] pass) {
+        setPassword(pass);
+        return this;
+    }
+
+    public Student withSalt(byte[] salt) {
+        setSalt(salt);
+        return this;
+    }
+
+    public Student withName(String name) {
+        setName(name);
+        return this;
+    }
+
+    public Student withAge(int age) {
+        setAge(age);
+        return this;
+    }
+
+    public Student withRole(Role role) {
+        setRole(role);
+        return this;
+    }
+
+    public Student addGroup(Group group) {
+        if (!groups.contains(group)) {
+            groups.add(group);
+        }
+        return this;
+    }
+
+    public Student withGrades(Map<String, List<Integer>> grades) {
+        this.grades = grades;
+        return this;
+    }
+
+    public void addThemeAndGrades(String name, Integer... grades) {
         this.grades.put(name, Arrays.asList(grades));
     }
 
-    public Map<String, List<Integer>> getGrades() {
-        return grades;
-    }
-
-    public void setGroupNumbers(Set<Integer> groupNumbers) {
-        this.groupNumbers = groupNumbers;
-    }
-
-    public void setGrades(Map<String, List<Integer>> grades) {
-        this.grades = grades;
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        if (!super.equals(o)) return false;
-        Student student = (Student) o;
-        return Objects.equals(groupNumbers, student.groupNumbers) &&
-                Objects.equals(grades, student.grades);
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(super.hashCode(), groupNumbers, grades);
-    }
-
-    @Override
-    public String toString() {
-        return "Student{" +
-                "groups=" + groupNumbers +
-                ", grades=" + grades +
-                super.toString();
+    public Student addGrade(String name, Integer grade) {
+        if (this.grades.containsKey(name)) {
+            this.grades.get(name).add(grade);
+        } else {
+            this.grades.put(name, Arrays.asList(grade));
+        }
+        return this;
     }
 
     @Override
@@ -72,12 +110,12 @@ public class Student extends Person {
                 "<br>Grades: " + stringOfGrades(grades);
     }
 
-    private String groupNumbersInString(){
+    private String groupNumbersInString() {
         String result = "";
         int count = 0;
-        for (int i:groupNumbers) {
-            result += i;
-            if (count != groupNumbers.size() - 1){
+        for (Group group : groups) {
+            result += group.getId();
+            if (count != groups.size() - 1) {
                 result += ", ";
             } else {
                 result += ";";
@@ -87,14 +125,14 @@ public class Student extends Person {
         return result;
     }
 
-    private String stringOfGrades(Map<String, List<Integer>> grades){
+    private String stringOfGrades(Map<String, List<Integer>> grades) {
         String result = "";
-        for (String s:grades.keySet()) {
+        for (String s : grades.keySet()) {
             result += "<br>&nbsp;&nbsp;&nbsp;&nbsp" + s + ": ";
             List<Integer> integers = grades.get(s);
             for (int i = 0; i < integers.size(); i++) {
                 result += integers.get(i);
-                if (i != integers.size() - 1){
+                if (i != integers.size() - 1) {
                     result += ", ";
                 } else {
                     result += ";";
@@ -103,4 +141,6 @@ public class Student extends Person {
         }
         return result;
     }
+
+
 }
