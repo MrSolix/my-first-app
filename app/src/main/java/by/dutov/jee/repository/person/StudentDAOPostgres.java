@@ -88,6 +88,7 @@ public class StudentDAOPostgres extends PersonDAO<Student> {
         return instance;
     }
 
+
     @Override
     String[] sqlMethods() {
         return new String[]{

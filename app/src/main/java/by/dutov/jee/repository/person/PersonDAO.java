@@ -27,7 +27,7 @@ import static by.dutov.jee.utils.DataBaseUtils.closeQuietly;
 import static by.dutov.jee.utils.DataBaseUtils.rollBack;
 
 @Slf4j
-public abstract class PersonDAO<T extends Person> {
+public abstract class PersonDAO<T extends Person> implements PersonDAOInterface<T> {
     private static final int POSITION_ID = 1;
     private final DataSource dataSource;
     private final GroupDAOPostgres instance;
@@ -83,7 +83,7 @@ public abstract class PersonDAO<T extends Person> {
                 return result.stream().findAny();
             }
             rollBack(con);
-            return Optional.empty();
+            return result.stream().findAny();
         } catch (SQLException e) {
             rollBack(con);
             log.error(e.getMessage());
@@ -98,7 +98,11 @@ public abstract class PersonDAO<T extends Person> {
         ps.setBytes(2, t.getPassword());
         ps.setBytes(3, t.getSalt());
         ps.setString(4, t.getName());
-        ps.setInt(5, t.getAge());
+        if (t.getAge() >= 0 || t.getAge() <= 99) {
+            ps.setInt(5, t.getAge());
+        } else {
+            ps.setInt(5, 0);
+        }
     }
 
     public T insert(T t) {
@@ -118,7 +122,7 @@ public abstract class PersonDAO<T extends Person> {
                 return (T) t.withId(rs.getInt(POSITION_ID));
             }
             rollBack(con);
-            return null;
+            throw new DataBaseException("Не удалось записать студента.");
         } catch (SQLException e) {
             rollBack(con);
             log.error(e.getMessage());
@@ -146,7 +150,7 @@ public abstract class PersonDAO<T extends Person> {
                 return t;
             }
             rollBack(con);
-            return null;
+            throw new DataBaseException("Не удалось изменить юзера.");
         } catch (SQLException e) {
             rollBack(con);
             log.error(e.getMessage());
@@ -170,7 +174,7 @@ public abstract class PersonDAO<T extends Person> {
             ps2.setString(1, t.getUserName());
             if ((ps1 != null && !(ps1.executeUpdate() > 0)) || !(ps2.executeUpdate() > 0)) {
                 rollBack(con);
-                return null;
+                throw new DataBaseException("Не удалось удалить юзера.");
             }
             con.commit();
             return t;

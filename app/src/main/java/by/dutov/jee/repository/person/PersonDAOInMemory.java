@@ -18,7 +18,8 @@ import java.util.stream.Collectors;
 
 @Slf4j
 public class PersonDAOInMemory extends PersonDAO<Person> {
-
+    private static Integer ID = 1;
+    private Integer id;
     private static volatile PersonDAOInMemory instance;
     private final Map<Integer, Person> accounts;
 
@@ -45,8 +46,8 @@ public class PersonDAOInMemory extends PersonDAO<Person> {
     @Override
     public Person save(Person person) {
         if (person != null) {
-            accounts.put(person.getId(), person);
-            return accounts.get(person.getId());
+            accounts.put(id=ID++, person);
+            return accounts.get(id);
         }
         return null;
     }
@@ -109,7 +110,7 @@ public class PersonDAOInMemory extends PersonDAO<Person> {
         accounts = new ConcurrentHashMap<>();
 
         Student student = new Student()
-                .withId(1)
+                .withId(id=ID++)
                 .withUserName("student")
                 .withPassword("123")
                 .withName("Vasya")
@@ -120,7 +121,7 @@ public class PersonDAOInMemory extends PersonDAO<Person> {
         student.addThemeAndGrades("English", 6, 5, 7, 4, 8);
 
         Student student1 = new Student()
-                .withId(2)
+                .withId(id=ID++)
                 .withUserName("student1")
                 .withPassword("123")
                 .withName("Gena")
@@ -131,7 +132,7 @@ public class PersonDAOInMemory extends PersonDAO<Person> {
         student1.addThemeAndGrades("English", 9, 7, 8, 6, 9);
 
         Teacher teacher = new Teacher()
-                .withId(3)
+                .withId(id=ID++)
                 .withUserName("teacher")
                 .withPassword("123")
                 .withName("Peter")
@@ -140,7 +141,7 @@ public class PersonDAOInMemory extends PersonDAO<Person> {
                 .withRole(Role.TEACHER);
 
         Teacher teacher1 = new Teacher()
-                .withId(4)
+                .withId(id=ID++)
                 .withUserName("teacher1")
                 .withPassword("123")
                 .withName("Daniel")
@@ -159,7 +160,7 @@ public class PersonDAOInMemory extends PersonDAO<Person> {
                 .withStudents(Arrays.asList(student, student1));
 
         Admin admin = new Admin()
-                .withId(5)
+                .withId(id=ID++)
                 .withUserName("admin")
                 .withPassword("123")
                 .withName("Administrator")

@@ -12,7 +12,7 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 
 @Slf4j
-@WebServlet("/home")
+@WebServlet("/main/home")
 public class HomeServlet extends HttpServlet {
 
     @Override
