@@ -3,7 +3,7 @@
 <html>
 <head>
     <title>Admin</title>
-    <jsp:include page="../menu.jsp"/>
+    <jsp:include page="/menu.jsp"/>
 </head>
 <body>
 
@@ -14,6 +14,9 @@
 </a>
 <a href="${pageContext.request.contextPath}/admin/average-salary">
     <h3>Average Salary Page</h3>
+</a>
+<a href="${pageContext.request.contextPath}/admin/update-user">
+    <h3>Update User Page</h3>
 </a>
 
 </body>

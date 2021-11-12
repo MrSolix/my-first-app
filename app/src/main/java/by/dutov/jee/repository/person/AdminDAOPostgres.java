@@ -56,15 +56,38 @@ public class AdminDAOPostgres extends PersonDAO<Admin> {
     }
 
     @Override
-    String[] sqlMethods() {
-        return new String[]{
-                SELECT_ADMIN,
-                DELETE_ADMIN,
-                UPDATE_ADMIN,
-                INSERT_ADMIN,
-                SELECT_ADMIN_BY_ID,
-                SELECT_ADMIN_BY_NAME,
-        };
+    String selectUser() {
+        return SELECT_ADMIN;
+    }
+
+    @Override
+    String deleteUser() {
+        return DELETE_ADMIN;
+    }
+
+    @Override
+    String updateUser() {
+        return UPDATE_ADMIN;
+    }
+
+    @Override
+    String insertUser() {
+        return INSERT_ADMIN;
+    }
+
+    @Override
+    String selectUserById() {
+        return SELECT_ADMIN_BY_ID;
+    }
+
+    @Override
+    String selectUserByName() {
+        return SELECT_ADMIN_BY_NAME;
+    }
+
+    @Override
+    String deleteUserInGroup() {
+        return null;
     }
 
     @Override

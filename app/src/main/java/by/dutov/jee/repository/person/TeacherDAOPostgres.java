@@ -24,9 +24,10 @@ public class TeacherDAOPostgres extends PersonDAO<Teacher> {
     //language=SQL
     public static final String UPDATE_TEACHER = "update teacher t " +
             "set user_name = ?, password = ?, salt = ?, name = ?, age = ?, salary = ?" + WHERE_TEACHER_ID;
+    //language=SQL
     public static final String DELETE_TEACHER = "delete from teacher t" + WHERE_TEACHER_NAME + ";";
     //language=SQL
-    public static final String UPDATE_TEACHER_FOR_DELETE = "update \"group\" g set teacher_id = null " +
+    public static final String DELETE_TEACHER_IN_GROUP = "update \"group\" g set teacher_id = null " +
             "where teacher_id = (select id from teacher t " + WHERE_TEACHER_NAME + "); ";
     //language=SQL
     public static final String INSERT_TEACHER = "insert into teacher (user_name, password, salt, \"name\", age, salary)" +
@@ -62,16 +63,38 @@ public class TeacherDAOPostgres extends PersonDAO<Teacher> {
     }
 
     @Override
-    String[] sqlMethods() {
-        return new String[]{
-                SELECT_TEACHER,
-                DELETE_TEACHER,
-                UPDATE_TEACHER,
-                INSERT_TEACHER,
-                SELECT_TEACHER_BY_ID,
-                SELECT_TEACHER_BY_NAME,
-                UPDATE_TEACHER_FOR_DELETE
-        };
+    String selectUser() {
+        return SELECT_TEACHER;
+    }
+
+    @Override
+    String deleteUser() {
+        return DELETE_TEACHER;
+    }
+
+    @Override
+    String updateUser() {
+        return UPDATE_TEACHER;
+    }
+
+    @Override
+    String insertUser() {
+        return INSERT_TEACHER;
+    }
+
+    @Override
+    String selectUserById() {
+        return SELECT_TEACHER_BY_ID;
+    }
+
+    @Override
+    String selectUserByName() {
+        return SELECT_TEACHER_BY_NAME;
+    }
+
+    @Override
+    String deleteUserInGroup() {
+        return DELETE_TEACHER_IN_GROUP;
     }
 
     @Override

@@ -8,7 +8,7 @@
 
 <h2>Registration Page</h2>
 
-<p style="color: red;">${errorMessage}${loginedError}</p>
+<p style="color: red;">${errorMessage}${loginedError}${successMessage}</p>
 
 <form action="${pageContext.request.contextPath}/registration" method="post">
     <table>

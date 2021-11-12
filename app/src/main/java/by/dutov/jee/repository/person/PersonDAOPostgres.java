@@ -5,6 +5,7 @@ import by.dutov.jee.people.Person;
 import by.dutov.jee.people.Role;
 import by.dutov.jee.people.Student;
 import by.dutov.jee.people.Teacher;
+import by.dutov.jee.repository.RepositoryFactory;
 import lombok.extern.slf4j.Slf4j;
 
 import javax.sql.DataSource;
@@ -117,8 +118,38 @@ public class PersonDAOPostgres extends PersonDAO<Person> {
     }
 
     @Override
-    String[] sqlMethods() {
-        throw new UnsupportedOperationException();
+    String selectUser() {
+        return null;
+    }
+
+    @Override
+    String deleteUser() {
+        return null;
+    }
+
+    @Override
+    String updateUser() {
+        return null;
+    }
+
+    @Override
+    String insertUser() {
+        return null;
+    }
+
+    @Override
+    String selectUserById() {
+        return null;
+    }
+
+    @Override
+    String selectUserByName() {
+        return null;
+    }
+
+    @Override
+    String deleteUserInGroup() {
+        return null;
     }
 
     @Override
@@ -129,5 +160,10 @@ public class PersonDAOPostgres extends PersonDAO<Person> {
     @Override
     String[] aliases() {
         throw new UnsupportedOperationException();
+    }
+
+    public static void main(String[] args) {
+        final PersonDAOPostgres instance = PersonDAOPostgres.getInstance(RepositoryFactory.getDataSource());
+        System.out.println(instance.remove(new Student().withUserName("MrSolix")));
     }
 }

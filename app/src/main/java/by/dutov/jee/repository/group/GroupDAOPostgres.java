@@ -174,7 +174,7 @@ public class GroupDAOPostgres implements GroupDAO<Group> {
                 return groups.stream().findAny();
             }
             rollBack(con);
-            throw new DataBaseException("Не удалось найти группу в базе");
+            return Optional.empty();
         } catch (SQLException e) {
             rollBack(con);
             log.error(e.getMessage());

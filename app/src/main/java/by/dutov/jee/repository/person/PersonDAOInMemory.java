@@ -39,11 +39,6 @@ public class PersonDAOInMemory extends PersonDAO<Person> {
     }
 
     @Override
-    String[] sqlMethods() {
-        return new String[0];
-    }
-
-    @Override
     public Person save(Person person) {
         if (person != null) {
             accounts.put(id=ID++, person);
@@ -94,6 +89,41 @@ public class PersonDAOInMemory extends PersonDAO<Person> {
     @Override
     public List<Person> findAll() {
         return accounts.isEmpty() ? new ArrayList<>() : new ArrayList<>(accounts.values());
+    }
+
+    @Override
+    String selectUser() {
+        return null;
+    }
+
+    @Override
+    String deleteUser() {
+        return null;
+    }
+
+    @Override
+    String updateUser() {
+        return null;
+    }
+
+    @Override
+    String insertUser() {
+        return null;
+    }
+
+    @Override
+    String selectUserById() {
+        return null;
+    }
+
+    @Override
+    String selectUserByName() {
+        return null;
+    }
+
+    @Override
+    String deleteUserInGroup() {
+        return null;
     }
 
     @Override

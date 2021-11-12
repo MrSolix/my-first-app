@@ -48,7 +48,7 @@ public abstract class PersonDAO<T extends Person> implements PersonDAOInterface<
         ResultSet rs = null;
         try {
             con = dataSource.getConnection();
-            ps = con.prepareStatement(sqlMethods()[5]);
+            ps = con.prepareStatement(selectUserByName());
             ps.setString(1, name);
             rs = ps.executeQuery();
             result = resultSetToPerson(rs);
@@ -74,7 +74,7 @@ public abstract class PersonDAO<T extends Person> implements PersonDAOInterface<
         ResultSet rs = null;
         try {
             con = dataSource.getConnection();
-            ps = con.prepareStatement(sqlMethods()[4]);
+            ps = con.prepareStatement(selectUserById());
             ps.setInt(1, id);
             rs = ps.executeQuery();
             result = resultSetToPerson(rs);
@@ -111,7 +111,7 @@ public abstract class PersonDAO<T extends Person> implements PersonDAOInterface<
         ResultSet rs = null;
         try {
             con = dataSource.getConnection();
-            ps = con.prepareStatement(sqlMethods()[3]);
+            ps = con.prepareStatement(insertUser());
             setterInsertOrUpdate(ps, t);
             if (getClass().equals(TeacherDAOPostgres.class)) {
                 ps.setDouble(6, ((Teacher) t).getSalary());
@@ -137,7 +137,7 @@ public abstract class PersonDAO<T extends Person> implements PersonDAOInterface<
         PreparedStatement ps = null;
         try {
             con = dataSource.getConnection();
-            ps = con.prepareStatement(sqlMethods()[2]);
+            ps = con.prepareStatement(updateUser());
             setterInsertOrUpdate(ps, t);
             if (getClass().equals(TeacherDAOPostgres.class)) {
                 ps.setDouble(6, ((Teacher) t).getSalary());
@@ -164,15 +164,25 @@ public abstract class PersonDAO<T extends Person> implements PersonDAOInterface<
         Connection con = null;
         PreparedStatement ps1 = null;
         PreparedStatement ps2 = null;
+        PreparedStatement ps3 = null;
         try {
             con = dataSource.getConnection();
             if (getClass().equals(StudentDAOPostgres.class) || getClass().equals(TeacherDAOPostgres.class)) {
-                ps1 = con.prepareStatement(sqlMethods()[6]);
+                ps1 = con.prepareStatement(deleteUserInGroup());
                 ps1.setString(1, t.getUserName());
+                if (getClass().equals(StudentDAOPostgres.class)) {
+                    ps2 = con.prepareStatement("delete from grades gr " +
+                            "where gr.student_id = (select id from student s where s.user_name = ?);");
+                    ps2.setString(1, t.getUserName());
+                }
             }
-            ps2 = con.prepareStatement(sqlMethods()[1]);
-            ps2.setString(1, t.getUserName());
-            if ((ps1 != null && !(ps1.executeUpdate() > 0)) || !(ps2.executeUpdate() > 0)) {
+            ps3 = con.prepareStatement(deleteUser());
+            ps3.setString(1, t.getUserName());
+            if (ps1 != null)
+                ps1.execute();
+            if (ps2 != null)
+                ps2.execute();
+            if (ps3.executeUpdate() <= 0) {
                 rollBack(con);
                 throw new DataBaseException("Не удалось удалить юзера.");
             }
@@ -183,7 +193,7 @@ public abstract class PersonDAO<T extends Person> implements PersonDAOInterface<
             log.error(e.getMessage());
             throw new DataBaseException(e);
         } finally {
-            closeQuietly(ps2, ps1, con);
+            closeQuietly(ps3, ps2, ps1, con);
         }
     }
 
@@ -198,7 +208,7 @@ public abstract class PersonDAO<T extends Person> implements PersonDAOInterface<
         ResultSet rs = null;
         try {
             con = dataSource.getConnection();
-            ps = con.prepareStatement(sqlMethods()[0]);
+            ps = con.prepareStatement(selectUser());
             rs = ps.executeQuery();
             result = resultSetToPerson(rs);
             if (!result.isEmpty()) {
@@ -239,7 +249,7 @@ public abstract class PersonDAO<T extends Person> implements PersonDAOInterface<
                         .withRole(role)
                         .withGrades(getGrades(pUserName))
                         .addGroup(putIfAbsentAndReturn(groupMap, gId,
-                                instance.find(gId).orElse(null))));
+                                instance.find(gId).orElse(new Group()))));
 
                 personMap.computeIfPresent(pId, (id, student) -> ((Student) student).addGroup(groupMap.get(gId)));
             }
@@ -255,7 +265,7 @@ public abstract class PersonDAO<T extends Person> implements PersonDAOInterface<
                         .withRole(role)
                         .withSalary(rs.getDouble(aliases()[8]))
                         .withGroup(putIfAbsentAndReturn(groupMap, gId,
-                                instance.find(gId).orElse(null))));
+                                instance.find(gId).orElse(new Group()))));
 
                 personMap.computeIfPresent(pId, (id, teacher) -> ((Teacher) teacher).withGroup(groupMap.get(gId)));
             }
@@ -274,7 +284,14 @@ public abstract class PersonDAO<T extends Person> implements PersonDAOInterface<
         return values.isEmpty() ? new ArrayList<>() : new ArrayList<>(values);
     }
 
-    abstract String[] sqlMethods();
+    abstract String selectUser();
+    abstract String deleteUser();
+    abstract String updateUser();
+    abstract String insertUser();
+    abstract String selectUserById();
+    abstract String selectUserByName();
+    abstract String deleteUserInGroup();
+
 
     abstract Map<String, List<Integer>> getGrades(String name);
 

@@ -55,8 +55,8 @@ public class StudentDAOPostgres extends PersonDAO<Student> {
     //language=SQL
     public static final String DELETE_STUDENT = "delete from student s" + WHERE_STUDENT_NAME + ";";
     //language=SQL
-    public static final String UPDATE_STUDENT_FOR_DELETE = "delete from group_student gs " +
-            "where gs.student_id = (select id from student s " + WHERE_STUDENT_NAME + "); ";
+    public static final String DELETE_STUDENT_IN_GROUP = "delete from group_student gs " +
+            "where gs.student_id = (select id from student s" + WHERE_STUDENT_NAME + "); ";
     //language=SQL
     public static final String SELECT_STUDENT_BY_NAME = SELECT_STUDENT + WHERE_STUDENT_NAME;
     //language=SQL
@@ -88,18 +88,39 @@ public class StudentDAOPostgres extends PersonDAO<Student> {
         return instance;
     }
 
+    @Override
+    String selectUser() {
+        return SELECT_STUDENT;
+    }
 
     @Override
-    String[] sqlMethods() {
-        return new String[]{
-                SELECT_STUDENT,
-                DELETE_STUDENT,
-                UPDATE_STUDENT,
-                INSERT_STUDENT,
-                SELECT_STUDENT_BY_ID,
-                SELECT_STUDENT_BY_NAME,
-                UPDATE_STUDENT_FOR_DELETE
-        };
+    String deleteUser() {
+        return DELETE_STUDENT;
+    }
+
+    @Override
+    String updateUser() {
+        return UPDATE_STUDENT;
+    }
+
+    @Override
+    String insertUser() {
+        return INSERT_STUDENT;
+    }
+
+    @Override
+    String selectUserById() {
+        return SELECT_STUDENT_BY_ID;
+    }
+
+    @Override
+    String selectUserByName() {
+        return SELECT_STUDENT_BY_NAME;
+    }
+
+    @Override
+    String deleteUserInGroup() {
+        return DELETE_STUDENT_IN_GROUP;
     }
 
     @Override
