@@ -1,8 +1,13 @@
 package by.dutov.jee.repository.person;
 
+import by.dutov.jee.group.Group;
+import by.dutov.jee.people.Admin;
+import by.dutov.jee.people.Person;
 import by.dutov.jee.people.Role;
 import by.dutov.jee.people.Student;
+import by.dutov.jee.people.Teacher;
 import by.dutov.jee.repository.RepositoryFactory;
+import by.dutov.jee.repository.group.GroupDAOPostgres;
 import by.dutov.jee.service.exceptions.DataBaseException;
 import lombok.extern.slf4j.Slf4j;
 
@@ -11,8 +16,10 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 
 import static by.dutov.jee.utils.DataBaseUtils.closeQuietly;
@@ -124,19 +131,6 @@ public class StudentDAOPostgres extends PersonDAO<Student> {
     }
 
     @Override
-    String[] aliases() {
-        return new String[]{
-                S_ID,
-                S_USER_NAME,
-                S_PASS,
-                S_SALT,
-                S_NAME,
-                S_AGE,
-                Role.getStrByType(Role.STUDENT),
-                G_ID};
-    }
-
-    @Override
     public Map<String, List<Integer>> getGrades(String name) {
         Connection con = null;
         PreparedStatement ps = null;
@@ -148,10 +142,10 @@ public class StudentDAOPostgres extends PersonDAO<Student> {
             rs = ps.executeQuery();
             Map<String, List<Integer>> grades = new ConcurrentHashMap<>();
             while (rs.next()) {
-                final String t_name = rs.getString(T_NAME);
-                final int g_grade = rs.getInt(G_GRADE);
-                grades.putIfAbsent(t_name, new ArrayList<>());
-                grades.get(t_name).add(g_grade);
+                final String tName = rs.getString(T_NAME);
+                final int gGrade = rs.getInt(G_GRADE);
+                grades.putIfAbsent(tName, new ArrayList<>());
+                grades.get(tName).add(gGrade);
             }
             con.commit();
             return grades;
@@ -162,5 +156,46 @@ public class StudentDAOPostgres extends PersonDAO<Student> {
         } finally {
             closeQuietly(rs, ps, con);
         }
+    }
+
+    @Override
+    List<Student> resultSetToEntities(ResultSet rs) throws SQLException {
+        GroupDAOPostgres instance = GroupDAOPostgres.getInstance(RepositoryFactory.getDataSource());
+        Map<Integer, Student> studentMap = new ConcurrentHashMap<>();
+        Map<Integer, Group> groupMap = new ConcurrentHashMap<>();
+        while (rs.next()) {
+            final int gId = rs.getInt(G_ID);
+            final int sId = rs.getInt(S_ID);
+            final String sUserName = rs.getString(S_USER_NAME);
+            final byte[] sPass = rs.getBytes(S_PASS);
+            final byte[] sSalt = rs.getBytes(S_SALT);
+            final String sName = rs.getString(S_NAME);
+            final int sAge = rs.getInt(S_AGE);
+            final Role role = Role.STUDENT;
+
+            studentMap.putIfAbsent(sId, new Student()
+                    .withId(sId)
+                    .withUserName(sUserName)
+                    .withBytePass(sPass)
+                    .withSalt(sSalt)
+                    .withName(sName)
+                    .withAge(sAge)
+                    .withRole(role)
+                    .withGrades(getGrades(sUserName))
+                    .addGroup(putIfAbsentAndReturn(groupMap, gId,
+                            instance.find(gId).orElse(new Group()))));
+
+            studentMap.computeIfPresent(sId, (id, student) -> student.addGroup(groupMap.get(gId)));
+        }
+        Collection<Student> values = studentMap.values();
+        return values.isEmpty() ? new ArrayList<>() : new ArrayList<>(values);
+    }
+
+    private static <K, V> V putIfAbsentAndReturn(Map<K, V> map, K key, V value) {
+        if (key == null) {
+            return null;
+        }
+        map.putIfAbsent(key, value);
+        return map.get(key);
     }
 }

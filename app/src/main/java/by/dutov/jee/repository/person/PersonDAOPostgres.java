@@ -9,6 +9,8 @@ import by.dutov.jee.repository.RepositoryFactory;
 import lombok.extern.slf4j.Slf4j;
 
 import javax.sql.DataSource;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -118,6 +120,11 @@ public class PersonDAOPostgres extends PersonDAO<Person> {
     }
 
     @Override
+    List<? extends Person> resultSetToEntities(ResultSet rs) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
     String selectUser() {
         return null;
     }
@@ -154,11 +161,6 @@ public class PersonDAOPostgres extends PersonDAO<Person> {
 
     @Override
     Map<String, List<Integer>> getGrades(String name) {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
-    String[] aliases() {
         throw new UnsupportedOperationException();
     }
 

@@ -8,6 +8,8 @@ import by.dutov.jee.people.Student;
 import by.dutov.jee.people.Teacher;
 import lombok.extern.slf4j.Slf4j;
 
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -92,6 +94,11 @@ public class PersonDAOInMemory extends PersonDAO<Person> {
     }
 
     @Override
+    List<? extends Person> resultSetToEntities(ResultSet rs) throws SQLException {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
     String selectUser() {
         return null;
     }
@@ -129,11 +136,6 @@ public class PersonDAOInMemory extends PersonDAO<Person> {
     @Override
     Map<String, List<Integer>> getGrades(String name) {
         return null;
-    }
-
-    @Override
-    String[] aliases() {
-        return new String[0];
     }
 
     {

@@ -51,7 +51,7 @@ public abstract class PersonDAO<T extends Person> implements PersonDAOInterface<
             ps = con.prepareStatement(selectUserByName());
             ps.setString(1, name);
             rs = ps.executeQuery();
-            result = resultSetToPerson(rs);
+            result = resultSetToEntities(rs);
             if (!result.isEmpty()) {
                 con.commit();
                 return result.stream().findAny();
@@ -77,7 +77,7 @@ public abstract class PersonDAO<T extends Person> implements PersonDAOInterface<
             ps = con.prepareStatement(selectUserById());
             ps.setInt(1, id);
             rs = ps.executeQuery();
-            result = resultSetToPerson(rs);
+            result = resultSetToEntities(rs);
             if (!result.isEmpty()) {
                 con.commit();
                 return result.stream().findAny();
@@ -210,7 +210,7 @@ public abstract class PersonDAO<T extends Person> implements PersonDAOInterface<
             con = dataSource.getConnection();
             ps = con.prepareStatement(selectUser());
             rs = ps.executeQuery();
-            result = resultSetToPerson(rs);
+            result = resultSetToEntities(rs);
             if (!result.isEmpty()) {
                 con.commit();
                 return result;
@@ -226,63 +226,7 @@ public abstract class PersonDAO<T extends Person> implements PersonDAOInterface<
         }
     }
 
-    private List<? extends Person> resultSetToPerson(ResultSet rs) throws SQLException {
-        Map<Integer, Person> personMap = new ConcurrentHashMap<>();
-        Map<Integer, Group> groupMap = new ConcurrentHashMap<>();
-        while (rs.next()) {
-            final int pId = rs.getInt(aliases()[0]);
-            final String pUserName = rs.getString(aliases()[1]);
-            final byte[] pPass = rs.getBytes(aliases()[2]);
-            final byte[] pSalt = rs.getBytes(aliases()[3]);
-            final String pName = rs.getString(aliases()[4]);
-            final int pAge = rs.getInt(aliases()[5]);
-            final Role role = Role.getTypeByStr(aliases()[6]);
-            if (getClass().equals(StudentDAOPostgres.class)) {
-                final int gId = rs.getInt(aliases()[7]);
-                personMap.putIfAbsent(pId, new Student()
-                        .withId(pId)
-                        .withUserName(pUserName)
-                        .withBytePass(pPass)
-                        .withSalt(pSalt)
-                        .withName(pName)
-                        .withAge(pAge)
-                        .withRole(role)
-                        .withGrades(getGrades(pUserName))
-                        .addGroup(putIfAbsentAndReturn(groupMap, gId,
-                                instance.find(gId).orElse(new Group()))));
-
-                personMap.computeIfPresent(pId, (id, student) -> ((Student) student).addGroup(groupMap.get(gId)));
-            }
-            if (getClass().equals(TeacherDAOPostgres.class)) {
-                final int gId = rs.getInt(aliases()[7]);
-                personMap.putIfAbsent(pId, new Teacher()
-                        .withId(pId)
-                        .withUserName(pUserName)
-                        .withBytePass(pPass)
-                        .withSalt(pSalt)
-                        .withName(pName)
-                        .withAge(pAge)
-                        .withRole(role)
-                        .withSalary(rs.getDouble(aliases()[8]))
-                        .withGroup(putIfAbsentAndReturn(groupMap, gId,
-                                instance.find(gId).orElse(new Group()))));
-
-                personMap.computeIfPresent(pId, (id, teacher) -> ((Teacher) teacher).withGroup(groupMap.get(gId)));
-            }
-            if (getClass().equals(AdminDAOPostgres.class)) {
-                personMap.putIfAbsent(pId, new Admin()
-                        .withId(pId)
-                        .withUserName(pUserName)
-                        .withBytePass(pPass)
-                        .withSalt(pSalt)
-                        .withName(pName)
-                        .withAge(pAge)
-                        .withRole(role));
-            }
-        }
-        Collection<Person> values = personMap.values();
-        return values.isEmpty() ? new ArrayList<>() : new ArrayList<>(values);
-    }
+    abstract List<? extends Person> resultSetToEntities(ResultSet rs) throws SQLException;
 
     abstract String selectUser();
     abstract String deleteUser();
@@ -295,13 +239,4 @@ public abstract class PersonDAO<T extends Person> implements PersonDAOInterface<
 
     abstract Map<String, List<Integer>> getGrades(String name);
 
-    abstract String[] aliases();
-
-    private static <K, V> V putIfAbsentAndReturn(Map<K, V> map, K key, V value) {
-        if (key == null) {
-            return null;
-        }
-        map.putIfAbsent(key, value);
-        return map.get(key);
-    }
 }

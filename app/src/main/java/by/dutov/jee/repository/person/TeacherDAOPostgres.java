@@ -1,11 +1,22 @@
 package by.dutov.jee.repository.person;
 
+import by.dutov.jee.group.Group;
+import by.dutov.jee.people.Admin;
+import by.dutov.jee.people.Person;
 import by.dutov.jee.people.Role;
+import by.dutov.jee.people.Student;
 import by.dutov.jee.people.Teacher;
+import by.dutov.jee.repository.RepositoryFactory;
+import by.dutov.jee.repository.group.GroupDAOPostgres;
 import lombok.extern.slf4j.Slf4j;
 
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 @Slf4j
 public class TeacherDAOPostgres extends PersonDAO<Teacher> {
@@ -98,17 +109,47 @@ public class TeacherDAOPostgres extends PersonDAO<Teacher> {
     }
 
     @Override
-    String[] aliases() {
-        return new String[]{
-                T_ID,
-                T_USER_NAME,
-                T_PASS,
-                T_SALT,
-                T_NAME,
-                T_AGE,
-                Role.getStrByType(Role.TEACHER),
-                G_ID,
-                T_SALARY};
+    List<Teacher> resultSetToEntities(ResultSet rs) throws SQLException {
+        GroupDAOPostgres instance = GroupDAOPostgres.getInstance(RepositoryFactory.getDataSource());
+        Map<Integer, Teacher> teacherMap = new ConcurrentHashMap<>();
+        Map<Integer, Group> groupMap = new ConcurrentHashMap<>();
+        while (rs.next()) {
+            final int gId = rs.getInt(G_ID);
+            final int tId = rs.getInt(T_ID);
+            final String tUserName = rs.getString(T_USER_NAME);
+            final byte[] tPass = rs.getBytes(T_PASS);
+            final byte[] tSalt = rs.getBytes(T_SALT);
+            final String tName = rs.getString(T_NAME);
+            final int tAge = rs.getInt(T_AGE);
+            final Role role = Role.TEACHER;
+            final double tSalary = rs.getDouble(T_SALARY);
+
+            teacherMap.putIfAbsent(tId, new Teacher()
+                    .withId(tId)
+                    .withUserName(tUserName)
+                    .withBytePass(tPass)
+                    .withSalt(tSalt)
+                    .withName(tName)
+                    .withAge(tAge)
+                    .withRole(role)
+                    .withSalary(tSalary)
+                    .withGroup(putIfAbsentAndReturn(groupMap, gId,
+                            instance.find(gId).orElse(new Group()))));
+
+            teacherMap.computeIfPresent(tId, (id, teacher) -> teacher.withGroup(groupMap.get(gId)));
+
+
+        }
+        Collection<Teacher> values = teacherMap.values();
+        return values.isEmpty() ? new ArrayList<>() : new ArrayList<>(values);
+    }
+
+    private static <K, V> V putIfAbsentAndReturn(Map<K, V> map, K key, V value) {
+        if (key == null) {
+            return null;
+        }
+        map.putIfAbsent(key, value);
+        return map.get(key);
     }
 
     @Override
