@@ -1,13 +1,11 @@
-package by.dutov.jee.repository.person;
+package by.dutov.jee.repository.person.postgres;
 
 import by.dutov.jee.group.Group;
-import by.dutov.jee.people.Admin;
-import by.dutov.jee.people.Person;
+import by.dutov.jee.people.Grades;
 import by.dutov.jee.people.Role;
 import by.dutov.jee.people.Student;
-import by.dutov.jee.people.Teacher;
 import by.dutov.jee.repository.RepositoryFactory;
-import by.dutov.jee.repository.group.GroupDAOPostgres;
+import by.dutov.jee.repository.group.postgres.GroupDAOPostgres;
 import by.dutov.jee.service.exceptions.DataBaseException;
 import lombok.extern.slf4j.Slf4j;
 
@@ -19,14 +17,13 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 
 import static by.dutov.jee.utils.DataBaseUtils.closeQuietly;
 import static by.dutov.jee.utils.DataBaseUtils.rollBack;
 
 @Slf4j
-public class StudentDAOPostgres extends PersonDAO<Student> {
+public class StudentDAOPostgres extends AbstractPersonDAOPostgres<Student> {
     //language=SQL
     public static final String SELECT_STUDENT =
             "select " +
@@ -96,42 +93,42 @@ public class StudentDAOPostgres extends PersonDAO<Student> {
     }
 
     @Override
-    String selectUser() {
+    protected String selectUser() {
         return SELECT_STUDENT;
     }
 
     @Override
-    String deleteUser() {
+    protected String deleteUser() {
         return DELETE_STUDENT;
     }
 
     @Override
-    String updateUser() {
+    protected String updateUser() {
         return UPDATE_STUDENT;
     }
 
     @Override
-    String insertUser() {
+    protected String insertUser() {
         return INSERT_STUDENT;
     }
 
     @Override
-    String selectUserById() {
+    protected String selectUserById() {
         return SELECT_STUDENT_BY_ID;
     }
 
     @Override
-    String selectUserByName() {
+    protected String selectUserByName() {
         return SELECT_STUDENT_BY_NAME;
     }
 
     @Override
-    String deleteUserInGroup() {
+    protected String deleteUserInGroup() {
         return DELETE_STUDENT_IN_GROUP;
     }
 
     @Override
-    public Map<String, List<Integer>> getGrades(String name) {
+    public List<Grades> getGrades(String name) {
         Connection con = null;
         PreparedStatement ps = null;
         ResultSet rs = null;
@@ -140,12 +137,15 @@ public class StudentDAOPostgres extends PersonDAO<Student> {
             ps = con.prepareStatement(SELECT_GRADES + WHERE_STUDENT_NAME);
             ps.setString(1, name);
             rs = ps.executeQuery();
-            Map<String, List<Integer>> grades = new ConcurrentHashMap<>();
+            List<Grades> grades = new ArrayList<>();
             while (rs.next()) {
-                final String tName = rs.getString(T_NAME);
-                final int gGrade = rs.getInt(G_GRADE);
-                grades.putIfAbsent(tName, new ArrayList<>());
-                grades.get(tName).add(gGrade);
+                String tName = rs.getString(T_NAME);
+                int gGrade = rs.getInt(G_GRADE);
+
+                grades.add(new Grades()
+                        .withName(tName)
+                        .withGrades(gGrade)
+                );
             }
             con.commit();
             return grades;
@@ -159,7 +159,7 @@ public class StudentDAOPostgres extends PersonDAO<Student> {
     }
 
     @Override
-    List<Student> resultSetToEntities(ResultSet rs) throws SQLException {
+    protected List<Student> resultSetToEntities(ResultSet rs) throws SQLException {
         GroupDAOPostgres instance = GroupDAOPostgres.getInstance(RepositoryFactory.getDataSource());
         Map<Integer, Student> studentMap = new ConcurrentHashMap<>();
         Map<Integer, Group> groupMap = new ConcurrentHashMap<>();

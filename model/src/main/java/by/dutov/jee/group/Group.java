@@ -9,22 +9,35 @@ import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
 
-import java.util.ArrayList;
-import java.util.List;
+import javax.persistence.CascadeType;
+import javax.persistence.Entity;
+import javax.persistence.ManyToMany;
+import javax.persistence.OneToOne;
+import javax.persistence.Table;
+import java.util.HashSet;
+import java.util.Set;
 
 @Data
 @NoArgsConstructor
 @EqualsAndHashCode(callSuper = true)
 @ToString(callSuper = true)
+@Entity
+@Table(name = "\"group\"")
 public class Group extends AbstractEntity {
-    @ToString.Include
-    @EqualsAndHashCode.Include
+    @ToString.Exclude
+    @EqualsAndHashCode.Exclude
+    @OneToOne(cascade = {CascadeType.MERGE,
+            CascadeType.PERSIST,
+            CascadeType.DETACH,
+            CascadeType.REFRESH})
     private Teacher teacher;
-    @ToString.Include
-    private List<Student> students;
+    @ToString.Exclude
+    @EqualsAndHashCode.Exclude
+    @ManyToMany(mappedBy = "groups", cascade = CascadeType.ALL)
+    private Set<Student> students;
 
     {
-        students = new ArrayList<>();
+        students = new HashSet<>();
     }
 
     public Group withId(Integer id) {
@@ -40,7 +53,7 @@ public class Group extends AbstractEntity {
         return this;
     }
 
-    public Group withStudents(List<Student> students) {
+    public Group withStudents(Set<Student> students) {
         setStudents(students);
         for (Student s : students) {
             s.addGroup(this);
@@ -49,7 +62,7 @@ public class Group extends AbstractEntity {
     }
 
     public Group addStudent(Student student) {
-        if (!students.contains(student) && student != null){
+        if (!students.contains(student) && student != null) {
             students.add(student);
         }
         return this;

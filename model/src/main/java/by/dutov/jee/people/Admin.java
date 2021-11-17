@@ -3,11 +3,20 @@ package by.dutov.jee.people;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
+import lombok.ToString;
+
+import javax.persistence.Entity;
 
 @Data
 @NoArgsConstructor
+@ToString(callSuper = true)
 @EqualsAndHashCode(callSuper = true)
+@Entity
 public class Admin extends Person{
+
+    {
+        setRole(Role.ADMIN);
+    }
 
     public Admin withId(Integer id){
         setId(id);
@@ -47,13 +56,6 @@ public class Admin extends Person{
     public Admin withRole(Role role){
         setRole(role);
         return this;
-    }
-
-    @Override
-    public String toString() {
-        return "Admin{" +
-                super.toString() +
-                ']';
     }
 
     @Override

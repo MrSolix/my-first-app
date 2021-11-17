@@ -1,12 +1,9 @@
-package by.dutov.jee.repository.person;
+package by.dutov.jee.repository.person.postgres;
 
 
-import by.dutov.jee.group.Group;
 import by.dutov.jee.people.Admin;
-import by.dutov.jee.people.Person;
+import by.dutov.jee.people.Grades;
 import by.dutov.jee.people.Role;
-import by.dutov.jee.people.Student;
-import by.dutov.jee.people.Teacher;
 import lombok.extern.slf4j.Slf4j;
 
 import java.sql.ResultSet;
@@ -18,7 +15,7 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 @Slf4j
-public class AdminDAOPostgres extends PersonDAO<Admin> {
+public class AdminDAOPostgres extends AbstractPersonDAOPostgres<Admin> {
     //language=SQL
     private static final String SELECT_ADMIN = "select " +
             "a.id a_id, " +
@@ -65,42 +62,42 @@ public class AdminDAOPostgres extends PersonDAO<Admin> {
     }
 
     @Override
-    String selectUser() {
+    protected String selectUser() {
         return SELECT_ADMIN;
     }
 
     @Override
-    String deleteUser() {
+    protected String deleteUser() {
         return DELETE_ADMIN;
     }
 
     @Override
-    String updateUser() {
+    protected String updateUser() {
         return UPDATE_ADMIN;
     }
 
     @Override
-    String insertUser() {
+    protected String insertUser() {
         return INSERT_ADMIN;
     }
 
     @Override
-    String selectUserById() {
+    protected String selectUserById() {
         return SELECT_ADMIN_BY_ID;
     }
 
     @Override
-    String selectUserByName() {
+    protected String selectUserByName() {
         return SELECT_ADMIN_BY_NAME;
     }
 
     @Override
-    String deleteUserInGroup() {
+    protected String deleteUserInGroup() {
         return null;
     }
 
     @Override
-    List<Admin> resultSetToEntities(ResultSet rs) throws SQLException {
+    protected List<Admin> resultSetToEntities(ResultSet rs) throws SQLException {
         Map<Integer, Admin> adminMap = new ConcurrentHashMap<>();
         while (rs.next()) {
             final int aId = rs.getInt(A_ID);
@@ -126,7 +123,7 @@ public class AdminDAOPostgres extends PersonDAO<Admin> {
     }
 
     @Override
-    Map<String, List<Integer>> getGrades(String name) {
+    protected List<Grades> getGrades(String name) {
         throw new UnsupportedOperationException();
     }
 }

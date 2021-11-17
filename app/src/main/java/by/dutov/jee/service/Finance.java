@@ -3,7 +3,8 @@ package by.dutov.jee.service;
 import by.dutov.jee.people.Person;
 import by.dutov.jee.people.Teacher;
 import by.dutov.jee.repository.RepositoryFactory;
-import by.dutov.jee.repository.person.PersonDAO;
+import by.dutov.jee.repository.person.PersonDAOInterface;
+import by.dutov.jee.repository.person.postgres.AbstractPersonDAOPostgres;
 import by.dutov.jee.utils.CommandServletUtils;
 import lombok.extern.slf4j.Slf4j;
 
@@ -21,7 +22,7 @@ import java.util.concurrent.ConcurrentHashMap;
 public class Finance {
     private static final Map<Teacher, Map<Integer, Double>> salaryHistory;
     private static final int CURRENT_MONTH = LocalDate.now().getMonthValue();
-    private static PersonDAO<Person> daoRepository;
+    private static PersonDAOInterface<Person> daoRepository;
     private static volatile Finance instance;
     private static final String MIN_RANGE = "minRange";
     private static final String MAX_RANGE = "maxRange";

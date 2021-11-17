@@ -1,36 +1,37 @@
 package by.dutov.jee.repository;
 
 import by.dutov.jee.service.exceptions.ApplicationException;
+import com.mchange.v2.c3p0.ComboPooledDataSource;
 import lombok.extern.slf4j.Slf4j;
 
 import javax.sql.DataSource;
+import java.beans.PropertyVetoException;
 import java.io.PrintWriter;
 import java.sql.Connection;
-import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.sql.SQLFeatureNotSupportedException;
 import java.util.logging.Logger;
 
 @Slf4j
 public class RepositoryDataSource implements DataSource {
-    private final String driver;
-    private final String uri;
-    private final String user;
-    private final String password;
+    ComboPooledDataSource ds;
 
     private static volatile RepositoryDataSource instance;
 
     public RepositoryDataSource(String driver, String uri, String user, String password) {
-        this.driver = driver;
-        this.uri = uri;
-        this.user = user;
-        this.password = password;
+        ds = new ComboPooledDataSource();
         try {
-            Class.forName(this.driver);
-        } catch (ClassNotFoundException e) {
-            log.error(e.getMessage(), e);
-            throw new ApplicationException(e);
+            ds.setDriverClass(driver);
+        } catch (PropertyVetoException e) {
+            log.info(e.getMessage());
+            throw new ApplicationException("Ошибка с подключением драйвера в pool connection", e);
         }
+        ds.setUser(user);
+        ds.setPassword(password);
+        ds.setJdbcUrl(uri);
+        ds.setMinPoolSize(5);
+        ds.setAcquireIncrement(5);
+        ds.setMaxPoolSize(20);
     }
 
     public static RepositoryDataSource getInstance(String driver, String uri, String user, String password){
@@ -47,7 +48,7 @@ public class RepositoryDataSource implements DataSource {
 
     @Override
     public Connection getConnection() throws SQLException {
-        Connection con = DriverManager.getConnection(this.uri, this.user, this.password);
+        Connection con = ds.getConnection();
         con.setAutoCommit(false);
         return con;
     }

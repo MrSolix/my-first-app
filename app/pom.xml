@@ -40,6 +40,10 @@
             <artifactId>postgresql</artifactId>
             <version>42.2.20</version>
         </dependency>
+        <dependency>
+            <groupId>org.hibernate</groupId>
+            <artifactId>hibernate-core</artifactId>
+        </dependency>
     </dependencies>
 
     <build>

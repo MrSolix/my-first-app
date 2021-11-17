@@ -9,6 +9,9 @@ import lombok.NoArgsConstructor;
 import lombok.ToString;
 import lombok.extern.slf4j.Slf4j;
 
+import javax.persistence.Column;
+import javax.persistence.MappedSuperclass;
+import javax.persistence.Transient;
 import java.security.NoSuchAlgorithmException;
 import java.security.spec.InvalidKeySpecException;
 
@@ -17,12 +20,15 @@ import java.security.spec.InvalidKeySpecException;
 @EqualsAndHashCode(callSuper = true)
 @ToString(callSuper = true)
 @Slf4j
+@MappedSuperclass
 public abstract class Person extends AbstractEntity implements Printable {
+    @Column(name = "user_name")
     private String userName;
     private byte[] salt;
     private byte[] password;
     private String name;
     private int age;
+    @Transient
     private Role role;
 
     protected void addPassword(String password, Person person){

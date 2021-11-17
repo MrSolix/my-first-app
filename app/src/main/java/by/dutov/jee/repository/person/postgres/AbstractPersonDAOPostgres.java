@@ -1,13 +1,12 @@
-package by.dutov.jee.repository.person;
+package by.dutov.jee.repository.person.postgres;
 
-import by.dutov.jee.group.Group;
-import by.dutov.jee.people.Admin;
+import by.dutov.jee.people.Grades;
 import by.dutov.jee.people.Person;
 import by.dutov.jee.people.Role;
-import by.dutov.jee.people.Student;
 import by.dutov.jee.people.Teacher;
 import by.dutov.jee.repository.RepositoryFactory;
-import by.dutov.jee.repository.group.GroupDAOPostgres;
+import by.dutov.jee.repository.group.postgres.GroupDAOPostgres;
+import by.dutov.jee.repository.person.PersonDAOInterface;
 import by.dutov.jee.service.exceptions.DataBaseException;
 import lombok.extern.slf4j.Slf4j;
 
@@ -17,17 +16,14 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
-import java.util.concurrent.ConcurrentHashMap;
 
 import static by.dutov.jee.utils.DataBaseUtils.closeQuietly;
 import static by.dutov.jee.utils.DataBaseUtils.rollBack;
 
 @Slf4j
-public abstract class PersonDAO<T extends Person> implements PersonDAOInterface<T> {
+public abstract class AbstractPersonDAOPostgres<T extends Person> implements PersonDAOInterface<T> {
     private static final int POSITION_ID = 1;
     private final DataSource dataSource;
     private final GroupDAOPostgres instance;
@@ -37,10 +33,12 @@ public abstract class PersonDAO<T extends Person> implements PersonDAOInterface<
         instance = GroupDAOPostgres.getInstance(dataSource);
     }
 
+    @Override
     public T save(T t) {
         return t.getId() == null ? insert(t) : update(t.getId(), t);
     }
 
+    @Override
     public Optional<? extends Person> find(String name) {
         List<? extends Person> result;
         Connection con = null;
@@ -67,6 +65,7 @@ public abstract class PersonDAO<T extends Person> implements PersonDAOInterface<
         }
     }
 
+    @Override
     public Optional<? extends Person> find(Integer id) {
         List<? extends Person> result;
         Connection con = null;
@@ -105,7 +104,7 @@ public abstract class PersonDAO<T extends Person> implements PersonDAOInterface<
         }
     }
 
-    public T insert(T t) {
+    private T insert(T t) {
         Connection con = null;
         PreparedStatement ps = null;
         ResultSet rs = null;
@@ -132,6 +131,7 @@ public abstract class PersonDAO<T extends Person> implements PersonDAOInterface<
         }
     }
 
+    @Override
     public T update(Integer id, T t) {
         Connection con = null;
         PreparedStatement ps = null;
@@ -160,6 +160,7 @@ public abstract class PersonDAO<T extends Person> implements PersonDAOInterface<
         }
     }
 
+    @Override
     public T remove(T t) {
         Connection con = null;
         PreparedStatement ps1 = null;
@@ -201,6 +202,7 @@ public abstract class PersonDAO<T extends Person> implements PersonDAOInterface<
         return new ArrayList<>();
     }
 
+    @Override
     public List<? extends Person> findAll() {
         List<? extends Person> result;
         Connection con = null;
@@ -226,17 +228,17 @@ public abstract class PersonDAO<T extends Person> implements PersonDAOInterface<
         }
     }
 
-    abstract List<? extends Person> resultSetToEntities(ResultSet rs) throws SQLException;
+    protected abstract List<? extends Person> resultSetToEntities(ResultSet rs) throws SQLException;
 
-    abstract String selectUser();
-    abstract String deleteUser();
-    abstract String updateUser();
-    abstract String insertUser();
-    abstract String selectUserById();
-    abstract String selectUserByName();
-    abstract String deleteUserInGroup();
+    protected abstract String selectUser();
+    protected abstract String deleteUser();
+    protected abstract String updateUser();
+    protected abstract String insertUser();
+    protected abstract String selectUserById();
+    protected abstract String selectUserByName();
+    protected abstract String deleteUserInGroup();
 
 
-    abstract Map<String, List<Integer>> getGrades(String name);
+    protected abstract List<Grades> getGrades(String name);
 
 }

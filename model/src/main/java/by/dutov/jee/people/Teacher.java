@@ -1,25 +1,37 @@
 package by.dutov.jee.people;
 
 import by.dutov.jee.group.Group;
-import com.fasterxml.jackson.annotation.JsonIdentityInfo;
-import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
+
+import javax.persistence.CascadeType;
+import javax.persistence.Entity;
+import javax.persistence.OneToOne;
+import javax.persistence.Temporal;
+import javax.persistence.Transient;
 
 
 @Data
 @NoArgsConstructor
 @EqualsAndHashCode(callSuper = true)
 @ToString(callSuper = true)
-@JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property = "id")
+@Entity
 public class Teacher extends Person {
-    @ToString.Exclude
-    @EqualsAndHashCode.Exclude
-//    @JsonBackReference
+    @ToString.Include
+    @EqualsAndHashCode.Include
+    @OneToOne(cascade = {CascadeType.MERGE,
+            CascadeType.PERSIST,
+            CascadeType.DETACH,
+            CascadeType.REFRESH},
+            mappedBy = "teacher")
     private Group group;
     private double salary;
+
+    {
+        setRole(Role.TEACHER);
+    }
 
     public void setSalary(double salary) {
         if (salary >= 0) {

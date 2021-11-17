@@ -5,7 +5,8 @@ import by.dutov.jee.people.Role;
 import by.dutov.jee.people.Student;
 import by.dutov.jee.people.Teacher;
 import by.dutov.jee.repository.RepositoryFactory;
-import by.dutov.jee.repository.person.PersonDAO;
+import by.dutov.jee.repository.person.PersonDAOInterface;
+import by.dutov.jee.repository.person.postgres.AbstractPersonDAOPostgres;
 import by.dutov.jee.service.encrypt.PasswordEncryptionService;
 import lombok.extern.slf4j.Slf4j;
 
@@ -111,7 +112,7 @@ public class UpdateService {
             final String ageParam = req.getParameter("age");
             age = checkingService.isEmpty(ageParam) ? 0 : Integer.parseInt(ageParam);
         }
-        PersonDAO<Person> daoRepository = RepositoryFactory.getDaoRepository();
+        PersonDAOInterface<Person> daoRepository = RepositoryFactory.getDaoRepository();
         if (role.equals(Role.STUDENT)) {
             daoRepository.save(
                     new Student()

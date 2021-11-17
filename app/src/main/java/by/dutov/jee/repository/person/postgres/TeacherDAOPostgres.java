@@ -1,13 +1,11 @@
-package by.dutov.jee.repository.person;
+package by.dutov.jee.repository.person.postgres;
 
 import by.dutov.jee.group.Group;
-import by.dutov.jee.people.Admin;
-import by.dutov.jee.people.Person;
+import by.dutov.jee.people.Grades;
 import by.dutov.jee.people.Role;
-import by.dutov.jee.people.Student;
 import by.dutov.jee.people.Teacher;
 import by.dutov.jee.repository.RepositoryFactory;
-import by.dutov.jee.repository.group.GroupDAOPostgres;
+import by.dutov.jee.repository.group.postgres.GroupDAOPostgres;
 import lombok.extern.slf4j.Slf4j;
 
 import java.sql.ResultSet;
@@ -19,7 +17,7 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 @Slf4j
-public class TeacherDAOPostgres extends PersonDAO<Teacher> {
+public class TeacherDAOPostgres extends AbstractPersonDAOPostgres<Teacher> {
     //language=SQL
     public static final String SELECT_TEACHER = "select " +
             "t.id t_id, t.user_name t_user_name, " +
@@ -74,42 +72,42 @@ public class TeacherDAOPostgres extends PersonDAO<Teacher> {
     }
 
     @Override
-    String selectUser() {
+    protected String selectUser() {
         return SELECT_TEACHER;
     }
 
     @Override
-    String deleteUser() {
+    protected String deleteUser() {
         return DELETE_TEACHER;
     }
 
     @Override
-    String updateUser() {
+    protected String updateUser() {
         return UPDATE_TEACHER;
     }
 
     @Override
-    String insertUser() {
+    protected String insertUser() {
         return INSERT_TEACHER;
     }
 
     @Override
-    String selectUserById() {
+    protected String selectUserById() {
         return SELECT_TEACHER_BY_ID;
     }
 
     @Override
-    String selectUserByName() {
+    protected String selectUserByName() {
         return SELECT_TEACHER_BY_NAME;
     }
 
     @Override
-    String deleteUserInGroup() {
+    protected String deleteUserInGroup() {
         return DELETE_TEACHER_IN_GROUP;
     }
 
     @Override
-    List<Teacher> resultSetToEntities(ResultSet rs) throws SQLException {
+    protected List<Teacher> resultSetToEntities(ResultSet rs) throws SQLException {
         GroupDAOPostgres instance = GroupDAOPostgres.getInstance(RepositoryFactory.getDataSource());
         Map<Integer, Teacher> teacherMap = new ConcurrentHashMap<>();
         Map<Integer, Group> groupMap = new ConcurrentHashMap<>();
@@ -153,7 +151,7 @@ public class TeacherDAOPostgres extends PersonDAO<Teacher> {
     }
 
     @Override
-    Map<String, List<Integer>> getGrades(String name) {
+    protected List<Grades> getGrades(String name) {
         throw new UnsupportedOperationException();
     }
 }

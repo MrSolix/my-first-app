@@ -1,23 +1,21 @@
-package by.dutov.jee.repository.person;
+package by.dutov.jee.repository.person.postgres;
 
 import by.dutov.jee.people.Admin;
+import by.dutov.jee.people.Grades;
 import by.dutov.jee.people.Person;
 import by.dutov.jee.people.Role;
 import by.dutov.jee.people.Student;
 import by.dutov.jee.people.Teacher;
-import by.dutov.jee.repository.RepositoryFactory;
 import lombok.extern.slf4j.Slf4j;
 
 import javax.sql.DataSource;
 import java.sql.ResultSet;
-import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 
 @Slf4j
-public class PersonDAOPostgres extends PersonDAO<Person> {
+public class PersonDAOPostgres extends AbstractPersonDAOPostgres<Person> {
     private static volatile PersonDAOPostgres instance;
     private final DataSource dataSource;
 
@@ -120,52 +118,47 @@ public class PersonDAOPostgres extends PersonDAO<Person> {
     }
 
     @Override
-    List<? extends Person> resultSetToEntities(ResultSet rs) {
+    protected List<? extends Person> resultSetToEntities(ResultSet rs) {
         throw new UnsupportedOperationException();
     }
 
     @Override
-    String selectUser() {
+    protected String selectUser() {
         return null;
     }
 
     @Override
-    String deleteUser() {
+    protected String deleteUser() {
         return null;
     }
 
     @Override
-    String updateUser() {
+    protected String updateUser() {
         return null;
     }
 
     @Override
-    String insertUser() {
+    protected String insertUser() {
         return null;
     }
 
     @Override
-    String selectUserById() {
+    protected String selectUserById() {
         return null;
     }
 
     @Override
-    String selectUserByName() {
+    protected String selectUserByName() {
         return null;
     }
 
     @Override
-    String deleteUserInGroup() {
+    protected String deleteUserInGroup() {
         return null;
     }
 
     @Override
-    Map<String, List<Integer>> getGrades(String name) {
+    protected List<Grades> getGrades(String name) {
         throw new UnsupportedOperationException();
-    }
-
-    public static void main(String[] args) {
-        final PersonDAOPostgres instance = PersonDAOPostgres.getInstance(RepositoryFactory.getDataSource());
-        System.out.println(instance.remove(new Student().withUserName("MrSolix")));
     }
 }

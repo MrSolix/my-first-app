@@ -1,9 +1,10 @@
-package by.dutov.jee.repository.group;
+package by.dutov.jee.repository.group.postgres;
 
 import by.dutov.jee.group.Group;
 import by.dutov.jee.people.Role;
 import by.dutov.jee.people.Student;
 import by.dutov.jee.people.Teacher;
+import by.dutov.jee.repository.group.GroupDAO;
 import by.dutov.jee.service.exceptions.DataBaseException;
 import lombok.extern.slf4j.Slf4j;
 
