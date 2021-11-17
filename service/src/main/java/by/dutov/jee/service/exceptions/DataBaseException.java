@@ -1,6 +1,9 @@
 package by.dutov.jee.service.exceptions;
 
 public class DataBaseException extends ApplicationException {
+
+
+
     public DataBaseException(String message) {
         super(message);
     }

@@ -10,7 +10,7 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 
 @Slf4j
-@WebServlet("/logout")
+@WebServlet("/main/logout")
 public class LogoutServlet extends HttpServlet {
 
     @Override

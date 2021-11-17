@@ -8,6 +8,8 @@ import by.dutov.jee.people.Student;
 import by.dutov.jee.people.Teacher;
 import lombok.extern.slf4j.Slf4j;
 
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -18,7 +20,8 @@ import java.util.stream.Collectors;
 
 @Slf4j
 public class PersonDAOInMemory extends PersonDAO<Person> {
-
+    private static Integer ID = 1;
+    private Integer id;
     private static volatile PersonDAOInMemory instance;
     private final Map<Integer, Person> accounts;
 
@@ -38,15 +41,10 @@ public class PersonDAOInMemory extends PersonDAO<Person> {
     }
 
     @Override
-    String[] sqlMethods() {
-        return new String[0];
-    }
-
-    @Override
     public Person save(Person person) {
         if (person != null) {
-            accounts.put(person.getId(), person);
-            return accounts.get(person.getId());
+            accounts.put(id=ID++, person);
+            return accounts.get(id);
         }
         return null;
     }
@@ -96,20 +94,55 @@ public class PersonDAOInMemory extends PersonDAO<Person> {
     }
 
     @Override
-    Map<String, List<Integer>> getGrades(String name) {
+    List<? extends Person> resultSetToEntities(ResultSet rs) throws SQLException {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    String selectUser() {
         return null;
     }
 
     @Override
-    String[] aliases() {
-        return new String[0];
+    String deleteUser() {
+        return null;
+    }
+
+    @Override
+    String updateUser() {
+        return null;
+    }
+
+    @Override
+    String insertUser() {
+        return null;
+    }
+
+    @Override
+    String selectUserById() {
+        return null;
+    }
+
+    @Override
+    String selectUserByName() {
+        return null;
+    }
+
+    @Override
+    String deleteUserInGroup() {
+        return null;
+    }
+
+    @Override
+    Map<String, List<Integer>> getGrades(String name) {
+        return null;
     }
 
     {
         accounts = new ConcurrentHashMap<>();
 
         Student student = new Student()
-                .withId(1)
+                .withId(id=ID++)
                 .withUserName("student")
                 .withPassword("123")
                 .withName("Vasya")
@@ -120,7 +153,7 @@ public class PersonDAOInMemory extends PersonDAO<Person> {
         student.addThemeAndGrades("English", 6, 5, 7, 4, 8);
 
         Student student1 = new Student()
-                .withId(2)
+                .withId(id=ID++)
                 .withUserName("student1")
                 .withPassword("123")
                 .withName("Gena")
@@ -131,7 +164,7 @@ public class PersonDAOInMemory extends PersonDAO<Person> {
         student1.addThemeAndGrades("English", 9, 7, 8, 6, 9);
 
         Teacher teacher = new Teacher()
-                .withId(3)
+                .withId(id=ID++)
                 .withUserName("teacher")
                 .withPassword("123")
                 .withName("Peter")
@@ -140,7 +173,7 @@ public class PersonDAOInMemory extends PersonDAO<Person> {
                 .withRole(Role.TEACHER);
 
         Teacher teacher1 = new Teacher()
-                .withId(4)
+                .withId(id=ID++)
                 .withUserName("teacher1")
                 .withPassword("123")
                 .withName("Daniel")
@@ -159,7 +192,7 @@ public class PersonDAOInMemory extends PersonDAO<Person> {
                 .withStudents(Arrays.asList(student, student1));
 
         Admin admin = new Admin()
-                .withId(5)
+                .withId(id=ID++)
                 .withUserName("admin")
                 .withPassword("123")
                 .withName("Administrator")

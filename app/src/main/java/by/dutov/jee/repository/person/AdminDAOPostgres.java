@@ -1,12 +1,21 @@
 package by.dutov.jee.repository.person;
 
 
+import by.dutov.jee.group.Group;
 import by.dutov.jee.people.Admin;
+import by.dutov.jee.people.Person;
 import by.dutov.jee.people.Role;
+import by.dutov.jee.people.Student;
+import by.dutov.jee.people.Teacher;
 import lombok.extern.slf4j.Slf4j;
 
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 @Slf4j
 public class AdminDAOPostgres extends PersonDAO<Admin> {
@@ -56,27 +65,64 @@ public class AdminDAOPostgres extends PersonDAO<Admin> {
     }
 
     @Override
-    String[] sqlMethods() {
-        return new String[]{
-                SELECT_ADMIN,
-                DELETE_ADMIN,
-                UPDATE_ADMIN,
-                INSERT_ADMIN,
-                SELECT_ADMIN_BY_ID,
-                SELECT_ADMIN_BY_NAME,
-        };
+    String selectUser() {
+        return SELECT_ADMIN;
     }
 
     @Override
-    String[] aliases() {
-        return new String[]{
-                A_ID,
-                A_USER_NAME,
-                A_PASS,
-                A_SALT,
-                A_NAME,
-                A_AGE,
-                Role.getStrByType(Role.ADMIN)};
+    String deleteUser() {
+        return DELETE_ADMIN;
+    }
+
+    @Override
+    String updateUser() {
+        return UPDATE_ADMIN;
+    }
+
+    @Override
+    String insertUser() {
+        return INSERT_ADMIN;
+    }
+
+    @Override
+    String selectUserById() {
+        return SELECT_ADMIN_BY_ID;
+    }
+
+    @Override
+    String selectUserByName() {
+        return SELECT_ADMIN_BY_NAME;
+    }
+
+    @Override
+    String deleteUserInGroup() {
+        return null;
+    }
+
+    @Override
+    List<Admin> resultSetToEntities(ResultSet rs) throws SQLException {
+        Map<Integer, Admin> adminMap = new ConcurrentHashMap<>();
+        while (rs.next()) {
+            final int aId = rs.getInt(A_ID);
+            final String aUserName = rs.getString(A_USER_NAME);
+            final byte[] aPass = rs.getBytes(A_PASS);
+            final byte[] aSalt = rs.getBytes(A_SALT);
+            final String aName = rs.getString(A_NAME);
+            final int aAge = rs.getInt(A_AGE);
+            final Role role = Role.ADMIN;
+
+            adminMap.putIfAbsent(aId, new Admin()
+                    .withId(aId)
+                    .withUserName(aUserName)
+                    .withBytePass(aPass)
+                    .withSalt(aSalt)
+                    .withName(aName)
+                    .withAge(aAge)
+                    .withRole(role));
+
+        }
+        Collection<Admin> values = adminMap.values();
+        return values.isEmpty() ? new ArrayList<>() : new ArrayList<>(values);
     }
 
     @Override

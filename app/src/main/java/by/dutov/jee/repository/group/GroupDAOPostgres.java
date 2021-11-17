@@ -23,7 +23,7 @@ import static by.dutov.jee.utils.DataBaseUtils.closeQuietly;
 import static by.dutov.jee.utils.DataBaseUtils.rollBack;
 
 @Slf4j
-public class GroupDAOPostgres extends GroupDAO<Group> {
+public class GroupDAOPostgres implements GroupDAO<Group> {
     //language=SQL
     private static final String SELECT_GROUP_ALL_FIELDS = "select " +
             "g.id g_id, " +
@@ -125,7 +125,7 @@ public class GroupDAOPostgres extends GroupDAO<Group> {
                 return group.withId(rs.getInt(POSITION_ID));
             }
             rollBack(con);
-            return null;
+            throw new DataBaseException("Не удалось записать группу в базу");
         } catch (SQLException e) {
             rollBack(con);
             log.error(e.getMessage());
@@ -148,7 +148,7 @@ public class GroupDAOPostgres extends GroupDAO<Group> {
                 return true;
             }
             rollBack(con);
-            return false;
+            throw new DataBaseException("Не удалось записать студента в группу");
         } catch (SQLException e) {
             rollBack(con);
             log.error(e.getMessage());
@@ -175,7 +175,6 @@ public class GroupDAOPostgres extends GroupDAO<Group> {
             }
             rollBack(con);
             return Optional.empty();
-
         } catch (SQLException e) {
             rollBack(con);
             log.error(e.getMessage());
@@ -199,7 +198,7 @@ public class GroupDAOPostgres extends GroupDAO<Group> {
                 return group;
             }
             rollBack(con);
-            return null;
+            throw new DataBaseException("Не удалось изменить группу");
         } catch (SQLException e) {
             rollBack(con);
             log.error(e.getMessage());
@@ -224,7 +223,7 @@ public class GroupDAOPostgres extends GroupDAO<Group> {
                 return true;
             }
             rollBack(con);
-            return false;
+            throw new DataBaseException("Не удалось изменить студента в группе");
         } catch (SQLException e) {
             rollBack(con);
             log.error(e.getMessage());
@@ -251,7 +250,7 @@ public class GroupDAOPostgres extends GroupDAO<Group> {
                     || !(ps2.executeUpdate() > 0)
                     || !(ps3.executeUpdate() > 0)) {
                 rollBack(con);
-                return null;
+                throw new DataBaseException("Не удалось удалить группу");
             }
             con.commit();
             return group;

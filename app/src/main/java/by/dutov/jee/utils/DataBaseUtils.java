@@ -9,13 +9,12 @@ import java.sql.SQLException;
 public class DataBaseUtils {
 
     public static void closeQuietly(AutoCloseable... closeable) {
-        if (closeable == null) {
-            return;
-        }
         try {
             for (AutoCloseable ac :
                     closeable) {
-                ac.close();
+                if (ac != null) {
+                    ac.close();
+                }
             }
         } catch (Exception e) {
             log.error("Couldn't close ", e);

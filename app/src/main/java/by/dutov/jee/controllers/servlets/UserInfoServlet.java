@@ -12,7 +12,7 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 
 @Slf4j
-@WebServlet("/user-info")
+@WebServlet("/main/user-info")
 public class UserInfoServlet extends HttpServlet {
 
     @Override

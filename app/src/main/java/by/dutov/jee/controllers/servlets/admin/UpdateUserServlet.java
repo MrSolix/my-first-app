@@ -1,6 +1,6 @@
-package by.dutov.jee.controllers.servlets;
+package by.dutov.jee.controllers.servlets.admin;
 
-import by.dutov.jee.service.LoginService;
+import by.dutov.jee.service.UpdateService;
 import by.dutov.jee.utils.CommandServletUtils;
 import lombok.extern.slf4j.Slf4j;
 
@@ -13,24 +13,19 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 
 @Slf4j
-@WebServlet({"/", "/main/login"})
-public class LoginServlet extends HttpServlet {
-
+@WebServlet("/admin/update-user")
+public class UpdateUserServlet extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        CommandServletUtils.dispatcher(req, resp, "/loginPage.jsp", DispatcherType.FORWARD);
+        CommandServletUtils.dispatcher(req, resp, "/admin/updateUserPage.jsp", DispatcherType.FORWARD);
     }
 
     @Override
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        log.info("Entered Login Page");
-        log.info("Get parameters");
-        String userName = req.getParameter("userName");
-        String password = req.getParameter("password");
-        log.info("userName = {}, password = ***", userName);
-        log.info("Get person from db");
-        LoginService.getInstance().getLoginedUser(req, resp, userName, password);
+        UpdateService updateService = UpdateService.getInstance();
+        log.info("Entered Update User Page");
+        log.info("Get parameter");
+        String userLogin = req.getParameter("userLogin");
+        updateService.updateUser(req, resp, userLogin);
     }
-
-
 }

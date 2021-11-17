@@ -3,7 +3,7 @@
 <html>
 <head>
     <title>Average Salary</title>
-    <jsp:include page="../menu.jsp"/>
+    <jsp:include page="/menu.jsp"/>
 </head>
 <body>
 <h1>Average Salary Page</h1>

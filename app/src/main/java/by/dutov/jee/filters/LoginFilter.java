@@ -16,7 +16,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 
-@WebFilter("/*")
+@WebFilter({"/main/*", "/admin/*", "/student/*", "/teacher/*"})
 public class LoginFilter implements Filter {
 
     @Override
