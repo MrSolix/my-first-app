@@ -1,7 +1,7 @@
 package by.dutov.jee.repository.person.postgres;
 
 import by.dutov.jee.group.Group;
-import by.dutov.jee.people.Grades;
+import by.dutov.jee.people.grades.Grade;
 import by.dutov.jee.people.Role;
 import by.dutov.jee.people.Teacher;
 import by.dutov.jee.repository.RepositoryFactory;
@@ -20,27 +20,32 @@ import java.util.concurrent.ConcurrentHashMap;
 public class TeacherDAOPostgres extends AbstractPersonDAOPostgres<Teacher> {
     //language=SQL
     public static final String SELECT_TEACHER = "select " +
-            "t.id t_id, t.user_name t_user_name, " +
-            "t.password t_pass, t.salt t_salt, " +
-            "t.name t_name, t.age t_age, " +
-            "t.salary t_salary, g.id g_id " +
-            "from teacher t " +
+            "u.id t_id, u.user_name t_user_name, " +
+            "u.password t_pass, u.salt t_salt, " +
+            "u.name t_name, u.age t_age, u.role t_role, " +
+            "g.id g_id , s.salary, " +
+            "from users u " +
             "left join \"group\" g " +
-            "on t.id = g.teacher_id ";
+            "on u.id = g.teacher_id " +
+            "left join salaries s " +
+            "on u.id = s.teacher_id;";
     //language=SQL
-    public static final String WHERE_TEACHER_NAME = " where t.user_name = ? ";
-    public static final String WHERE_TEACHER_ID = " where t.id = ? ";
+    public static final String WHERE_TEACHER_NAME = " where u.user_name = ? ";
+    public static final String WHERE_TEACHER_ID = " where u.id = ? ";
     //language=SQL
-    public static final String UPDATE_TEACHER = "update teacher t " +
-            "set user_name = ?, password = ?, salt = ?, name = ?, age = ?, salary = ?" + WHERE_TEACHER_ID;
+    public static final String UPDATE_TEACHER = "update users u " +
+            "set user_name = ?, password = ?, salt = ?, name = ?, age = ?" + WHERE_TEACHER_ID;
     //language=SQL
-    public static final String DELETE_TEACHER = "delete from teacher t" + WHERE_TEACHER_NAME + ";";
+    public static final String DELETE_TEACHER = "delete from users u" + WHERE_TEACHER_NAME + ";";
     //language=SQL
     public static final String DELETE_TEACHER_IN_GROUP = "update \"group\" g set teacher_id = null " +
-            "where teacher_id = (select id from teacher t " + WHERE_TEACHER_NAME + "); ";
+            "where teacher_id = (select id from users u " + WHERE_TEACHER_NAME + "); ";
     //language=SQL
-    public static final String INSERT_TEACHER = "insert into teacher (user_name, password, salt, \"name\", age, salary)" +
+    public static final String INSERT_TEACHER = "insert into users (user_name, password, salt, \"name\", age, role)" +
             " values (?, ?, ?, ?, ?, ?) returning id;";
+    //language=SQL
+    public static final String INSERT_SALARY_FOR_TEACHER = "insert into salaries (salary)" +
+            " values (?);";
     //language=SQL
     public static final String SELECT_TEACHER_BY_NAME = SELECT_TEACHER + WHERE_TEACHER_NAME;
     public static final String SELECT_TEACHER_BY_ID = SELECT_TEACHER + WHERE_TEACHER_ID;
@@ -51,6 +56,7 @@ public class TeacherDAOPostgres extends AbstractPersonDAOPostgres<Teacher> {
     public static final String T_USER_NAME = "t_user_name";
     public static final String T_PASS = "t_pass";
     public static final String T_SALT = "t_salt";
+    public static final String T_ROLE = "t_role";
     public static final String T_SALARY = "t_salary";
 
 
@@ -119,7 +125,7 @@ public class TeacherDAOPostgres extends AbstractPersonDAOPostgres<Teacher> {
             final byte[] tSalt = rs.getBytes(T_SALT);
             final String tName = rs.getString(T_NAME);
             final int tAge = rs.getInt(T_AGE);
-            final Role role = Role.TEACHER;
+            final Role role = Role.getTypeByStr(rs.getString(T_ROLE));
             final double tSalary = rs.getDouble(T_SALARY);
 
             teacherMap.putIfAbsent(tId, new Teacher()
@@ -151,7 +157,7 @@ public class TeacherDAOPostgres extends AbstractPersonDAOPostgres<Teacher> {
     }
 
     @Override
-    protected List<Grades> getGrades(String name) {
+    protected List<Grade> getGrades(String name) {
         throw new UnsupportedOperationException();
     }
 }

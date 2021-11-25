@@ -59,10 +59,10 @@ ALTER SEQUENCE public.admin_id_seq OWNED BY public.admin.id;
 
 
 --
--- Name: grades; Type: TABLE; Schema: public; Owner: slavik
+-- Name: grade; Type: TABLE; Schema: public; Owner: slavik
 --
 
-CREATE TABLE public.grades (
+CREATE TABLE public.grade (
     id integer NOT NULL,
     theme_id integer NOT NULL,
     grade integer NOT NULL,
@@ -70,7 +70,7 @@ CREATE TABLE public.grades (
 );
 
 
-ALTER TABLE public.grades OWNER TO slavik;
+ALTER TABLE public.grade OWNER TO slavik;
 
 --
 -- Name: grades_id_seq; Type: SEQUENCE; Schema: public; Owner: slavik
@@ -91,7 +91,7 @@ ALTER TABLE public.grades_id_seq OWNER TO slavik;
 -- Name: grades_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: slavik
 --
 
-ALTER SEQUENCE public.grades_id_seq OWNED BY public.grades.id;
+ALTER SEQUENCE public.grades_id_seq OWNED BY public.grade.id;
 
 
 --
@@ -237,10 +237,10 @@ ALTER TABLE ONLY public.admin ALTER COLUMN id SET DEFAULT nextval('public.admin_
 
 
 --
--- Name: grades id; Type: DEFAULT; Schema: public; Owner: slavik
+-- Name: grade id; Type: DEFAULT; Schema: public; Owner: slavik
 --
 
-ALTER TABLE ONLY public.grades ALTER COLUMN id SET DEFAULT nextval('public.grades_id_seq'::regclass);
+ALTER TABLE ONLY public.grade ALTER COLUMN id SET DEFAULT nextval('public.grades_id_seq'::regclass);
 
 
 --
@@ -274,10 +274,10 @@ COPY public.admin (id, user_name, password, salt, name, age) FROM stdin;
 
 
 --
--- Data for Name: grades; Type: TABLE DATA; Schema: public; Owner: slavik
+-- Data for Name: grade; Type: TABLE DATA; Schema: public; Owner: slavik
 --
 
-COPY public.grades (id, theme_id, grade, student_id) FROM stdin;
+COPY public.grade (id, theme_id, grade, student_id) FROM stdin;
 1	1	90	5
 2	1	70	5
 3	1	60	5
@@ -403,10 +403,10 @@ ALTER TABLE ONLY public.admin
 
 
 --
--- Name: grades grades_pkey; Type: CONSTRAINT; Schema: public; Owner: slavik
+-- Name: grade grades_pkey; Type: CONSTRAINT; Schema: public; Owner: slavik
 --
 
-ALTER TABLE ONLY public.grades
+ALTER TABLE ONLY public.grade
     ADD CONSTRAINT grades_pkey PRIMARY KEY (id);
 
 
@@ -459,18 +459,18 @@ ALTER TABLE ONLY public.theme
 
 
 --
--- Name: grades grades_student_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: slavik
+-- Name: grade grades_student_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: slavik
 --
 
-ALTER TABLE ONLY public.grades
+ALTER TABLE ONLY public.grade
     ADD CONSTRAINT grades_student_id_fkey FOREIGN KEY (student_id) REFERENCES public.student(id);
 
 
 --
--- Name: grades grades_theme_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: slavik
+-- Name: grade grades_theme_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: slavik
 --
 
-ALTER TABLE ONLY public.grades
+ALTER TABLE ONLY public.grade
     ADD CONSTRAINT grades_theme_id_fkey FOREIGN KEY (theme_id) REFERENCES public.theme(id);
 
 

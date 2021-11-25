@@ -1,6 +1,5 @@
 package by.dutov.jee.service;
 
-import by.dutov.jee.people.Role;
 import by.dutov.jee.people.Teacher;
 import org.junit.Before;
 import org.junit.Test;
@@ -18,12 +17,11 @@ public class FinanceTest {
     public void setUp() {
         finance = Finance.getInstance();
         teacher = new Teacher()
-                .withId(90)
+                .withId(3)
                 .withUserName("teacher")
                 .withPassword("123")
                 .withName("Lolka")
                 .withAge(13)
-                .withRole(Role.TEACHER)
                 .withSalary(5000);
 
         for (int i = 1; i <= LocalDate.now().getMonthValue(); i++) {

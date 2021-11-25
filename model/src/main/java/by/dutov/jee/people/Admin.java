@@ -6,12 +6,14 @@ import lombok.NoArgsConstructor;
 import lombok.ToString;
 
 import javax.persistence.Entity;
+import javax.persistence.NamedQuery;
 
 @Data
 @NoArgsConstructor
 @ToString(callSuper = true)
 @EqualsAndHashCode(callSuper = true)
 @Entity
+@NamedQuery(name = "findAdmin", query = "select a from Admin a where a.userName = :name")
 public class Admin extends Person{
 
     {

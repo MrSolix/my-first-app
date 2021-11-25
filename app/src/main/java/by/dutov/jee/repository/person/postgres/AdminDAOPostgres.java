@@ -2,7 +2,7 @@ package by.dutov.jee.repository.person.postgres;
 
 
 import by.dutov.jee.people.Admin;
-import by.dutov.jee.people.Grades;
+import by.dutov.jee.people.grades.Grade;
 import by.dutov.jee.people.Role;
 import lombok.extern.slf4j.Slf4j;
 
@@ -123,7 +123,7 @@ public class AdminDAOPostgres extends AbstractPersonDAOPostgres<Admin> {
     }
 
     @Override
-    protected List<Grades> getGrades(String name) {
+    protected List<Grade> getGrades(String name) {
         throw new UnsupportedOperationException();
     }
 }

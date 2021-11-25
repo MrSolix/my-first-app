@@ -2,16 +2,27 @@ package by.dutov.jee.utils;
 
 import lombok.extern.slf4j.Slf4j;
 
+import javax.persistence.EntityManager;
 import java.sql.Connection;
 import java.sql.SQLException;
 
 @Slf4j
 public class DataBaseUtils {
 
-    public static void closeQuietly(AutoCloseable... closeable) {
+    public static void closeQuietly(EntityManager em) {
+        try {
+            if (em != null) {
+                em.close();
+            }
+        } catch (Exception e) {
+            log.error("Couldn't close ", e);
+        }
+    }
+
+    public static void closeQuietly(AutoCloseable... autoCloseable) {
         try {
             for (AutoCloseable ac :
-                    closeable) {
+                    autoCloseable) {
                 if (ac != null) {
                     ac.close();
                 }
@@ -21,14 +32,19 @@ public class DataBaseUtils {
         }
     }
 
-    public static void rollBack(Connection con) {
-        if (con == null) {
-            return;
+    public static void rollBack(EntityManager em) {
+        if (em != null) {
+            em.getTransaction().rollback();
         }
-        try {
-            con.rollback();
-        } catch (SQLException e) {
-            log.error("Failed to rollback ", e);
+    }
+
+    public static void rollBack(Connection con) {
+        if (con != null) {
+            try {
+                con.rollback();
+            } catch (SQLException e) {
+                log.error("Failed to rollback ", e);
+            }
         }
     }
 }

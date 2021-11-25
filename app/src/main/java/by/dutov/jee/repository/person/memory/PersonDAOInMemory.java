@@ -2,19 +2,15 @@ package by.dutov.jee.repository.person.memory;
 
 import by.dutov.jee.group.Group;
 import by.dutov.jee.people.Admin;
-import by.dutov.jee.people.Grades;
+import by.dutov.jee.people.grades.Grade;
 import by.dutov.jee.people.Person;
 import by.dutov.jee.people.Role;
 import by.dutov.jee.people.Student;
 import by.dutov.jee.people.Teacher;
 import by.dutov.jee.repository.person.PersonDAOInterface;
-import by.dutov.jee.repository.person.postgres.AbstractPersonDAOPostgres;
 import lombok.extern.slf4j.Slf4j;
 
-import java.sql.ResultSet;
-import java.sql.SQLException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -107,34 +103,34 @@ public class PersonDAOInMemory implements PersonDAOInterface<Person> {
                 .withName("Vasya")
                 .withAge(21)
                 .withRole(Role.STUDENT);
-        List<Grades> grades = new ArrayList<>();
-        grades.add(new Grades()
+        List<Grade> grades = new ArrayList<>();
+        grades.add(new Grade()
                 .withName("Math")
-                .withGrades(9));
-        grades.add(new Grades()
+                .withGrade(9));
+        grades.add(new Grade()
                 .withName("Math")
-                .withGrades(7));
-        grades.add(new Grades()
+                .withGrade(7));
+        grades.add(new Grade()
                 .withName("Math")
-                .withGrades(6));
-        grades.add(new Grades()
+                .withGrade(6));
+        grades.add(new Grade()
                 .withName("Math")
-                .withGrades(8));
-        grades.add(new Grades()
+                .withGrade(8));
+        grades.add(new Grade()
                 .withName("English")
-                .withGrades(6));
-        grades.add(new Grades()
+                .withGrade(6));
+        grades.add(new Grade()
                 .withName("English")
-                .withGrades(5));
-        grades.add(new Grades()
+                .withGrade(5));
+        grades.add(new Grade()
                 .withName("English")
-                .withGrades(7));
-        grades.add(new Grades()
+                .withGrade(7));
+        grades.add(new Grade()
                 .withName("English")
-                .withGrades(4));
-        grades.add(new Grades()
+                .withGrade(4));
+        grades.add(new Grade()
                 .withName("English")
-                .withGrades(8));
+                .withGrade(8));
         student.setGrades(grades);
 
 
@@ -146,37 +142,37 @@ public class PersonDAOInMemory implements PersonDAOInterface<Person> {
                 .withAge(22)
                 .withRole(Role.STUDENT);
 
-        List<Grades> grades1 = new ArrayList<>();
-        grades1.add(new Grades()
+        List<Grade> grade1 = new ArrayList<>();
+        grade1.add(new Grade()
                 .withName("Math")
-                .withGrades(5));
-        grades1.add(new Grades()
+                .withGrade(5));
+        grade1.add(new Grade()
                 .withName("Math")
-                .withGrades(4));
-        grades1.add(new Grades()
+                .withGrade(4));
+        grade1.add(new Grade()
                 .withName("Math")
-                .withGrades(6));
-        grades1.add(new Grades()
+                .withGrade(6));
+        grade1.add(new Grade()
                 .withName("Math")
-                .withGrades(7));
-        grades1.add(new Grades()
+                .withGrade(7));
+        grade1.add(new Grade()
                 .withName("English")
-                .withGrades(9));
-        grades1.add(new Grades()
+                .withGrade(9));
+        grade1.add(new Grade()
                 .withName("English")
-                .withGrades(7));
-        grades1.add(new Grades()
+                .withGrade(7));
+        grade1.add(new Grade()
                 .withName("English")
-                .withGrades(8));
-        grades1.add(new Grades()
+                .withGrade(8));
+        grade1.add(new Grade()
                 .withName("English")
-                .withGrades(6));
-        grades1.add(new Grades()
+                .withGrade(6));
+        grade1.add(new Grade()
                 .withName("English")
-                .withGrades(9));
+                .withGrade(9));
 
 
-        student1.setGrades(grades1);
+        student1.setGrades(grade1);
 
 
         Teacher teacher = new Teacher()

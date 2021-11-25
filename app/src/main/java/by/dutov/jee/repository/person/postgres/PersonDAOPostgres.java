@@ -1,14 +1,13 @@
 package by.dutov.jee.repository.person.postgres;
 
 import by.dutov.jee.people.Admin;
-import by.dutov.jee.people.Grades;
+import by.dutov.jee.people.grades.Grade;
 import by.dutov.jee.people.Person;
 import by.dutov.jee.people.Role;
 import by.dutov.jee.people.Student;
 import by.dutov.jee.people.Teacher;
 import lombok.extern.slf4j.Slf4j;
 
-import javax.sql.DataSource;
 import java.sql.ResultSet;
 import java.util.ArrayList;
 import java.util.List;
@@ -17,18 +16,16 @@ import java.util.Optional;
 @Slf4j
 public class PersonDAOPostgres extends AbstractPersonDAOPostgres<Person> {
     private static volatile PersonDAOPostgres instance;
-    private final DataSource dataSource;
 
-    public PersonDAOPostgres(DataSource dataSource) {
-        this.dataSource = dataSource;
+    public PersonDAOPostgres() {
         //singleton
     }
 
-    public static PersonDAOPostgres getInstance(DataSource dataSource) {
+    public static PersonDAOPostgres getInstance() {
         if (instance == null) {
             synchronized (PersonDAOPostgres.class) {
                 if (instance == null) {
-                    instance = new PersonDAOPostgres(dataSource);
+                    instance = new PersonDAOPostgres();
                 }
             }
         }
@@ -102,7 +99,6 @@ public class PersonDAOPostgres extends AbstractPersonDAOPostgres<Person> {
         return AdminDAOPostgres.getInstance().remove((Admin) person);
     }
 
-    @Override
     public List<? extends Person> findAll(Role role) {
         if (Role.STUDENT.equals(role)) {
             return StudentDAOPostgres.getInstance().findAll();
@@ -158,7 +154,18 @@ public class PersonDAOPostgres extends AbstractPersonDAOPostgres<Person> {
     }
 
     @Override
-    protected List<Grades> getGrades(String name) {
+    protected List<Grade> getGrades(String name) {
         throw new UnsupportedOperationException();
+    }
+
+    public static void main(String[] args) {
+        PersonDAOPostgres instance = PersonDAOPostgres.getInstance();
+        Teacher student = new Teacher()
+                .withUserName("teacher")
+                .withPassword("123")
+                .withName("Ychitel")
+                .withAge(30)
+                .withSalary(5000);
+        System.out.println(instance.find(3));
     }
 }

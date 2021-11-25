@@ -28,17 +28,14 @@ public class GroupDAOPostgres implements GroupDAO<Group> {
     //language=SQL
     private static final String SELECT_GROUP_ALL_FIELDS = "select " +
             "g.id g_id, " +
-            "t.id t_id, t.user_name t_user_name, t.password t_pass, " +
-            "t.salt t_salt, t.name t_name, t.age t_age, t.salary t_salary, " +
-            "s.id s_id, s.user_name s_user_name, s.password s_pass, " +
-            "s.salt s_salt, s.name s_name, s.age s_age " +
+            "u.id t_id, u.user_name t_user_name, u.password t_pass, " +
+            "u.salt t_salt, u.name t_name, u.age t_age " +
             "from \"group\" g " +
-            "left join teacher t " +
-            "on t.id = g.teacher_id " +
+            "left join users u " +
+            "on u.id = g.teacher_id " +
             "left join group_student gs " +
             "on g.id = gs.group_id " +
-            "left join student s " +
-            "on s.id = gs.student_id";
+            "and u.id = gs.student_id";
 
     //language=SQL
     private static final String INSERT_GROUP = "insert into \"group\" (teacher_id) " +

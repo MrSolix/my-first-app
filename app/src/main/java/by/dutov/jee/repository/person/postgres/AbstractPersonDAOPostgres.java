@@ -1,8 +1,7 @@
 package by.dutov.jee.repository.person.postgres;
 
-import by.dutov.jee.people.Grades;
+import by.dutov.jee.people.grades.Grade;
 import by.dutov.jee.people.Person;
-import by.dutov.jee.people.Role;
 import by.dutov.jee.people.Teacher;
 import by.dutov.jee.repository.RepositoryFactory;
 import by.dutov.jee.repository.group.postgres.GroupDAOPostgres;
@@ -15,7 +14,6 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -43,6 +41,7 @@ public abstract class AbstractPersonDAOPostgres<T extends Person> implements Per
         List<? extends Person> result;
         Connection con = null;
         PreparedStatement ps = null;
+        PreparedStatement ps2 = null;
         ResultSet rs = null;
         try {
             con = dataSource.getConnection();
@@ -51,6 +50,7 @@ public abstract class AbstractPersonDAOPostgres<T extends Person> implements Per
             rs = ps.executeQuery();
             result = resultSetToEntities(rs);
             if (!result.isEmpty()) {
+//                findSalary(con, ps2, result);
                 con.commit();
                 return result.stream().findAny();
             }
@@ -58,10 +58,10 @@ public abstract class AbstractPersonDAOPostgres<T extends Person> implements Per
             return result.stream().findAny();
         } catch (SQLException e) {
             rollBack(con);
-            log.error(e.getMessage());
+            log.error("Не удалось найти пользователя");
             throw new DataBaseException(e);
         } finally {
-            closeQuietly(rs, ps, con);
+            closeQuietly(rs, ps2, ps, con);
         }
     }
 
@@ -70,6 +70,7 @@ public abstract class AbstractPersonDAOPostgres<T extends Person> implements Per
         List<? extends Person> result;
         Connection con = null;
         PreparedStatement ps = null;
+        PreparedStatement ps2 = null;
         ResultSet rs = null;
         try {
             con = dataSource.getConnection();
@@ -78,6 +79,7 @@ public abstract class AbstractPersonDAOPostgres<T extends Person> implements Per
             rs = ps.executeQuery();
             result = resultSetToEntities(rs);
             if (!result.isEmpty()) {
+//                findSalary(con, ps2, result);
                 con.commit();
                 return result.stream().findAny();
             }
@@ -88,7 +90,18 @@ public abstract class AbstractPersonDAOPostgres<T extends Person> implements Per
             log.error(e.getMessage());
             throw new DataBaseException(e);
         } finally {
-            closeQuietly(rs, ps, con);
+            closeQuietly(rs, ps2, ps, con);
+        }
+    }
+
+    private void findSalary(Connection con, PreparedStatement ps, List<? extends Person> result) throws SQLException {
+        if (getClass().equals(TeacherDAOPostgres.class)) {
+            ps = con.prepareStatement("select s.salary from salaries s where s.teacher_id = ?;");
+            ps.setDouble(1, result.stream().findAny().get().getId());
+            if (ps.executeUpdate() <= 0) {
+                rollBack(con);
+                log.error("Не удалось найти зарплату для учителя");
+            }
         }
     }
 
@@ -102,32 +115,42 @@ public abstract class AbstractPersonDAOPostgres<T extends Person> implements Per
         } else {
             ps.setInt(5, 0);
         }
+        ps.setString(6, t.getRole().getType());
     }
 
     private T insert(T t) {
         Connection con = null;
         PreparedStatement ps = null;
+        PreparedStatement ps2 = null;
         ResultSet rs = null;
         try {
             con = dataSource.getConnection();
             ps = con.prepareStatement(insertUser());
             setterInsertOrUpdate(ps, t);
-            if (getClass().equals(TeacherDAOPostgres.class)) {
-                ps.setDouble(6, ((Teacher) t).getSalary());
-            }
             rs = ps.executeQuery();
             if (rs.next()) {
+                if (getClass().equals(TeacherDAOPostgres.class)) {
+                    ps2 = con.prepareStatement("insert into salaries (teacher_id, salary) values (?, ?);");
+                    ps2.setDouble(1, rs.getInt(POSITION_ID));
+                    ps2.setDouble(2, ((Teacher) t).getSalary());
+                    if (ps2.executeUpdate() <= 0) {
+                        rollBack(con);
+                        log.error("Не удалось записать зарплату для учителя.");
+                        throw new DataBaseException("Не удалось записать зарплату для учителя.");
+                    }
+                }
                 con.commit();
                 return (T) t.withId(rs.getInt(POSITION_ID));
             }
             rollBack(con);
-            throw new DataBaseException("Не удалось записать студента.");
+            log.error("Не удалось записать пользователя.");
+            throw new DataBaseException("Не удалось записать пользователя.");
         } catch (SQLException e) {
             rollBack(con);
             log.error(e.getMessage());
             throw new DataBaseException(e);
         } finally {
-            closeQuietly(rs, ps, con);
+            closeQuietly(rs, ps2, ps, con);
         }
     }
 
@@ -135,28 +158,33 @@ public abstract class AbstractPersonDAOPostgres<T extends Person> implements Per
     public T update(Integer id, T t) {
         Connection con = null;
         PreparedStatement ps = null;
+        PreparedStatement ps2 = null;
         try {
             con = dataSource.getConnection();
             ps = con.prepareStatement(updateUser());
             setterInsertOrUpdate(ps, t);
+            ps.setInt(6, id);
             if (getClass().equals(TeacherDAOPostgres.class)) {
-                ps.setDouble(6, ((Teacher) t).getSalary());
-                ps.setInt(7, id);
-            } else {
-                ps.setInt(6, id);
+                ps2 = con.prepareStatement("update salaries s set salary = ? where s.teacher_id = ?");
+                if (ps2.executeUpdate() <= 0) {
+                    rollBack(con);
+                    log.error("Не удалось изменить зарплату для учителя.");
+                    throw new DataBaseException("Не удалось изменить зарплату для учителя.");
+                }
             }
             if (ps.executeUpdate() > 0) {
                 con.commit();
                 return t;
             }
             rollBack(con);
-            throw new DataBaseException("Не удалось изменить юзера.");
+            log.error("Не удалось изменить пользователя.");
+            throw new DataBaseException("Не удалось изменить пользователя.");
         } catch (SQLException e) {
             rollBack(con);
             log.error(e.getMessage());
             throw new DataBaseException(e);
         } finally {
-            closeQuietly(ps, con);
+            closeQuietly(ps2, ps, con);
         }
     }
 
@@ -185,7 +213,7 @@ public abstract class AbstractPersonDAOPostgres<T extends Person> implements Per
                 ps2.execute();
             if (ps3.executeUpdate() <= 0) {
                 rollBack(con);
-                throw new DataBaseException("Не удалось удалить юзера.");
+                throw new DataBaseException("Не удалось удалить пользователя.");
             }
             con.commit();
             return t;
@@ -196,10 +224,6 @@ public abstract class AbstractPersonDAOPostgres<T extends Person> implements Per
         } finally {
             closeQuietly(ps3, ps2, ps1, con);
         }
-    }
-
-    public List<? extends Person> findAll(Role role) {
-        return new ArrayList<>();
     }
 
     @Override
@@ -239,6 +263,6 @@ public abstract class AbstractPersonDAOPostgres<T extends Person> implements Per
     protected abstract String deleteUserInGroup();
 
 
-    protected abstract List<Grades> getGrades(String name);
+    protected abstract List<Grade> getGrades(String name);
 
 }

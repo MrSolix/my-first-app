@@ -4,7 +4,6 @@ import by.dutov.jee.people.Person;
 import by.dutov.jee.people.Teacher;
 import by.dutov.jee.repository.RepositoryFactory;
 import by.dutov.jee.repository.person.PersonDAOInterface;
-import by.dutov.jee.repository.person.postgres.AbstractPersonDAOPostgres;
 import by.dutov.jee.utils.CommandServletUtils;
 import lombok.extern.slf4j.Slf4j;
 
@@ -23,11 +22,11 @@ public class Finance {
     private static final Map<Teacher, Map<Integer, Double>> salaryHistory;
     private static final int CURRENT_MONTH = LocalDate.now().getMonthValue();
     private static PersonDAOInterface<Person> daoRepository;
-    private static volatile Finance instance;
+    private static Finance instance;
     private static final String MIN_RANGE = "minRange";
     private static final String MAX_RANGE = "maxRange";
 
-    public Finance() {
+    private Finance() {
         //singleton
     }
 
@@ -53,11 +52,11 @@ public class Finance {
         final Optional<? extends Person> teacher1 = daoRepository.find("teacher1");
         if (teacher.isPresent() && teacher1.isPresent()) {
             for (int i = 1; i < 11; i++) {
-                Finance.getInstance().saveSalary((Teacher) teacher.get(), i, i * 110.0);
-                Finance.getInstance().saveSalary((Teacher) teacher1.get(), i, i * 100.0);
+                getInstance().saveSalary((Teacher) teacher.get(), i, i * 110.0);
+                getInstance().saveSalary((Teacher) teacher1.get(), i, i * 100.0);
             }
-            Finance.getInstance().saveSalary((Teacher) teacher.get(), CURRENT_MONTH, ((Teacher) teacher.get()).getSalary());
-            Finance.getInstance().saveSalary((Teacher) teacher1.get(), CURRENT_MONTH, ((Teacher) teacher1.get()).getSalary());
+            getInstance().saveSalary((Teacher) teacher.get(), CURRENT_MONTH, ((Teacher) teacher.get()).getSalary());
+            getInstance().saveSalary((Teacher) teacher1.get(), CURRENT_MONTH, ((Teacher) teacher1.get()).getSalary());
         }
     }
 

@@ -2,6 +2,8 @@ package by.dutov.jee.people;
 
 
 import by.dutov.jee.group.Group;
+import by.dutov.jee.people.grades.Grade;
+import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
@@ -12,11 +14,9 @@ import javax.persistence.Entity;
 import javax.persistence.JoinColumn;
 import javax.persistence.JoinTable;
 import javax.persistence.ManyToMany;
+import javax.persistence.NamedQuery;
 import javax.persistence.OneToMany;
-import javax.persistence.Transient;
 import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -25,27 +25,37 @@ import java.util.Set;
 
 @Data
 @NoArgsConstructor
+@AllArgsConstructor
 @EqualsAndHashCode(callSuper = true)
 @ToString(callSuper = true)
 @Entity
-//@SecondaryTable(name = "grades", pkJoinColumns = {@PrimaryKeyJoinColumn(name = "student_id")})
+@NamedQuery(name = "findStudent", query = "select s from Student s where s.userName = :name")
 public class Student extends Person {
     @ToString.Include
     @EqualsAndHashCode.Include
-    @ManyToMany
+    @ManyToMany(cascade =
+            {CascadeType.MERGE,
+            CascadeType.PERSIST,
+            CascadeType.DETACH,
+            CascadeType.REFRESH})
     @JoinTable(
             name = "group_student",
             joinColumns = @JoinColumn(name = "student_id"),
             inverseJoinColumns = @JoinColumn(name = "group_id"))
+
     private Set<Group> groups;
     @ToString.Include
     @EqualsAndHashCode.Include
-    @OneToMany(mappedBy = "student", cascade = CascadeType.ALL)
-    private List<Grades> grades;
+    @OneToMany(
+            mappedBy = "student",
+            cascade = CascadeType.ALL,
+            orphanRemoval = true)
+    private List<Grade> grades;
 
     {
-        setRole(Role.STUDENT);
         groups = new HashSet<>();
+        grades = new ArrayList<>();
+        setRole(Role.STUDENT);
     }
 
     public Student withGroups(Set<Group> groups) {
@@ -98,9 +108,24 @@ public class Student extends Person {
         return this;
     }
 
-    public Student withGrades(List<Grades> grades) {
+    public void removeGroup(Group group) {
+        groups.remove(group);
+        group.getStudents().remove(this);
+    }
+
+    public Student withGrades(List<Grade> grades) {
         this.grades = grades;
         return this;
+    }
+
+    public void addGrade(Grade grade) {
+        grades.add(grade);
+        grade.setStudent(this);
+    }
+
+    public void removeGrade(Grade grade) {
+        grades.remove(grade);
+        grade.setStudent(null);
     }
 
     @Override
@@ -127,17 +152,14 @@ public class Student extends Person {
         return result.toString();
     }
 
-    private String stringOfGrades(List<Grades> grades) {
+    private String stringOfGrades(List<Grade> grades) {
         StringBuilder result = new StringBuilder();
         Map<String, List<Integer>> map = new LinkedHashMap<>();
-        for (Grades grade : grades) {
-            map.putIfAbsent(grade.getThemeName()/*.getName()*/, new ArrayList<>());
-            map.get(grade.getThemeName()/*.getName()*/).add(grade.getGrade());
+        for (Grade grade : grades) {
+            map.putIfAbsent(grade.getThemeName(), new ArrayList<>());
+            map.get(grade.getThemeName()).add(grade.getGrade());
         }
         Set<String> strings = map.keySet();
-        Collection<List<Integer>> values = map.values();
-        List<Integer> list = new ArrayList<>();
-        values.forEach(list::addAll);
         for (String s : strings) {
             result.append("<br>&nbsp;&nbsp;&nbsp;&nbsp").append(s).append(": ").append(map.get(s));
         }

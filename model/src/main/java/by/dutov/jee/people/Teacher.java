@@ -8,9 +8,8 @@ import lombok.ToString;
 
 import javax.persistence.CascadeType;
 import javax.persistence.Entity;
+import javax.persistence.NamedQuery;
 import javax.persistence.OneToOne;
-import javax.persistence.Temporal;
-import javax.persistence.Transient;
 
 
 @Data
@@ -18,6 +17,7 @@ import javax.persistence.Transient;
 @EqualsAndHashCode(callSuper = true)
 @ToString(callSuper = true)
 @Entity
+@NamedQuery(name = "findTeacher", query = "select t from Teacher t where t.userName = :name")
 public class Teacher extends Person {
     @ToString.Include
     @EqualsAndHashCode.Include
@@ -89,6 +89,17 @@ public class Teacher extends Person {
     public Teacher withGroup(Group group){
         setGroup(group);
         return this;
+    }
+
+    public void setGroup(Group group) {
+        if (group == null) {
+            if (this.group != null) {
+                this.group.setTeacher(null);
+            }
+        } else {
+            group.setTeacher(this);
+        }
+        this.group = group;
     }
 
     @Override

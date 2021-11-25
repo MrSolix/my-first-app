@@ -1,7 +1,7 @@
 package by.dutov.jee.repository.person.postgres;
 
 import by.dutov.jee.group.Group;
-import by.dutov.jee.people.Grades;
+import by.dutov.jee.people.grades.Grade;
 import by.dutov.jee.people.Role;
 import by.dutov.jee.people.Student;
 import by.dutov.jee.repository.RepositoryFactory;
@@ -29,20 +29,18 @@ public class StudentDAOPostgres extends AbstractPersonDAOPostgres<Student> {
             "select " +
                     "s.id s_id, " +
                     "s.user_name s_user_name, s.password s_pass, s.salt s_salt, " +
-                    "s.name s_name, s.age s_age, " +
-                    "g.id g_id, t.id t_id " +
-                    "from student s " +
+                    "s.name s_name, s.age s_age, s.role s_role, " +
+                    "g.id g_id " +
+                    "from users s " +
                     "left join group_student gs " +
                     "on s.id = gs.student_id " +
                     "left join \"group\" g " +
-                    "on g.id = gs.group_id " +
-                    "left join teacher t " +
-                    "on t.id = g.teacher_id";
+                    "on g.id = gs.group_id ";
     //language=SQL
     public static final String SELECT_GRADES = "select " +
             "g.grade g_grade, t.name t_name " +
             "from grades g " +
-            "left join student s " +
+            "left join users s " +
             "on s.id = g.student_id " +
             "left join theme t " +
             "on t.id = g.theme_id";
@@ -51,16 +49,16 @@ public class StudentDAOPostgres extends AbstractPersonDAOPostgres<Student> {
     //language=SQL
     public static final String WHERE_STUDENT_ID = " where s.id = ?";
     //language=SQL
-    public static final String INSERT_STUDENT = "insert into student (user_name, password, salt, \"name\", age)" +
-            " values (?, ?, ?, ?, ?) returning id;";
+    public static final String INSERT_STUDENT = "insert into users (user_name, password, salt, \"name\", age, role)" +
+            " values (?, ?, ?, ?, ?, ?) returning id;";
     //language=SQL
-    public static final String UPDATE_STUDENT = "update student s " +
+    public static final String UPDATE_STUDENT = "update users s " +
             "set user_name = ?, password = ?, salt = ?, name = ?, age = ?" + WHERE_STUDENT_ID;
     //language=SQL
-    public static final String DELETE_STUDENT = "delete from student s" + WHERE_STUDENT_NAME + ";";
+    public static final String DELETE_STUDENT = "delete from users s" + WHERE_STUDENT_NAME + ";";
     //language=SQL
     public static final String DELETE_STUDENT_IN_GROUP = "delete from group_student gs " +
-            "where gs.student_id = (select id from student s" + WHERE_STUDENT_NAME + "); ";
+            "where gs.student_id = (select id from users s" + WHERE_STUDENT_NAME + "); ";
     //language=SQL
     public static final String SELECT_STUDENT_BY_NAME = SELECT_STUDENT + WHERE_STUDENT_NAME;
     //language=SQL
@@ -72,6 +70,7 @@ public class StudentDAOPostgres extends AbstractPersonDAOPostgres<Student> {
     public static final String G_ID = "g_id";
     public static final String S_NAME = "s_name";
     public static final String S_AGE = "s_age";
+    public static final String S_ROLE = "s_role";
     public static final String G_GRADE = "g_grade";
     public static final String T_NAME = "t_name";
 
@@ -128,7 +127,7 @@ public class StudentDAOPostgres extends AbstractPersonDAOPostgres<Student> {
     }
 
     @Override
-    public List<Grades> getGrades(String name) {
+    public List<Grade> getGrades(String name) {
         Connection con = null;
         PreparedStatement ps = null;
         ResultSet rs = null;
@@ -137,14 +136,14 @@ public class StudentDAOPostgres extends AbstractPersonDAOPostgres<Student> {
             ps = con.prepareStatement(SELECT_GRADES + WHERE_STUDENT_NAME);
             ps.setString(1, name);
             rs = ps.executeQuery();
-            List<Grades> grades = new ArrayList<>();
+            List<Grade> grades = new ArrayList<>();
             while (rs.next()) {
                 String tName = rs.getString(T_NAME);
                 int gGrade = rs.getInt(G_GRADE);
 
-                grades.add(new Grades()
+                grades.add(new Grade()
                         .withName(tName)
-                        .withGrades(gGrade)
+                        .withGrade(gGrade)
                 );
             }
             con.commit();
@@ -171,7 +170,7 @@ public class StudentDAOPostgres extends AbstractPersonDAOPostgres<Student> {
             final byte[] sSalt = rs.getBytes(S_SALT);
             final String sName = rs.getString(S_NAME);
             final int sAge = rs.getInt(S_AGE);
-            final Role role = Role.STUDENT;
+            final Role role = Role.getTypeByStr(rs.getString(S_ROLE));
 
             studentMap.putIfAbsent(sId, new Student()
                     .withId(sId)

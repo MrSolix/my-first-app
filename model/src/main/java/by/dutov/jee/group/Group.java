@@ -33,7 +33,10 @@ public class Group extends AbstractEntity {
     private Teacher teacher;
     @ToString.Exclude
     @EqualsAndHashCode.Exclude
-    @ManyToMany(mappedBy = "groups", cascade = CascadeType.ALL)
+    @ManyToMany(mappedBy = "groups", cascade = {CascadeType.MERGE,
+            CascadeType.PERSIST,
+            CascadeType.DETACH,
+            CascadeType.REFRESH})
     private Set<Student> students;
 
     {
