@@ -5,6 +5,7 @@ import by.dutov.jee.people.Role;
 import by.dutov.jee.people.Student;
 import by.dutov.jee.people.Teacher;
 import by.dutov.jee.repository.RepositoryFactory;
+import by.dutov.jee.service.exceptions.DataBaseException;
 import lombok.extern.slf4j.Slf4j;
 
 import javax.servlet.DispatcherType;
@@ -52,22 +53,33 @@ public class RegistrationService {
             return;
         }
         final int age = checkingService.isEmpty(ageStr) ? 0 : Integer.parseInt(ageStr);
-        RepositoryFactory.getDaoRepository().save(
-                role == Role.STUDENT ?
-                    new Student()
-                            .withUserName(userName)
-                            .withPassword(password)
-                            .withName(name)
-                            .withAge(age)
-                            .withRole(role)
-                        :
-                    new Teacher()
-                            .withUserName(userName)
-                            .withPassword(password)
-                            .withName(name)
-                            .withAge(age)
-                            .withRole(role)
+        try {
+            RepositoryFactory.getDaoRepository().save(
+                    role == Role.STUDENT ?
+                            new Student()
+                                    .withUserName(userName)
+                                    .withPassword(password)
+                                    .withName(name)
+                                    .withAge(age)
+                                    .withRole(role)
+                            :
+                            new Teacher()
+                                    .withUserName(userName)
+                                    .withPassword(password)
+                                    .withName(name)
+                                    .withAge(age)
+                                    .withRole(role)
             );
+        } catch (DataBaseException e) {
+            log.info("registration is successful");
+            checkingService.setAttributeAndDispatcher(
+                    req, resp,
+                    "Registration is failed",
+                    "errorMessage",
+                    "/registrationPage.jsp",
+                    DispatcherType.INCLUDE
+            );
+        }
         log.info("registration is successful");
         checkingService.setAttributeAndDispatcher(
                 req, resp,

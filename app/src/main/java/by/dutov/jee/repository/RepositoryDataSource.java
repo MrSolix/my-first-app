@@ -1,5 +1,6 @@
 package by.dutov.jee.repository;
 
+import by.dutov.jee.repository.person.postgres.ConnectionType;
 import by.dutov.jee.service.exceptions.ApplicationException;
 import com.mchange.v2.c3p0.ComboPooledDataSource;
 import lombok.extern.slf4j.Slf4j;
@@ -15,8 +16,9 @@ import java.util.logging.Logger;
 @Slf4j
 public class RepositoryDataSource implements DataSource {
     ComboPooledDataSource ds;
-
+    private final ThreadLocal<Connection> threadLocal;
     private static volatile RepositoryDataSource instance;
+    public static ConnectionType connectionType = ConnectionType.SINGLE;
 
     public RepositoryDataSource(String driver, String uri, String user, String password) {
         ds = new ComboPooledDataSource();
@@ -32,12 +34,13 @@ public class RepositoryDataSource implements DataSource {
         ds.setMinPoolSize(5);
         ds.setAcquireIncrement(5);
         ds.setMaxPoolSize(20);
+        threadLocal = new ThreadLocal<>();
     }
 
-    public static RepositoryDataSource getInstance(String driver, String uri, String user, String password){
-        if (instance == null){
-            synchronized (RepositoryDataSource.class){
-                if (instance == null){
+    public static RepositoryDataSource getInstance(String driver, String uri, String user, String password) {
+        if (instance == null) {
+            synchronized (RepositoryDataSource.class) {
+                if (instance == null) {
                     instance = new RepositoryDataSource(driver, uri, user, password);
                 }
             }
@@ -45,12 +48,32 @@ public class RepositoryDataSource implements DataSource {
         return instance;
     }
 
+    public static void commitSingle(Connection connection) throws SQLException {
+        if (ConnectionType.SINGLE.equals(connectionType)) {
+            connection.commit();
+        }
+    }
+
+    public static void commitMany(Connection connection) throws SQLException {
+        connection.commit();
+        connectionType = ConnectionType.SINGLE;
+    }
 
     @Override
     public Connection getConnection() throws SQLException {
-        Connection con = ds.getConnection();
-        con.setAutoCommit(false);
-        return con;
+        Connection connection = threadLocal.get();
+        if (connection == null) {
+            connection = ds.getConnection();
+            threadLocal.set(connection);
+        }
+        connection.setAutoCommit(false);
+        return connection;
+    }
+
+    public void removeConnection() {
+        if (threadLocal.get() != null) {
+            threadLocal.remove();
+        }
     }
 
     @Override

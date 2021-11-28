@@ -1,6 +1,7 @@
 package by.dutov.jee.service;
 
 import by.dutov.jee.people.Person;
+import by.dutov.jee.people.Role;
 import by.dutov.jee.people.Teacher;
 import by.dutov.jee.repository.RepositoryFactory;
 import by.dutov.jee.repository.person.PersonDAOInterface;
@@ -13,13 +14,14 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.time.LocalDate;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 
 @Slf4j
 public class Finance {
-    private static final Map<Teacher, Map<Integer, Double>> salaryHistory;
+    private final Map<Teacher, Map<Integer, Double>> salaryHistory;
     private static final int CURRENT_MONTH = LocalDate.now().getMonthValue();
     private static PersonDAOInterface<Person> daoRepository;
     private static Finance instance;
@@ -27,6 +29,9 @@ public class Finance {
     private static final String MAX_RANGE = "maxRange";
 
     private Finance() {
+        daoRepository = RepositoryFactory.getDaoRepository();
+        salaryHistory = new ConcurrentHashMap<>();
+        staticSaveSalaries();
         //singleton
     }
 
@@ -45,18 +50,19 @@ public class Finance {
         return instance;
     }
 
-    static {
-        daoRepository = RepositoryFactory.getDaoRepository();
-        salaryHistory = new ConcurrentHashMap<>();
-        final Optional<? extends Person> teacher = daoRepository.find("teacher");
-        final Optional<? extends Person> teacher1 = daoRepository.find("teacher1");
-        if (teacher.isPresent() && teacher1.isPresent()) {
-            for (int i = 1; i < 11; i++) {
-                getInstance().saveSalary((Teacher) teacher.get(), i, i * 110.0);
-                getInstance().saveSalary((Teacher) teacher1.get(), i, i * 100.0);
+    private void staticSaveSalaries() {
+        List<? extends Person> all = daoRepository.findAll();
+        for (Person p : all) {
+            if (p.getRole().equals(Role.TEACHER)) {
+                Optional<? extends Person> user = daoRepository.find(p.getId());
+                if (user.isPresent()) {
+                    Teacher teacher = (Teacher) user.get();
+                    for (int i = 1; i < CURRENT_MONTH; i++) {
+                        saveSalary(teacher, i, i * 110.0);
+                    }
+                    saveSalary(teacher, CURRENT_MONTH, teacher.getSalary());
+                }
             }
-            getInstance().saveSalary((Teacher) teacher.get(), CURRENT_MONTH, ((Teacher) teacher.get()).getSalary());
-            getInstance().saveSalary((Teacher) teacher1.get(), CURRENT_MONTH, ((Teacher) teacher1.get()).getSalary());
         }
     }
 
@@ -66,7 +72,7 @@ public class Finance {
         if (minRange < 1 || maxRange > CURRENT_MONTH
                 || rangeCount <= 0
                 || teacher == null
-                || !salaryHistory.containsKey(teacher)) {
+                || !getSalaryHistory().containsKey(teacher)) {
             return -1;
         }
         avgSal = getAvgSal(teacher, minRange, maxRange, avgSal);
@@ -74,7 +80,7 @@ public class Finance {
     }
 
     private double getAvgSal(Teacher teacher, int minRange, int maxRange, double avgSal) {
-        Map<Integer, Double> integerDoubleMap = salaryHistory.get(teacher);
+        Map<Integer, Double> integerDoubleMap = getSalaryHistory().get(teacher);
         for (int i = minRange; i <= maxRange; i++) {
             avgSal += integerDoubleMap.get(i);
         }
@@ -83,14 +89,14 @@ public class Finance {
 
     public void saveSalary(Teacher teacher, Integer month, Double salary) {
         if (month >= 1 && month <= CURRENT_MONTH) {
-            salaryHistory.putIfAbsent(teacher, new HashMap<>());
-            salaryHistory.get(teacher).putIfAbsent(month, salary);
+            getSalaryHistory().putIfAbsent(teacher, new HashMap<>());
+            getSalaryHistory().get(teacher).putIfAbsent(month, salary);
         }
     }
 
     public void getSalary(HttpServletRequest req, HttpServletResponse resp, String userName) throws ServletException, IOException {
         Optional<? extends Person> person = daoRepository.find(userName);
-        if (person.isEmpty() || !"teacher".equals(person.get().getRole().getType())) {
+        if (person.isEmpty() || !Role.TEACHER.equals(person.get().getRole())) {
             log.info("person == null or person role != \"TEACHER\"");
             String errorString = "the teacher's login is incorrect";
             req.setAttribute("errorStringInSalaryPage", errorString);
@@ -113,7 +119,7 @@ public class Finance {
         Optional<? extends Person> person = daoRepository.find(userName);
         log.info("Get person from db");
 
-        if (person.isEmpty() || !"teacher".equals(person.get().getRole().getType())) {
+        if (person.isEmpty() || !Role.TEACHER.equals(person.get().getRole())) {
             log.info("person == null or person role != \"TEACHER\"");
             CommandServletUtils.errorMessage(req, "the teacher's login is incorrect"
                     , "errorStringInAvgSalaryPage");

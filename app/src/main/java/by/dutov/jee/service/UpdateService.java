@@ -7,6 +7,7 @@ import by.dutov.jee.people.Teacher;
 import by.dutov.jee.repository.RepositoryFactory;
 import by.dutov.jee.repository.person.PersonDAOInterface;
 import by.dutov.jee.service.encrypt.PasswordEncryptionService;
+import by.dutov.jee.service.exceptions.DataBaseException;
 import lombok.extern.slf4j.Slf4j;
 
 import javax.servlet.DispatcherType;
@@ -112,25 +113,36 @@ public class UpdateService {
             age = checkingService.isEmpty(ageParam) ? 0 : Integer.parseInt(ageParam);
         }
         PersonDAOInterface<Person> daoRepository = RepositoryFactory.getDaoRepository();
-        if (role.equals(Role.STUDENT)) {
-            daoRepository.save(
-                    new Student()
-                            .withId(userId)
-                            .withUserName(userName)
-                            .withBytePass(password)
-                            .withSalt(salt)
-                            .withName(name)
-                            .withAge(age)
-            );
-        } else if (role.equals(Role.TEACHER)) {
-            daoRepository.save(
-                    new Teacher()
-                            .withId(userId)
-                            .withUserName(userName)
-                            .withBytePass(password)
-                            .withSalt(salt)
-                            .withName(name)
-                            .withAge(age)
+        try {
+            if (role.equals(Role.STUDENT)) {
+                daoRepository.save(
+                        new Student()
+                                .withId(userId)
+                                .withUserName(userName)
+                                .withBytePass(password)
+                                .withSalt(salt)
+                                .withName(name)
+                                .withAge(age)
+                );
+            } else if (role.equals(Role.TEACHER)) {
+                daoRepository.save(
+                        new Teacher()
+                                .withId(userId)
+                                .withUserName(userName)
+                                .withBytePass(password)
+                                .withSalt(salt)
+                                .withName(name)
+                                .withAge(age)
+                );
+            }
+        } catch (DataBaseException e) {
+            log.info("changed failed");
+            checkingService.setAttributeAndDispatcher(
+                    req, resp,
+                    "changed failed",
+                    "errorMessage",
+                    "/admin/updateUserPage.jsp",
+                    DispatcherType.INCLUDE
             );
         }
         log.info("changed successful");

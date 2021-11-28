@@ -2,17 +2,10 @@ package by.dutov.jee.repository.person.jpa;
 
 import by.dutov.jee.people.Admin;
 import by.dutov.jee.people.Person;
-import by.dutov.jee.people.Role;
 import by.dutov.jee.people.Student;
 import by.dutov.jee.people.Teacher;
-import by.dutov.jee.repository.person.postgres.AdminDAOPostgres;
-import by.dutov.jee.repository.person.postgres.PersonDAOPostgres;
-import by.dutov.jee.repository.person.postgres.StudentDAOPostgres;
-import by.dutov.jee.repository.person.postgres.TeacherDAOPostgres;
 import by.dutov.jee.service.exceptions.DataBaseException;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Optional;
 
 public class PersonDaoJpa extends AbstractPersonDaoJpa<Person> {
@@ -106,16 +99,6 @@ public class PersonDaoJpa extends AbstractPersonDaoJpa<Person> {
             return person;
         }
         return AdminDaoJpa.getInstance().remove((Admin) person);
-    }
-
-
-    public List<? extends Person> findAll(Role role) {
-        if (Role.STUDENT.equals(role)) {
-            return StudentDAOPostgres.getInstance().findAll();
-        } else if (Role.TEACHER.equals(role)) {
-            return TeacherDAOPostgres.getInstance().findAll();
-        }
-        return new ArrayList<>();
     }
 
     @Override
