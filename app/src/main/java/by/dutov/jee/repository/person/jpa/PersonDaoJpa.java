@@ -11,6 +11,8 @@ import by.dutov.jee.service.exceptions.DataBaseException;
 import lombok.extern.slf4j.Slf4j;
 
 import javax.persistence.EntityManager;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 
 import static by.dutov.jee.utils.DataBaseUtils.closeQuietly;
@@ -147,6 +149,15 @@ public class PersonDaoJpa extends AbstractPersonDaoJpa<Person> {
     }
 
     @Override
+    public List<? extends Person> findAll() {
+        setParameters(Role.STUDENT);
+        List<Person> personList = new ArrayList<>(super.findAll());
+        setParameters(Role.TEACHER);
+        personList.addAll(super.findAll());
+        return personList;
+    }
+
+    @Override
     protected Class<? extends Person> getType() {
         return classType;
     }
@@ -170,21 +181,27 @@ public class PersonDaoJpa extends AbstractPersonDaoJpa<Person> {
         switch (role) {
             case STUDENT:
                 classType = Student.class;
-                findAllJpql = "from Student";
+                findAllJpql = "from Student u where u.role = 'STUDENT'";
                 namedQueryByName = "findStudentByName";
                 namedQueryById = "findStudentById";
                 return;
             case TEACHER:
                 classType = Teacher.class;
-                findAllJpql = "from Teacher";
+                findAllJpql = "from Teacher u where u.role = 'TEACHER'";
                 namedQueryByName = "findTeacherByName";
                 namedQueryById = "findTeacherById";
                 return;
             case ADMIN:
                 classType = Admin.class;
-                findAllJpql = "from Admin";
+                findAllJpql = "from Admin u where u.role = 'ADMIN'";
                 namedQueryByName = "findAdminByName";
                 namedQueryById = "findAdminById";
         }
+    }
+
+    public static void main(String[] args) {
+        PersonDaoJpa instance = PersonDaoJpa.getInstance();
+
+        System.out.println(instance.findAll());
     }
 }

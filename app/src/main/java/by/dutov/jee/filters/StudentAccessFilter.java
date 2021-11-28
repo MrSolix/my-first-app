@@ -17,6 +17,6 @@ public class StudentAccessFilter implements Filter {
     @Override
     public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain) throws IOException, ServletException {
         CommandServletUtils.filtredAccess((HttpServletRequest) request,
-                (HttpServletResponse) response, chain, "student");
+                (HttpServletResponse) response, chain, "STUDENT");
     }
 }

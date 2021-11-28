@@ -1,6 +1,7 @@
 package by.dutov.jee.utils;
 
 import by.dutov.jee.people.Person;
+import by.dutov.jee.people.Role;
 import lombok.extern.slf4j.Slf4j;
 
 import javax.servlet.DispatcherType;
@@ -36,7 +37,7 @@ public class CommandServletUtils {
 
         Person loginedUser = AppUtils.getLoginedUser(request.getSession());
 
-        if (loginedUser == null || !loginedUser.getRole().getType().equals(who)) {
+        if (loginedUser == null || !Role.getStrByType(loginedUser.getRole()).equals(who)) {
             log.info("Access denied");
             CommandServletUtils.dispatcher(request, response,
                     "/home", DispatcherType.FORWARD);

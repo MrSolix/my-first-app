@@ -1,8 +1,8 @@
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
-<c:set var="student" value="student"/>
-<c:set var="teacher" value="teacher"/>
-<c:set var="admin" value="admin"/>
+<c:set var="student" value="STUDENT"/>
+<c:set var="teacher" value="TEACHER"/>
+<c:set var="admin" value="ADMIN"/>
 <c:choose>
     <c:when test="${loginedUser.role.getType().equals(admin)}">
 <a href="${pageContext.request.contextPath}/admin/admin">

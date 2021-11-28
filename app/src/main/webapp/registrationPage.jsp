@@ -32,8 +32,8 @@
             <td><b>What is your status?</b></td>
         </tr>
         <tr>
-            <td><input type="radio" name="status" value="student" checked><b>Student</b></td>
-            <td><input type="radio" name="status" value="teacher"><b>Teacher</b></td>
+            <td><input type="radio" name="status" value="STUDENT" checked><b>Student</b></td>
+            <td><input type="radio" name="status" value="TEACHER"><b>Teacher</b></td>
         </tr>
         <tr>
             <td>

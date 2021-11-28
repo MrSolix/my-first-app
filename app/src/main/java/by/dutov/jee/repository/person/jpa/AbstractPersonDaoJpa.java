@@ -8,6 +8,8 @@ import lombok.extern.slf4j.Slf4j;
 
 import javax.persistence.EntityManager;
 import javax.persistence.TypedQuery;
+import javax.transaction.Transactional;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -141,7 +143,7 @@ public abstract class AbstractPersonDaoJpa<T extends Person> implements PersonDA
             em = helper.getEntityManager();
             em.getTransaction().begin();
 
-            TypedQuery<? extends Person> query = em.createQuery(findAllJpql(), getType());
+            TypedQuery<? extends Person> query = em.createQuery(findAllJpql(), Person.class);
             entities = query.getResultList();
 
             em.getTransaction().commit();
