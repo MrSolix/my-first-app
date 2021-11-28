@@ -7,17 +7,24 @@ import lombok.NoArgsConstructor;
 import lombok.ToString;
 
 import javax.persistence.CascadeType;
+import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.NamedQuery;
 import javax.persistence.OneToOne;
+import javax.persistence.PrimaryKeyJoinColumn;
+import javax.persistence.SecondaryTable;
+import javax.persistence.Table;
 
 
 @Data
 @NoArgsConstructor
 @EqualsAndHashCode(callSuper = true)
 @ToString(callSuper = true)
+@Table(name = "users")
 @Entity
-@NamedQuery(name = "findTeacher", query = "select t from Teacher t where t.userName = :name")
+@SecondaryTable(name = "salaries", pkJoinColumns = @PrimaryKeyJoinColumn(name = "teacher_id"))
+@NamedQuery(name = "findTeacherByName", query = "from Teacher u where u.userName = :name and u.role = 'TEACHER'")
+@NamedQuery(name = "findTeacherById", query = "from Teacher u where u.id = :id and u.role = 'TEACHER'")
 public class Teacher extends Person {
     @ToString.Include
     @EqualsAndHashCode.Include
@@ -27,6 +34,7 @@ public class Teacher extends Person {
             CascadeType.REFRESH},
             mappedBy = "teacher")
     private Group group;
+    @Column(table = "salaries", name = "salary")
     private double salary;
 
     {

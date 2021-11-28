@@ -16,6 +16,9 @@ import javax.persistence.JoinTable;
 import javax.persistence.ManyToMany;
 import javax.persistence.NamedQuery;
 import javax.persistence.OneToMany;
+import javax.persistence.PrimaryKeyJoinColumn;
+import javax.persistence.SecondaryTable;
+import javax.persistence.Table;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
@@ -28,8 +31,10 @@ import java.util.Set;
 @AllArgsConstructor
 @EqualsAndHashCode(callSuper = true)
 @ToString(callSuper = true)
+@Table(name = "users")
 @Entity
-@NamedQuery(name = "findStudent", query = "select s from Student s where s.userName = :name")
+@NamedQuery(name = "findStudentByName", query = "from Student u where u.userName = :name and u.role = 'STUDENT'")
+@NamedQuery(name = "findStudentById", query = "from Student u where u.id = :id and u.role = 'STUDENT'")
 public class Student extends Person {
     @ToString.Include
     @EqualsAndHashCode.Include

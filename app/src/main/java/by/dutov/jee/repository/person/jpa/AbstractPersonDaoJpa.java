@@ -1,18 +1,13 @@
 package by.dutov.jee.repository.person.jpa;
 
 import by.dutov.jee.people.Person;
-import by.dutov.jee.people.Role;
-import by.dutov.jee.people.Student;
 import by.dutov.jee.repository.EntityManagerHelper;
 import by.dutov.jee.repository.person.PersonDAOInterface;
 import by.dutov.jee.service.exceptions.DataBaseException;
-import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 
 import javax.persistence.EntityManager;
-import javax.persistence.NoResultException;
 import javax.persistence.TypedQuery;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -56,13 +51,14 @@ public abstract class AbstractPersonDaoJpa<T extends Person> implements PersonDA
 
     @Override
     public Optional<? extends Person> find(Integer id) {
-        T entity;
         EntityManager em = null;
         try {
             em = helper.getEntityManager();
             em.getTransaction().begin();
 
-            entity = em.find(getType(), id);
+            TypedQuery<? extends Person> find = em.createNamedQuery(namedQueryById(), getType());
+            find.setParameter("id", id);
+            T entity = (T) find.getSingleResult();
 
             em.getTransaction().commit();
             return Optional.ofNullable(entity);
@@ -82,9 +78,9 @@ public abstract class AbstractPersonDaoJpa<T extends Person> implements PersonDA
             em = helper.getEntityManager();
             em.getTransaction().begin();
 
-            TypedQuery<T> find = em.createNamedQuery(nameNamedQuery(), getType());
+            TypedQuery<? extends Person> find = em.createNamedQuery(namedQueryByName(), getType());
             find.setParameter("name", name);
-            T entity = find.getSingleResult();
+            T entity = (T) find.getSingleResult();
 
             em.getTransaction().commit();
             return Optional.ofNullable(entity);
@@ -139,13 +135,13 @@ public abstract class AbstractPersonDaoJpa<T extends Person> implements PersonDA
 
     @Override
     public List<? extends Person> findAll() {
-        List<T> entities;
+        List<? extends Person> entities;
         EntityManager em = null;
         try {
             em = helper.getEntityManager();
             em.getTransaction().begin();
 
-            TypedQuery<T> query = em.createQuery(findAllJpql(), getType());
+            TypedQuery<? extends Person> query = em.createQuery(findAllJpql(), getType());
             entities = query.getResultList();
 
             em.getTransaction().commit();
@@ -159,10 +155,12 @@ public abstract class AbstractPersonDaoJpa<T extends Person> implements PersonDA
         return entities;
     }
 
-    protected abstract Class<T> getType();
+    protected abstract Class<? extends Person> getType();
 
     protected abstract String findAllJpql();
 
-    protected abstract String nameNamedQuery();
+    protected abstract String namedQueryByName();
+
+    protected abstract String namedQueryById();
 
 }

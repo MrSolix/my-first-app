@@ -1,15 +1,28 @@
 package by.dutov.jee.repository.person.jpa;
 
+import by.dutov.jee.group.Group;
 import by.dutov.jee.people.Admin;
 import by.dutov.jee.people.Person;
+import by.dutov.jee.people.Role;
 import by.dutov.jee.people.Student;
 import by.dutov.jee.people.Teacher;
+import by.dutov.jee.people.grades.Grade;
 import by.dutov.jee.service.exceptions.DataBaseException;
+import lombok.extern.slf4j.Slf4j;
 
+import javax.persistence.EntityManager;
 import java.util.Optional;
 
+import static by.dutov.jee.utils.DataBaseUtils.closeQuietly;
+import static by.dutov.jee.utils.DataBaseUtils.rollBack;
+
+@Slf4j
 public class PersonDaoJpa extends AbstractPersonDaoJpa<Person> {
     private static volatile PersonDaoJpa instance;
+    private Class<? extends Person> classType;
+    private String findAllJpql;
+    private String namedQueryByName;
+    private String namedQueryById;
 
     public PersonDaoJpa() {
         //singleton
@@ -27,29 +40,18 @@ public class PersonDaoJpa extends AbstractPersonDaoJpa<Person> {
     }
 
     @Override
-    public Person save(Person person) {
-        if (person instanceof Student) {
-            return StudentDaoJpa.getInstance().save((Student) person);
-        }
-        if (person instanceof Teacher) {
-            return TeacherDaoJpa.getInstance().save((Teacher) person);
-        }
-        if (person instanceof Admin) {
-            return AdminDaoJpa.getInstance().save((Admin) person);
-        }
-        return null;
-    }
-
-    @Override
     public Optional<? extends Person> find(Integer id) {
         try {
-            return StudentDaoJpa.getInstance().find(id);
+            setParameters(Role.STUDENT);
+            return super.find(id);
         } catch (DataBaseException e) {
             try {
-                return TeacherDaoJpa.getInstance().find(id);
+                setParameters(Role.TEACHER);
+                return super.find(id);
             } catch (DataBaseException e1) {
                 try {
-                    return AdminDaoJpa.getInstance().find(id);
+                    setParameters(Role.ADMIN);
+                    return super.find(id);
                 } catch (DataBaseException e2) {
                     return Optional.empty();
                 }
@@ -60,13 +62,16 @@ public class PersonDaoJpa extends AbstractPersonDaoJpa<Person> {
     @Override
     public Optional<? extends Person> find(String name) {
         try {
-            return StudentDaoJpa.getInstance().find(name);
+            setParameters(Role.STUDENT);
+            return super.find(name);
         } catch (DataBaseException e) {
             try {
-                return TeacherDaoJpa.getInstance().find(name);
+                setParameters(Role.TEACHER);
+                return super.find(name);
             } catch (DataBaseException e1) {
                 try {
-                    return AdminDaoJpa.getInstance().find(name);
+                    setParameters(Role.ADMIN);
+                    return super.find(name);
                 } catch (DataBaseException e2) {
                     return Optional.empty();
                 }
@@ -76,49 +81,110 @@ public class PersonDaoJpa extends AbstractPersonDaoJpa<Person> {
 
     @Override
     public Person update(Integer id, Person person) {
-        if (person instanceof Student) {
-            return StudentDaoJpa.getInstance().update(id, (Student) person);
-        }
-        if (person instanceof Teacher) {
-            return TeacherDaoJpa.getInstance().update(id, (Teacher) person);
-        }
-        if (person instanceof Admin) {
-            return AdminDaoJpa.getInstance().update(id, (Admin) person);
-        }
-        return null;
+        return super.update(id, person);
     }
 
     @Override
     public Person remove(Person person) {
-        if (person instanceof Student) {
-            StudentDaoJpa.getInstance().remove((Student) person);
-            return person;
+        switch (person.getRole()) {
+            case STUDENT:
+                return removeStudent((Student) person);
+            case TEACHER:
+                return removeTeacher((Teacher) person);
         }
-        if (person instanceof Teacher) {
-            TeacherDaoJpa.getInstance().remove((Teacher) person);
-            return person;
+        throw new DataBaseException("Не удалось удалить пользователя");
+    }
+
+    private Student removeStudent(Student student) {
+        EntityManager em = null;
+        try {
+            em = helper.getEntityManager();
+            em.getTransaction().begin();
+
+            Student naturalStudent = em.find(Student.class, student.getId());
+            for (int i = 0; i < naturalStudent.getGroups().size(); i++) {
+                Optional<Group> first = naturalStudent.getGroups().stream().findFirst();
+                first.ifPresent(naturalStudent::removeGroup);
+            }
+            for (int i = 0; i < naturalStudent.getGrades().size(); i++) {
+                Grade grade = naturalStudent.getGrades().get(i);
+                em.remove(grade);
+            }
+
+            em.remove(naturalStudent);
+
+            em.getTransaction().commit();
+            return naturalStudent;
+        } catch (Exception e) {
+            rollBack(em);
+            log.error(ERROR_FROM_REMOVE);
+            throw new DataBaseException(ERROR_FROM_REMOVE);
+        } finally {
+            closeQuietly(em);
         }
-        return AdminDaoJpa.getInstance().remove((Admin) person);
+    }
+
+    private Teacher removeTeacher(Teacher teacher) {
+        EntityManager em = null;
+        try {
+            em = helper.getEntityManager();
+            em.getTransaction().begin();
+
+            Teacher naturalTeacher = em.find(Teacher.class, teacher.getId());
+            naturalTeacher.setGroup(null);
+
+            em.remove(naturalTeacher);
+
+            em.getTransaction().commit();
+            return naturalTeacher;
+        } catch (Exception e) {
+            rollBack(em);
+            log.error(ERROR_FROM_REMOVE);
+            throw new DataBaseException(ERROR_FROM_REMOVE);
+        } finally {
+            closeQuietly(em);
+        }
     }
 
     @Override
-    protected Class<Person> getType() {
-        throw new UnsupportedOperationException();
+    protected Class<? extends Person> getType() {
+        return classType;
     }
 
     @Override
     protected String findAllJpql() {
-        throw new UnsupportedOperationException();
+        return findAllJpql;
     }
 
     @Override
-    protected String nameNamedQuery() {
-        throw new UnsupportedOperationException();
+    protected String namedQueryByName() {
+        return namedQueryByName;
     }
 
-    public static void main(String[] args) {
-        PersonDaoJpa instance = PersonDaoJpa.getInstance();
+    @Override
+    protected String namedQueryById() {
+        return namedQueryById;
+    }
 
-        System.out.println(instance.remove(instance.find(1).orElseThrow()));
+    private void setParameters(Role role) {
+        switch (role) {
+            case STUDENT:
+                classType = Student.class;
+                findAllJpql = "from Student";
+                namedQueryByName = "findStudentByName";
+                namedQueryById = "findStudentById";
+                return;
+            case TEACHER:
+                classType = Teacher.class;
+                findAllJpql = "from Teacher";
+                namedQueryByName = "findTeacherByName";
+                namedQueryById = "findTeacherById";
+                return;
+            case ADMIN:
+                classType = Admin.class;
+                findAllJpql = "from Admin";
+                namedQueryByName = "findAdminByName";
+                namedQueryById = "findAdminById";
+        }
     }
 }

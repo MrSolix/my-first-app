@@ -1,6 +1,7 @@
 package by.dutov.jee.repository.person.postgres;
 
 import by.dutov.jee.people.Person;
+import by.dutov.jee.people.Role;
 import by.dutov.jee.repository.RepositoryFactory;
 import by.dutov.jee.repository.group.postgres.GroupDAOPostgres;
 import by.dutov.jee.repository.person.PersonDAOInterface;
@@ -12,7 +13,6 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.sql.SQLType;
 import java.sql.Types;
 import java.util.List;
 import java.util.Optional;
@@ -113,7 +113,7 @@ public abstract class AbstractPersonDAOPostgres<T extends Person> implements Per
         } else {
             ps.setInt(5, 0);
         }
-        ps.setObject(6, t.getRole(), Types.OTHER);
+        ps.setString(6, Role.getStrByType(t.getRole()));
     }
 
     private T insert(T t) {

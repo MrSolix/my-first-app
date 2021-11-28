@@ -17,7 +17,6 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.sql.Types;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
@@ -221,7 +220,7 @@ public class PersonDAOPostgres extends AbstractPersonDAOPostgres<Person> {
             final byte[] salt = rs.getBytes(U_SALT);
             final String name = rs.getString(U_NAME);
             final int age = rs.getInt(U_AGE);
-            final Role role = Role.valueOf(rs.getString(U_ROLE));
+            final Role role = Role.getTypeByStr(rs.getString(U_ROLE));
 
             if (Role.STUDENT.equals(role)) {
                 personMap.putIfAbsent(id, new Student()

@@ -1,33 +1,154 @@
 package by.dutov.jee.repository.group.jpa;
 
+import by.dutov.jee.group.Group;
+import by.dutov.jee.people.Student;
+import by.dutov.jee.repository.EntityManagerHelper;
 import by.dutov.jee.repository.group.GroupDAO;
+import by.dutov.jee.service.exceptions.DataBaseException;
+import lombok.extern.slf4j.Slf4j;
 
+import javax.persistence.EntityManager;
+import javax.persistence.TypedQuery;
 import java.util.List;
 import java.util.Optional;
 
-public class GroupDaoJpa implements GroupDAO {
-    @Override
-    public Object save(Object o) {
-        return null;
+import static by.dutov.jee.utils.DataBaseUtils.closeQuietly;
+import static by.dutov.jee.utils.DataBaseUtils.rollBack;
+
+@Slf4j
+public class GroupDaoJpa implements GroupDAO<Group> {
+    public static final String ERROR_FROM_REMOVE = "Error from remove";
+    public static final String ERROR_FROM_UPDATE = "Error from update";
+    public static final String ERROR_FROM_SAVE = "Error from save";
+    public static final String ERROR_FROM_FIND = "Error from find";
+    public static final String ERROR_FROM_FIND_ALL = "Error from findAll";
+    protected final EntityManagerHelper helper = EntityManagerHelper.getInstance();
+    private static volatile GroupDaoJpa instance;
+
+    public GroupDaoJpa() {
+        //singleton
+    }
+
+    public static GroupDaoJpa getInstance() {
+        if (instance == null) {
+            synchronized (GroupDaoJpa.class) {
+                if (instance == null) {
+                    instance = new GroupDaoJpa();
+                }
+            }
+        }
+        return instance;
     }
 
     @Override
-    public Optional find(Integer id) {
-        return Optional.empty();
+    public Group save(Group group) {
+        EntityManager em = null;
+        try {
+            em = helper.getEntityManager();
+            em.getTransaction().begin();
+
+            if (group.getId() == null) {
+                em.persist(group);
+            } else {
+                update(group.getId(), group);
+            }
+
+            em.getTransaction().commit();
+            return group;
+        } catch (Exception e) {
+            rollBack(em);
+            log.error(ERROR_FROM_SAVE);
+            throw new DataBaseException(ERROR_FROM_SAVE, e);
+        } finally {
+            closeQuietly(em);
+        }
     }
 
     @Override
-    public Object update(Integer id, Object o) {
-        return null;
+    public Optional<Group> find(Integer id) {
+        EntityManager em = null;
+        try {
+            em = helper.getEntityManager();
+            em.getTransaction().begin();
+
+            Group entity = em.find(Group.class, id);
+
+            em.getTransaction().commit();
+            return Optional.ofNullable(entity);
+        } catch (Exception e) {
+            rollBack(em);
+            log.error(ERROR_FROM_FIND);
+            throw new DataBaseException(ERROR_FROM_FIND, e);
+        } finally {
+            closeQuietly(em);
+        }
     }
 
     @Override
-    public Object remove(Object o) {
-        return null;
+    public Group update(Integer id, Group group) {
+        EntityManager em = null;
+        try {
+            em = helper.getEntityManager();
+            em.getTransaction().begin();
+
+            em.merge(group);
+
+            em.getTransaction().commit();
+            return group;
+        } catch (Exception e) {
+            rollBack(em);
+            log.error(ERROR_FROM_UPDATE);
+            throw new DataBaseException(ERROR_FROM_UPDATE);
+        } finally {
+            closeQuietly(em);
+        }
     }
 
     @Override
-    public List findAll() {
-        return null;
+    public Group remove(Group group) {
+        EntityManager em = null;
+        try {
+            em = helper.getEntityManager();
+            em.getTransaction().begin();
+
+            Group naturalGroup = em.find(Group.class, group.getId());
+            for (int i = 0; i < naturalGroup.getStudents().size(); i++) {
+                Optional<Student> first = naturalGroup.getStudents().stream().findFirst();
+                first.ifPresent(naturalGroup::removeStudent);
+            }
+
+            em.remove(naturalGroup);
+
+            em.getTransaction().commit();
+            return naturalGroup;
+        } catch (Exception e) {
+            rollBack(em);
+            log.error(ERROR_FROM_REMOVE);
+            throw new DataBaseException(ERROR_FROM_REMOVE);
+        } finally {
+            closeQuietly(em);
+        }
+    }
+
+    @Override
+    public List<Group> findAll() {
+        List<Group> entities;
+        EntityManager em = null;
+        try {
+            em = helper.getEntityManager();
+            em.getTransaction().begin();
+
+            TypedQuery<Group> query = em.createQuery("from Group ", Group.class);
+            entities = query.getResultList();
+
+            em.getTransaction().commit();
+        } catch (Exception e) {
+            rollBack(em);
+            log.error(ERROR_FROM_FIND_ALL);
+            throw new DataBaseException(ERROR_FROM_FIND_ALL);
+        } finally {
+            closeQuietly(em);
+        }
+        return entities;
     }
 }

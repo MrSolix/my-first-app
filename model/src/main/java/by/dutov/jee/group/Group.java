@@ -11,6 +11,8 @@ import lombok.ToString;
 
 import javax.persistence.CascadeType;
 import javax.persistence.Entity;
+import javax.persistence.JoinColumn;
+import javax.persistence.JoinTable;
 import javax.persistence.ManyToMany;
 import javax.persistence.OneToOne;
 import javax.persistence.Table;
@@ -33,10 +35,14 @@ public class Group extends AbstractEntity {
     private Teacher teacher;
     @ToString.Exclude
     @EqualsAndHashCode.Exclude
-    @ManyToMany(mappedBy = "groups", cascade = {CascadeType.MERGE,
+    @ManyToMany(cascade = {CascadeType.MERGE,
             CascadeType.PERSIST,
             CascadeType.DETACH,
             CascadeType.REFRESH})
+    @JoinTable(
+            name = "group_student",
+            joinColumns = @JoinColumn(name = "group_id"),
+            inverseJoinColumns = @JoinColumn(name = "student_id"))
     private Set<Student> students;
 
     {
@@ -69,5 +75,15 @@ public class Group extends AbstractEntity {
             students.add(student);
         }
         return this;
+    }
+
+    public void removeStudent(Student student) {
+        students.remove(student);
+        student.getGroups().remove(this);
+    }
+
+    public void removeTeacher(Teacher teacher) {
+        this.teacher = null;
+        teacher.setGroup(null);
     }
 }
