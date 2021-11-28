@@ -12,6 +12,8 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.SQLType;
+import java.sql.Types;
 import java.util.List;
 import java.util.Optional;
 
@@ -87,7 +89,7 @@ public abstract class AbstractPersonDAOPostgres<T extends Person> implements Per
                 return result.stream().findAny();
             }
             rollBack(con);
-            return result.stream().findAny();
+            throw new DataBaseException("Не удалось найти пользователя");
         } catch (SQLException e) {
             rollBack(con);
             log.error(e.getMessage());
@@ -111,7 +113,7 @@ public abstract class AbstractPersonDAOPostgres<T extends Person> implements Per
         } else {
             ps.setInt(5, 0);
         }
-        ps.setString(6, t.getRole().getType());
+        ps.setObject(6, t.getRole(), Types.OTHER);
     }
 
     private T insert(T t) {

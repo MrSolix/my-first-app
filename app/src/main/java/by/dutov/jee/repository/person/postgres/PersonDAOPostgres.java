@@ -17,6 +17,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Types;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
@@ -55,7 +56,7 @@ public class PersonDAOPostgres extends AbstractPersonDAOPostgres<Person> {
             "select " +
                     "u.id u_id, " +
                     "u.user_name u_user_name, u.password u_pass, u.salt u_salt, " +
-                    "u.name u_name, u.age u_age, u.role u_role " +
+                    "u.name u_name, u.age u_age, u.roles u_role " +
                     "from users u";
     //language=SQL
     public static final String SELECT_GRADES = "select " +
@@ -68,11 +69,11 @@ public class PersonDAOPostgres extends AbstractPersonDAOPostgres<Person> {
     //language=SQL
     public static final String SELECT_SALARY = "select s.salary s_salary from salaries s";
     //language=SQL
-    public static final String INSERT_USER = "insert into users (user_name, password, salt, \"name\", age, role)" +
+    public static final String INSERT_USER = "insert into users (user_name, password, salt, \"name\", age, roles)" +
             " values (?, ?, ?, ?, ?, ?) returning id;";
     //language=SQL
     public static final String UPDATE_USER = "update users u " +
-            "set user_name = ?, password = ?, salt = ?, name = ?, age = ?, role = ?";
+            "set user_name = ?, password = ?, salt = ?, name = ?, age = ?, roles = ?";
     //language=SQL
     public static final String DELETE_USER = "delete from users u ";
     public static final String WHERE_TEACHER_ID = " where s.teacher_id = ?;";
@@ -173,7 +174,7 @@ public class PersonDAOPostgres extends AbstractPersonDAOPostgres<Person> {
     @Override
     public Person update(Integer id, Person person) {
         person.setId(id);
-        return save(person);
+        return super.update(person.getId(), person);
     }
 
     @Override
@@ -220,7 +221,7 @@ public class PersonDAOPostgres extends AbstractPersonDAOPostgres<Person> {
             final byte[] salt = rs.getBytes(U_SALT);
             final String name = rs.getString(U_NAME);
             final int age = rs.getInt(U_AGE);
-            final Role role = Role.getTypeByStr(rs.getString(U_ROLE));
+            final Role role = Role.valueOf(rs.getString(U_ROLE));
 
             if (Role.STUDENT.equals(role)) {
                 personMap.putIfAbsent(id, new Student()
@@ -447,15 +448,5 @@ public class PersonDAOPostgres extends AbstractPersonDAOPostgres<Person> {
         }
         map.putIfAbsent(key, value);
         return map.get(key);
-    }
-
-    public static void main(String[] args) {
-        PersonDAOPostgres instance = PersonDAOPostgres.getInstance();
-        Student student = new Student()
-                .withUserName("test")
-                .withPassword("123")
-                .withName("test")
-                .withAge(30);
-        System.out.println(instance.remove(student));
     }
 }

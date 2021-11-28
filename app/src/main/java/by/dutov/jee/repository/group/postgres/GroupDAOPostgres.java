@@ -36,7 +36,7 @@ public class GroupDAOPostgres implements GroupDAO<Group> {
     private static final String SELECT_GROUP_ALL_FIELDS_FOR_STUDENT = "select " +
             "g.id g_id, " +
             "u.id u_id, u.user_name u_user_name, u.password u_pass, " +
-            "u.salt u_salt, u.name u_name, u.age u_age, u.role u_role " +
+            "u.salt u_salt, u.name u_name, u.age u_age, u.roles u_role " +
             "from \"group\" g " +
             "left join group_student gs " +
             "on g.id = gs.group_id " +
@@ -46,7 +46,7 @@ public class GroupDAOPostgres implements GroupDAO<Group> {
     private static final String SELECT_GROUP_ALL_FIELDS_FOR_TEACHER = "select " +
             "g.id g_id, " +
             "u.id u_id, u.user_name u_user_name, u.password u_pass, " +
-            "u.salt u_salt, u.name u_name, u.age u_age, u.role u_role, t.salary t_salary " +
+            "u.salt u_salt, u.name u_name, u.age u_age, u.roles u_role, t.salary t_salary " +
             "from \"group\" g " +
             "left join users u " +
             "on u.id = g.teacher_id " +
@@ -87,7 +87,6 @@ public class GroupDAOPostgres implements GroupDAO<Group> {
     public static final String U_ROLE = "u_role";
     public static final String T_SALARY = "t_salary";
     private static final int POSITION_ID = 1;
-    public static final String TH_NAME = "th_name";
 
 
     private static volatile GroupDAOPostgres instance;
