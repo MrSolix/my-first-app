@@ -2,9 +2,6 @@ package by.dutov.jee.repository;
 
 import by.dutov.jee.people.Person;
 import by.dutov.jee.repository.person.PersonDAOInterface;
-import by.dutov.jee.repository.person.jpa.PersonDaoJpa;
-import by.dutov.jee.repository.person.memory.PersonDAOInMemory;
-import by.dutov.jee.repository.person.postgres.PersonDAOPostgres;
 import lombok.extern.slf4j.Slf4j;
 
 import java.io.IOException;
@@ -14,6 +11,7 @@ import java.util.Properties;
 public class RepositoryFactory {
     public static final RepositoryTypes TYPE;
     private static RepositoryDataSource dataSource;
+    public static final PersonDAOInterface<Person> dao;
 
     static {
         Properties appProperties = new Properties();
@@ -25,6 +23,7 @@ public class RepositoryFactory {
             log.error(e.getMessage(), e);
         }
         TYPE = RepositoryTypes.getTypeByStr(appProperties.getProperty("repository.type"));
+        dao = RepositoryTypes.getDaoByType(TYPE);
         if (TYPE == RepositoryTypes.POSTGRES) {
             dataSource = RepositoryDataSource.getInstance(
                     appProperties.getProperty("postgres.driver"),
@@ -39,15 +38,7 @@ public class RepositoryFactory {
     }
 
     public static PersonDAOInterface<Person> getDaoRepository() {
-        switch (TYPE) {
-            case JPA:
-                return PersonDaoJpa.getInstance();
-            case POSTGRES:
-                return PersonDAOPostgres.getInstance();
-            case MEMORY:
-            default:
-                return PersonDAOInMemory.getInstance();
-        }
+        return dao;
     }
 
     public static RepositoryDataSource getDataSource(){
