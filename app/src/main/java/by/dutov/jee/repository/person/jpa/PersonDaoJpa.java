@@ -198,10 +198,4 @@ public class PersonDaoJpa extends AbstractPersonDaoJpa<Person> {
                 namedQueryById = "findAdminById";
         }
     }
-
-    public static void main(String[] args) {
-        PersonDaoJpa instance = PersonDaoJpa.getInstance();
-
-        System.out.println(instance.findAll());
-    }
 }
