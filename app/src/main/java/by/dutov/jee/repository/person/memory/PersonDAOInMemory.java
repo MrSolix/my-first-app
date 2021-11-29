@@ -26,6 +26,8 @@ public class PersonDAOInMemory implements PersonDAOInterface<Person> {
     private final Map<Integer, Person> accounts;
 
     public PersonDAOInMemory() {
+        accounts = new ConcurrentHashMap<>();
+        initialize();
         //singleton
     }
 
@@ -43,7 +45,7 @@ public class PersonDAOInMemory implements PersonDAOInterface<Person> {
     @Override
     public Person save(Person person) {
         if (person != null) {
-            accounts.put(id=ID++, person);
+            accounts.put(person.getId(), person);
             return accounts.get(id);
         }
         return null;
@@ -93,9 +95,7 @@ public class PersonDAOInMemory implements PersonDAOInterface<Person> {
         return accounts.isEmpty() ? new ArrayList<>() : new ArrayList<>(accounts.values());
     }
 
-    {
-        accounts = new ConcurrentHashMap<>();
-
+    private void initialize() {
         Student student = new Student()
                 .withId(id=ID++)
                 .withUserName("student")
