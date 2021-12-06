@@ -18,6 +18,9 @@
 <a href="${pageContext.request.contextPath}/admin/update-user">
     <h3>Update User Page</h3>
 </a>
+<a href="${pageContext.request.contextPath}/admin/delete-user">
+    <h3>Delete User Page</h3>
+</a>
 
 </body>
 </html>

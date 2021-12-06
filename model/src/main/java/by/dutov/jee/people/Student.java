@@ -35,6 +35,7 @@ import java.util.Set;
 @Entity
 @NamedQuery(name = "findStudentByName", query = "from Student u where u.userName = :name and u.role = 'STUDENT'")
 @NamedQuery(name = "findStudentById", query = "from Student u where u.id = :id and u.role = 'STUDENT'")
+@NamedQuery(name = "findAllStudents", query = "from Student u where u.role = 'STUDENT'")
 public class Student extends Person {
     @ToString.Include
     @EqualsAndHashCode.Include

@@ -2,6 +2,7 @@ package by.dutov.jee.repository.person.postgres;
 
 import by.dutov.jee.people.Person;
 import by.dutov.jee.people.Role;
+import by.dutov.jee.repository.RepositoryDataSource;
 import by.dutov.jee.repository.RepositoryFactory;
 import by.dutov.jee.repository.group.postgres.GroupDAOPostgres;
 import by.dutov.jee.repository.person.PersonDAOInterface;
@@ -26,14 +27,6 @@ import static by.dutov.jee.utils.DataBaseUtils.rollBack;
 @Slf4j
 public abstract class AbstractPersonDAOPostgres<T extends Person> implements PersonDAOInterface<T> {
     private static final int POSITION_ID = 1;
-    protected static final DataSource dataSource;
-    private static final GroupDAOPostgres instance;
-
-
-    static {
-        dataSource = RepositoryFactory.getDataSource();
-        instance = GroupDAOPostgres.getInstance(dataSource);
-    }
 
     @Override
     public T save(T t) {
@@ -48,7 +41,7 @@ public abstract class AbstractPersonDAOPostgres<T extends Person> implements Per
         PreparedStatement ps2 = null;
         ResultSet rs = null;
         try {
-            con = dataSource.getConnection();
+            con = RepositoryFactory.getDataSource().getConnection();
             ps = con.prepareStatement(selectUserByName());
             ps.setString(1, name);
             rs = ps.executeQuery();
@@ -79,7 +72,7 @@ public abstract class AbstractPersonDAOPostgres<T extends Person> implements Per
         PreparedStatement ps2 = null;
         ResultSet rs = null;
         try {
-            con = dataSource.getConnection();
+            con = RepositoryFactory.getDataSource().getConnection();
             ps = con.prepareStatement(selectUserById());
             ps.setInt(1, id);
             rs = ps.executeQuery();
@@ -121,7 +114,7 @@ public abstract class AbstractPersonDAOPostgres<T extends Person> implements Per
         PreparedStatement ps = null;
         ResultSet rs = null;
         try {
-            con = dataSource.getConnection();
+            con = RepositoryFactory.getDataSource().getConnection();
             ps = con.prepareStatement(insertUser());
             setterInsertOrUpdate(ps, t);
             rs = ps.executeQuery();
@@ -150,7 +143,7 @@ public abstract class AbstractPersonDAOPostgres<T extends Person> implements Per
         PreparedStatement ps = null;
         PreparedStatement ps2 = null;
         try {
-            con = dataSource.getConnection();
+            con = RepositoryFactory.getDataSource().getConnection();
             ps = con.prepareStatement(updateUser());
             setterInsertOrUpdate(ps, t);
             ps.setInt(7, id);
@@ -178,7 +171,7 @@ public abstract class AbstractPersonDAOPostgres<T extends Person> implements Per
         Connection con = null;
         PreparedStatement ps = null;
         try {
-            con = dataSource.getConnection();
+            con = RepositoryFactory.getDataSource().getConnection();
             ps = con.prepareStatement(deleteUser());
             ps.setString(1, t.getUserName());
             if (ps.executeUpdate() <= 0) {
@@ -206,7 +199,7 @@ public abstract class AbstractPersonDAOPostgres<T extends Person> implements Per
         PreparedStatement ps = null;
         ResultSet rs = null;
         try {
-            con = dataSource.getConnection();
+            con = RepositoryFactory.getDataSource().getConnection();
             ps = con.prepareStatement(selectUser());
             rs = ps.executeQuery();
             result = resultSetToEntities(rs);

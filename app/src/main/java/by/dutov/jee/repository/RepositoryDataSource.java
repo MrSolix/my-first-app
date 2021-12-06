@@ -15,7 +15,7 @@ import java.util.logging.Logger;
 
 @Slf4j
 public class RepositoryDataSource implements DataSource {
-    ComboPooledDataSource ds;
+    private static ComboPooledDataSource ds;
     private final ThreadLocal<Connection> threadLocal;
     private static volatile RepositoryDataSource instance;
     public static ConnectionType connectionType = ConnectionType.SINGLE;
@@ -28,9 +28,9 @@ public class RepositoryDataSource implements DataSource {
             log.info(e.getMessage());
             throw new ApplicationException("Ошибка с подключением драйвера в pool connection", e);
         }
+        ds.setJdbcUrl(uri);
         ds.setUser(user);
         ds.setPassword(password);
-        ds.setJdbcUrl(uri);
         ds.setMinPoolSize(5);
         ds.setAcquireIncrement(5);
         ds.setMaxPoolSize(20);

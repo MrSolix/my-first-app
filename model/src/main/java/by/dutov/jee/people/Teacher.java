@@ -25,6 +25,7 @@ import javax.persistence.Table;
 @SecondaryTable(name = "salaries", pkJoinColumns = @PrimaryKeyJoinColumn(name = "teacher_id"))
 @NamedQuery(name = "findTeacherByName", query = "from Teacher u where u.userName = :name and u.role = 'TEACHER'")
 @NamedQuery(name = "findTeacherById", query = "from Teacher u where u.id = :id and u.role = 'TEACHER'")
+@NamedQuery(name = "findAllTeachers", query = "from Teacher u where u.role = 'TEACHER'")
 public class Teacher extends Person {
     @ToString.Include
     @EqualsAndHashCode.Include
@@ -35,7 +36,7 @@ public class Teacher extends Person {
             mappedBy = "teacher")
     private Group group;
     @Column(table = "salaries", name = "salary")
-    private double salary;
+    private Double salary;
 
     {
         setRole(Role.TEACHER);
@@ -45,7 +46,7 @@ public class Teacher extends Person {
         if (salary >= 0) {
             this.salary = salary;
         } else {
-            this.salary = 0;
+            this.salary = 0.0;
         }
     }
 

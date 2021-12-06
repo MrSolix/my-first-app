@@ -33,8 +33,10 @@ public abstract class Person extends AbstractEntity implements Printable {
     private String userName;
     private byte[] salt;
     private byte[] password;
+    @Column(name = "name")
     private String name;
-    private int age;
+    @Column(name = "age")
+    private Integer age;
     @Column(name = "roles", columnDefinition = "enum('STUDENT', 'TEACHER', 'ADMIN')")
     @Enumerated(value = EnumType.STRING)
     private Role role;

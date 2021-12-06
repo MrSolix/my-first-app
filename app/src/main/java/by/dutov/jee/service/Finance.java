@@ -23,7 +23,7 @@ import java.util.concurrent.ConcurrentHashMap;
 public class Finance {
     private final Map<Teacher, Map<Integer, Double>> salaryHistory;
     private static final int CURRENT_MONTH = LocalDate.now().getMonthValue();
-    private static PersonDAOInterface<Person> daoRepository;
+    private PersonDAOInterface<Person> daoRepository;
     private static Finance instance;
     private static final String MIN_RANGE = "minRange";
     private static final String MAX_RANGE = "maxRange";
@@ -31,7 +31,8 @@ public class Finance {
     private Finance() {
         daoRepository = RepositoryFactory.getDaoRepository();
         salaryHistory = new ConcurrentHashMap<>();
-        staticSaveSalaries();
+        saveSalaries();
+
         //singleton
     }
 
@@ -50,7 +51,7 @@ public class Finance {
         return instance;
     }
 
-    private void staticSaveSalaries() {
+    private void saveSalaries() {
         List<? extends Person> all = daoRepository.findAll();
         for (Person p : all) {
             if (p.getRole().equals(Role.TEACHER)) {
