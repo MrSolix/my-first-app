@@ -1,10 +1,19 @@
 package by.dutov.jee.repository;
 
+import by.dutov.jee.MyAppContext;
 import by.dutov.jee.repository.person.postgres.ConnectionType;
 import by.dutov.jee.service.exceptions.ApplicationException;
 import com.mchange.v2.c3p0.ComboPooledDataSource;
+import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.AnnotationConfigApplicationContext;
+import org.springframework.context.annotation.Lazy;
+import org.springframework.context.annotation.PropertySource;
+import org.springframework.stereotype.Component;
 
+import javax.annotation.PostConstruct;
 import javax.sql.DataSource;
 import java.beans.PropertyVetoException;
 import java.io.PrintWriter;
@@ -13,14 +22,25 @@ import java.sql.SQLException;
 import java.sql.SQLFeatureNotSupportedException;
 import java.util.logging.Logger;
 
+@NoArgsConstructor
 @Slf4j
+@Component
+@PropertySource("classpath:app.properties")
 public class RepositoryDataSource implements DataSource {
+    @Value("${postgres.driver}")
+    private String driver;
+    @Value("${postgres.uri}")
+    private String uri;
+    @Value("${postgres.user}")
+    private String user;
+    @Value("${postgres.password}")
+    private String password;
     private static ComboPooledDataSource ds;
-    private final ThreadLocal<Connection> threadLocal;
-    private static volatile RepositoryDataSource instance;
+    private ThreadLocal<Connection> threadLocal;
     public static ConnectionType connectionType = ConnectionType.SINGLE;
 
-    public RepositoryDataSource(String driver, String uri, String user, String password) {
+    @PostConstruct
+    private void init() {
         ds = new ComboPooledDataSource();
         try {
             ds.setDriverClass(driver);
@@ -35,17 +55,6 @@ public class RepositoryDataSource implements DataSource {
         ds.setAcquireIncrement(5);
         ds.setMaxPoolSize(20);
         threadLocal = new ThreadLocal<>();
-    }
-
-    public static RepositoryDataSource getInstance(String driver, String uri, String user, String password) {
-        if (instance == null) {
-            synchronized (RepositoryDataSource.class) {
-                if (instance == null) {
-                    instance = new RepositoryDataSource(driver, uri, user, password);
-                }
-            }
-        }
-        return instance;
     }
 
     public static void commitSingle(Connection connection) throws SQLException {

@@ -1,6 +1,8 @@
 package by.dutov.jee.controllers.servlets;
 
+import by.dutov.jee.MyAppContext;
 import by.dutov.jee.people.Role;
+import by.dutov.jee.service.CheckingService;
 import by.dutov.jee.service.RegistrationService;
 import by.dutov.jee.utils.CommandServletUtils;
 import lombok.extern.slf4j.Slf4j;
@@ -33,7 +35,7 @@ public class RegistrationServlet extends HttpServlet {
         Role role = Role.getTypeByStr(req.getParameter("status"));
         log.info("userName = {}, password = ***, name = {}, age = {}, role = {}", userName, name, age, role.getType());
         log.info("Set person from db");
-        RegistrationService.getInstance().registrationUser(
+        MyAppContext.getContext().getBean(RegistrationService.class).registrationUser(
                 req, resp,
                 userName, password,
                 name, age, role

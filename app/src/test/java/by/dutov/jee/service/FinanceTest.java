@@ -1,8 +1,11 @@
 package by.dutov.jee.service;
 
+import by.dutov.jee.MyAppContext;
 import by.dutov.jee.people.Teacher;
 import org.junit.Before;
 import org.junit.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
 import java.time.LocalDate;
 
@@ -15,7 +18,8 @@ public class FinanceTest {
 
     @Before
     public void setUp() {
-        finance = Finance.getInstance();
+//        finance = Finance.getInstance();
+        finance = MyAppContext.getContext().getBean("finance", Finance.class);
         teacher = new Teacher()
                 .withId(3)
                 .withUserName("teacher")
@@ -47,7 +51,7 @@ public class FinanceTest {
         double expected = -1;
 
         //actual
-        double actual = Finance.getInstance().averageSalary(2, 1, teacher);
+        double actual = finance.averageSalary(2, 1, teacher);
 
         //assert
         assertEquals(expected, actual, 0);

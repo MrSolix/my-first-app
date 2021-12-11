@@ -1,5 +1,7 @@
 package by.dutov.jee.utils;
 
+import by.dutov.jee.MyAppContext;
+import by.dutov.jee.repository.RepositoryDataSource;
 import by.dutov.jee.repository.RepositoryFactory;
 import lombok.extern.slf4j.Slf4j;
 
@@ -14,7 +16,7 @@ public class DataBaseUtils {
         try {
             if (con != null) {
                 con.close();
-                RepositoryFactory.getDataSource().removeConnection();
+                MyAppContext.getContext().getBean(RepositoryDataSource.class).removeConnection();
             }
         } catch (Exception e) {
             log.error("Couldn't close and remove connection", e);

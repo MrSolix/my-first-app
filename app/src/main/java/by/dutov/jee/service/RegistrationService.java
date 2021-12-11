@@ -7,6 +7,8 @@ import by.dutov.jee.people.Teacher;
 import by.dutov.jee.repository.RepositoryFactory;
 import by.dutov.jee.service.exceptions.DataBaseException;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
 import javax.servlet.DispatcherType;
 import javax.servlet.ServletException;
@@ -14,24 +16,17 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 
+
 @Slf4j
+@Service
 public class RegistrationService {
-    private static volatile RegistrationService instance;
-    final CheckingService checkingService = CheckingService.getInstance();
+    private final CheckingService checkingService;
+    private final RepositoryFactory repositoryFactory;
 
-    public RegistrationService() {
-        //singleton
-    }
-
-    public static RegistrationService getInstance() {
-        if (instance == null) {
-            synchronized (RegistrationService.class) {
-                if (instance == null) {
-                    instance = new RegistrationService();
-                }
-            }
-        }
-        return instance;
+    @Autowired
+    private RegistrationService(CheckingService checkingService, RepositoryFactory repositoryFactory) {
+        this.checkingService = checkingService;
+        this.repositoryFactory = repositoryFactory;
     }
 
     public void registrationUser(HttpServletRequest req, HttpServletResponse resp,
@@ -54,7 +49,7 @@ public class RegistrationService {
         }
         final int age = checkingService.isEmpty(ageStr) ? 0 : Integer.parseInt(ageStr);
         try {
-            RepositoryFactory.getDaoRepository().save(
+            repositoryFactory.getPersonDaoRepository().save(
                     role == Role.STUDENT ?
                             new Student()
                                     .withUserName(userName)

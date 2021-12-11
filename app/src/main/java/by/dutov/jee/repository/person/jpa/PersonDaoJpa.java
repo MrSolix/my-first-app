@@ -7,8 +7,13 @@ import by.dutov.jee.people.Role;
 import by.dutov.jee.people.Student;
 import by.dutov.jee.people.Teacher;
 import by.dutov.jee.people.grades.Grade;
+import by.dutov.jee.repository.EntityManagerHelper;
 import by.dutov.jee.service.exceptions.DataBaseException;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
+import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Repository;
 
 import javax.persistence.EntityManager;
 import java.util.ArrayList;
@@ -19,26 +24,17 @@ import static by.dutov.jee.utils.DataBaseUtils.closeQuietly;
 import static by.dutov.jee.utils.DataBaseUtils.rollBack;
 
 @Slf4j
+@Repository
+@Lazy
 public class PersonDaoJpa extends AbstractPersonDaoJpa<Person> {
-    private static volatile PersonDaoJpa instance;
     private Class<? extends Person> classType;
     private String findAllJpql;
     private String namedQueryByName;
     private String namedQueryById;
 
-    public PersonDaoJpa() {
-        //singleton
-    }
-
-    public static PersonDaoJpa getInstance() {
-        if (instance == null) {
-            synchronized (PersonDaoJpa.class) {
-                if (instance == null) {
-                    instance = new PersonDaoJpa();
-                }
-            }
-        }
-        return instance;
+    @Autowired
+    public PersonDaoJpa(EntityManagerHelper entityManagerHelper) {
+        super(entityManagerHelper);
     }
 
     @Override

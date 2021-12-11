@@ -9,7 +9,11 @@ import by.dutov.jee.people.Student;
 import by.dutov.jee.people.Teacher;
 import by.dutov.jee.repository.person.PersonDAOInterface;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
+import org.springframework.stereotype.Repository;
 
+import javax.annotation.PostConstruct;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -19,27 +23,16 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
 @Slf4j
+@Repository
+@Lazy
 public class PersonDAOInMemory implements PersonDAOInterface<Person> {
     private static Integer ID = 1;
     private Integer id;
-    private static volatile PersonDAOInMemory instance;
     private final Map<Integer, Person> accounts;
 
-    public PersonDAOInMemory() {
+    @Autowired
+    private PersonDAOInMemory() {
         accounts = new ConcurrentHashMap<>();
-        initialize();
-        //singleton
-    }
-
-    public static PersonDAOInMemory getInstance() {
-        if (instance == null) {
-            synchronized (PersonDAOInMemory.class) {
-                if (instance == null) {
-                    instance = new PersonDAOInMemory();
-                }
-            }
-        }
-        return instance;
     }
 
     @Override
@@ -95,6 +88,7 @@ public class PersonDAOInMemory implements PersonDAOInterface<Person> {
         return accounts.isEmpty() ? new ArrayList<>() : new ArrayList<>(accounts.values());
     }
 
+    @PostConstruct
     private void initialize() {
         Student student = new Student()
                 .withId(id=ID++)

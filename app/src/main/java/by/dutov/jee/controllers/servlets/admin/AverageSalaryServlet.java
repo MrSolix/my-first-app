@@ -1,5 +1,6 @@
 package by.dutov.jee.controllers.servlets.admin;
 
+import by.dutov.jee.MyAppContext;
 import by.dutov.jee.service.Finance;
 import by.dutov.jee.utils.CommandServletUtils;
 import lombok.extern.slf4j.Slf4j;
@@ -26,7 +27,8 @@ public class AverageSalaryServlet extends HttpServlet {
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         log.info("Get parameters");
         String userName = req.getParameter("userName");
-        Finance.getInstance().getAverageSalary(req, userName);
+//        Finance.getInstance().getAverageSalary(req, userName);
+        MyAppContext.getContext().getBean("finance", Finance.class).getAverageSalary(req, userName);
         CommandServletUtils.dispatcher(req, resp, "/admin/averageSalaryPage.jsp", DispatcherType.INCLUDE);
     }
 }

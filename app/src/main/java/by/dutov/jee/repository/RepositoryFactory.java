@@ -1,50 +1,55 @@
 package by.dutov.jee.repository;
 
+import by.dutov.jee.MyAppContext;
+import by.dutov.jee.group.Group;
 import by.dutov.jee.people.Person;
+import by.dutov.jee.repository.group.GroupDAOInterface;
+import by.dutov.jee.repository.group.jpa.GroupDaoJpa;
+import by.dutov.jee.repository.group.postgres.GroupDAOPostgres;
 import by.dutov.jee.repository.person.PersonDAOInterface;
 import by.dutov.jee.repository.person.jpa.PersonDaoJpa;
 import by.dutov.jee.repository.person.memory.PersonDAOInMemory;
 import by.dutov.jee.repository.person.postgres.PersonDAOPostgres;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.PropertySource;
+import org.springframework.stereotype.Component;
 
-import java.io.IOException;
-import java.util.Properties;
+import javax.annotation.PostConstruct;
 
 @Slf4j
+@Component
+@PropertySource("classpath:app.properties")
 public class RepositoryFactory {
-    public static final RepositoryTypes TYPE;
-    private static RepositoryDataSource dataSource;
-    private static final PersonDAOInterface<Person> dao;
+    @Value("${repository.type}")
+    private String stringType;
+    private RepositoryTypes type;
 
-    static {
-        Properties appProperties = new Properties();
-        try {
-            appProperties.load(Thread.currentThread()
-                    .getContextClassLoader()
-                    .getResourceAsStream("app.properties"));
-        } catch (IOException e) {
-            log.error(e.getMessage(), e);
+    @PostConstruct
+    private void init() {
+        type = RepositoryTypes.getTypeByStr(stringType);
+    }
+
+    public PersonDAOInterface<Person> getPersonDaoRepository() {
+        switch (type) {
+            case MEMORY:
+                return MyAppContext.getContext().getBean(PersonDAOInMemory.class);
+            case POSTGRES:
+                return MyAppContext.getContext().getBean(PersonDAOPostgres.class);
+            case JPA:
+            default:
+                return MyAppContext.getContext().getBean(PersonDaoJpa.class);
         }
-        TYPE = RepositoryTypes.getTypeByStr(appProperties.getProperty("repository.type"));
-        if (TYPE == RepositoryTypes.POSTGRES) {
-            dataSource = RepositoryDataSource.getInstance(
-                    appProperties.getProperty("postgres.driver"),
-                    appProperties.getProperty("postgres.uri"),
-                    appProperties.getProperty("postgres.user"),
-                    appProperties.getProperty("postgres.password"));
+    }
+
+    public GroupDAOInterface<Group> getGroupDaoRepository() {
+        switch (type) {
+            case MEMORY:
+            case POSTGRES:
+                return MyAppContext.getContext().getBean(GroupDAOPostgres.class);
+            case JPA:
+            default:
+                return MyAppContext.getContext().getBean(GroupDaoJpa.class);
         }
-        dao = RepositoryTypes.getDaoByType(TYPE);
-    }
-
-    private RepositoryFactory() {
-        //factory empty private
-    }
-
-    public static PersonDAOInterface<Person> getDaoRepository() {
-        return dao;
-    }
-
-    public static RepositoryDataSource getDataSource() {
-        return dataSource;
     }
 }

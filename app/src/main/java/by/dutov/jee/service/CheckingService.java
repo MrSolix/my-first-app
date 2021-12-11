@@ -7,6 +7,8 @@ import by.dutov.jee.service.exceptions.HashException;
 import by.dutov.jee.service.exceptions.PasswordException;
 import by.dutov.jee.utils.CommandServletUtils;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
 import javax.servlet.DispatcherType;
 import javax.servlet.ServletException;
@@ -16,22 +18,13 @@ import java.io.IOException;
 import java.util.Optional;
 
 @Slf4j
+@Service
 public class CheckingService {
-    private static volatile CheckingService instance;
+    private final RepositoryFactory repositoryFactory;
 
-    public CheckingService() {
-        //singleton
-    }
-
-    public static CheckingService getInstance() {
-        if (instance == null) {
-            synchronized (CheckingService.class) {
-                if (instance == null) {
-                    instance = new CheckingService();
-                }
-            }
-        }
-        return instance;
+    @Autowired
+    public CheckingService(RepositoryFactory repositoryFactory) {
+        this.repositoryFactory = repositoryFactory;
     }
 
     public boolean checkPassword(Person person, String password) {
@@ -54,7 +47,7 @@ public class CheckingService {
     }
 
     public Person checkUser(String userName) {
-        Optional<? extends Person> person = RepositoryFactory.getDaoRepository().find(userName);
+        Optional<? extends Person> person = repositoryFactory.getPersonDaoRepository().find(userName);
         return person.orElse(null);
     }
 

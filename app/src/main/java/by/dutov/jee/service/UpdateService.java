@@ -9,6 +9,8 @@ import by.dutov.jee.repository.person.PersonDAOInterface;
 import by.dutov.jee.service.encrypt.PasswordEncryptionService;
 import by.dutov.jee.service.exceptions.DataBaseException;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
 import javax.servlet.DispatcherType;
 import javax.servlet.ServletException;
@@ -19,23 +21,15 @@ import java.security.NoSuchAlgorithmException;
 import java.security.spec.InvalidKeySpecException;
 
 @Slf4j
+@Service
 public class UpdateService {
-    private static volatile UpdateService instance;
-    final CheckingService checkingService = CheckingService.getInstance();
+    private final CheckingService checkingService;
+    private final RepositoryFactory repositoryFactory;
 
-    public UpdateService() {
-        //singleton
-    }
-
-    public static UpdateService getInstance() {
-        if (instance == null) {
-            synchronized (UpdateService.class) {
-                if (instance == null) {
-                    instance = new UpdateService();
-                }
-            }
-        }
-        return instance;
+    @Autowired
+    private UpdateService(CheckingService checkingService, RepositoryFactory repositoryFactory) {
+        this.checkingService = checkingService;
+        this.repositoryFactory = repositoryFactory;
     }
 
     public void updateUser(HttpServletRequest req, HttpServletResponse resp,
@@ -60,13 +54,13 @@ public class UpdateService {
         String[] names = req.getParameterValues("check");
         if (names != null) {
             for (String str : names) {
-                if (str.equals("login"))
+                if ("login".equals(str))
                     isLogin = true;
-                if (str.equals("pass"))
+                if ("pass".equals(str))
                     isPass = true;
-                if (str.equals("name"))
+                if ("name".equals(str))
                     isName = true;
-                if (str.equals("age"))
+                if ("age".equals(str))
                     isAge = true;
             }
         }
@@ -112,7 +106,7 @@ public class UpdateService {
             final String ageParam = req.getParameter("age");
             age = checkingService.isEmpty(ageParam) ? 0 : Integer.parseInt(ageParam);
         }
-        PersonDAOInterface<Person> daoRepository = RepositoryFactory.getDaoRepository();
+        PersonDAOInterface<Person> daoRepository = repositoryFactory.getPersonDaoRepository();
         try {
             if (role.equals(Role.STUDENT)) {
                 daoRepository.save(

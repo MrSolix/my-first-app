@@ -5,6 +5,9 @@ import by.dutov.jee.repository.EntityManagerHelper;
 import by.dutov.jee.repository.person.PersonDAOInterface;
 import by.dutov.jee.service.exceptions.DataBaseException;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Repository;
 
 import javax.persistence.EntityManager;
 import javax.persistence.TypedQuery;
@@ -16,14 +19,18 @@ import static by.dutov.jee.utils.DataBaseUtils.rollBack;
 
 
 @Slf4j
+@Repository
 public abstract class AbstractPersonDaoJpa<T extends Person> implements PersonDAOInterface<T> {
     public static final String ERROR_FROM_REMOVE = "Error from remove";
     public static final String ERROR_FROM_UPDATE = "Error from update";
     public static final String ERROR_FROM_SAVE = "Error from save";
     public static final String ERROR_FROM_FIND = "Error from find";
     public static final String ERROR_FROM_FIND_ALL = "Error from findAll";
-    protected final EntityManagerHelper helper = EntityManagerHelper.getInstance();
+    protected final EntityManagerHelper helper;
 
+    public AbstractPersonDaoJpa(EntityManagerHelper entityManagerHelper) {
+        this.helper = entityManagerHelper;
+    }
 
     @Override
     public T save(T t) {

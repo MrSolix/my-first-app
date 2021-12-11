@@ -4,14 +4,13 @@ import by.dutov.jee.people.Person;
 import by.dutov.jee.people.Role;
 import by.dutov.jee.people.Teacher;
 import by.dutov.jee.repository.RepositoryFactory;
-import by.dutov.jee.repository.person.PersonDAOInterface;
 import by.dutov.jee.utils.CommandServletUtils;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
+import org.springframework.stereotype.Component;
 
-import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import java.io.IOException;
 import java.time.LocalDate;
 import java.util.HashMap;
 import java.util.List;
@@ -19,20 +18,21 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 
+
 @Slf4j
+@Component
+@Lazy
 public class Finance {
-    private final Map<Teacher, Map<Integer, Double>> salaryHistory;
+    private Map<Teacher, Map<Integer, Double>> salaryHistory;
     private static final int CURRENT_MONTH = LocalDate.now().getMonthValue();
-    private PersonDAOInterface<Person> daoRepository;
-    private static Finance instance;
     private static final String MIN_RANGE = "minRange";
     private static final String MAX_RANGE = "maxRange";
+    private final RepositoryFactory repositoryFactory;
 
-    private Finance() {
-        daoRepository = RepositoryFactory.getDaoRepository();
-        salaryHistory = new ConcurrentHashMap<>();
-        saveSalaries();
-
+    @Autowired
+    private Finance(RepositoryFactory repositoryFactory) {
+        this.repositoryFactory = repositoryFactory;
+        saveSalary();
         //singleton
     }
 
@@ -40,22 +40,13 @@ public class Finance {
         return salaryHistory;
     }
 
-    public static Finance getInstance() {
-        if (instance == null) {
-            synchronized (Finance.class) {
-                if (instance == null) {
-                    instance = new Finance();
-                }
-            }
-        }
-        return instance;
-    }
 
-    private void saveSalaries() {
-        List<? extends Person> all = daoRepository.findAll();
+    private void saveSalary() {
+        salaryHistory = new ConcurrentHashMap<>();
+        List<? extends Person> all = repositoryFactory.getPersonDaoRepository().findAll();
         for (Person p : all) {
             if (p.getRole().equals(Role.TEACHER)) {
-                Optional<? extends Person> user = daoRepository.find(p.getId());
+                Optional<? extends Person> user = repositoryFactory.getPersonDaoRepository().find(p.getId());
                 if (user.isPresent()) {
                     Teacher teacher = (Teacher) user.get();
                     for (int i = 1; i < CURRENT_MONTH; i++) {
@@ -95,8 +86,8 @@ public class Finance {
         }
     }
 
-    public void getSalary(HttpServletRequest req, HttpServletResponse resp, String userName) throws ServletException, IOException {
-        Optional<? extends Person> person = daoRepository.find(userName);
+    public void getSalary(HttpServletRequest req, String userName) {
+        Optional<? extends Person> person = repositoryFactory.getPersonDaoRepository().find(userName);
         if (person.isEmpty() || !Role.TEACHER.equals(person.get().getRole())) {
             log.info("person == null or person role != \"TEACHER\"");
             String errorString = "the teacher's login is incorrect";
@@ -117,7 +108,7 @@ public class Finance {
         }
         log.info("userName = {}, minRange = {}, maxRange = {}", userName, minRange, maxRange);
 
-        Optional<? extends Person> person = daoRepository.find(userName);
+        Optional<? extends Person> person = repositoryFactory.getPersonDaoRepository().find(userName);
         log.info("Get person from db");
 
         if (person.isEmpty() || !Role.TEACHER.equals(person.get().getRole())) {

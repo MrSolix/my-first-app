@@ -1,5 +1,6 @@
 package by.dutov.jee.controllers.servlets.admin;
 
+import by.dutov.jee.MyAppContext;
 import by.dutov.jee.service.Finance;
 import by.dutov.jee.utils.CommandServletUtils;
 import lombok.extern.slf4j.Slf4j;
@@ -28,7 +29,8 @@ public class SalaryServlet extends HttpServlet {
         String userName = req.getParameter("userName");
         log.info("userName = {}", userName);
         log.info("Get person from db");
-        Finance.getInstance().getSalary(req, resp, userName);
+//        Finance.getInstance().getSalary(req, userName);
+        MyAppContext.getContext().getBean("finance", Finance.class).getSalary(req, userName);
         CommandServletUtils.dispatcher(req, resp, "/admin/salaryPage.jsp", DispatcherType.INCLUDE);
     }
 

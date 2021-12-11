@@ -1,5 +1,7 @@
 package by.dutov.jee.controllers.servlets.admin;
 
+import by.dutov.jee.MyAppContext;
+import by.dutov.jee.service.CheckingService;
 import by.dutov.jee.service.DeleteService;
 import by.dutov.jee.service.Finance;
 import by.dutov.jee.utils.CommandServletUtils;
@@ -29,7 +31,6 @@ public class DeleteUserServlet extends HttpServlet {
         String userName = req.getParameter("userName");
         log.info("userName = {}", userName);
         log.info("Get person from db");
-        DeleteService.getInstance().deleteUser(req, resp, userName);
-//        CommandServletUtils.dispatcher(req, resp, "/admin/deleteUserPage.jsp", DispatcherType.INCLUDE);
+        MyAppContext.getContext().getBean(DeleteService.class).deleteUser(req, resp, userName);
     }
 }

@@ -1,5 +1,7 @@
 package by.dutov.jee.controllers.servlets;
 
+import by.dutov.jee.MyAppContext;
+import by.dutov.jee.service.CheckingService;
 import by.dutov.jee.service.LoginService;
 import by.dutov.jee.utils.CommandServletUtils;
 import lombok.extern.slf4j.Slf4j;
@@ -29,7 +31,7 @@ public class LoginServlet extends HttpServlet {
         String password = req.getParameter("password");
         log.info("userName = {}, password = ***", userName);
         log.info("Get person from db");
-        LoginService.getInstance().getLoginedUser(req, resp, userName, password);
+        MyAppContext.getContext().getBean(LoginService.class).getLoginedUser(req, resp, userName, password);
     }
 
 

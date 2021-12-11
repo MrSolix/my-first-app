@@ -5,6 +5,8 @@ import by.dutov.jee.people.Role;
 import by.dutov.jee.repository.RepositoryFactory;
 import by.dutov.jee.repository.person.PersonDAOInterface;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
 import javax.servlet.DispatcherType;
 import javax.servlet.ServletException;
@@ -13,23 +15,15 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 
 @Slf4j
+@Service
 public class DeleteService {
-    private static volatile DeleteService instance;
-    final CheckingService checkingService = CheckingService.getInstance();
+    private final CheckingService checkingService;
+    private final RepositoryFactory repositoryFactory;
 
-    public DeleteService() {
-        //singleton
-    }
-
-    public static DeleteService getInstance() {
-        if (instance == null) {
-            synchronized (DeleteService.class) {
-                if (instance == null) {
-                    instance = new DeleteService();
-                }
-            }
-        }
-        return instance;
+    @Autowired
+    private DeleteService(CheckingService checkingService, RepositoryFactory repositoryFactory) {
+        this.checkingService = checkingService;
+        this.repositoryFactory = repositoryFactory;
     }
 
     public void deleteUser(HttpServletRequest req, HttpServletResponse resp,
@@ -48,7 +42,7 @@ public class DeleteService {
         }
         log.info("User is finded");
         req.setAttribute("user", person);
-        PersonDAOInterface<Person> daoRepository = RepositoryFactory.getDaoRepository();
+        PersonDAOInterface<Person> daoRepository = repositoryFactory.getPersonDaoRepository();
         daoRepository.remove(person);
         checkingService.setAttributeAndDispatcher(
                 req, resp,

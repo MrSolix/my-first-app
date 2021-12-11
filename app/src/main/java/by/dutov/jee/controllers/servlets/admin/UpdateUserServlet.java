@@ -1,5 +1,7 @@
 package by.dutov.jee.controllers.servlets.admin;
 
+import by.dutov.jee.MyAppContext;
+import by.dutov.jee.service.CheckingService;
 import by.dutov.jee.service.UpdateService;
 import by.dutov.jee.utils.CommandServletUtils;
 import lombok.extern.slf4j.Slf4j;
@@ -22,7 +24,7 @@ public class UpdateUserServlet extends HttpServlet {
 
     @Override
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        UpdateService updateService = UpdateService.getInstance();
+        UpdateService updateService = MyAppContext.getContext().getBean(UpdateService.class);
         log.info("Entered Update User Page");
         log.info("Get parameter");
         String userLogin = req.getParameter("userLogin");

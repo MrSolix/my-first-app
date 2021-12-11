@@ -1,5 +1,6 @@
 package by.dutov.jee.repository;
 
+import by.dutov.jee.MyAppContext;
 import by.dutov.jee.people.Person;
 import by.dutov.jee.repository.person.PersonDAOInterface;
 import by.dutov.jee.repository.person.jpa.PersonDaoJpa;
@@ -12,40 +13,24 @@ import java.util.HashMap;
 import java.util.Map;
 
 public enum  RepositoryTypes {
-    MEMORY("memory", PersonDAOInMemory.getInstance()),
-    POSTGRES("postgres", PersonDAOPostgres.getInstance()),
-    JPA("jpa", PersonDaoJpa.getInstance());
+    MEMORY("memory"),
+    POSTGRES("postgres"),
+    JPA("jpa");
 
     private final String type;
-    private final PersonDAOInterface<Person> dao;
 
-    private static Map<String, RepositoryTypes> value2Enum = initValue2Enum();
+    private static final Map<String, RepositoryTypes> value2Enum = initValue2Enum();
 
-    private static Map<RepositoryTypes, String> enum2Value = initEnum2Value();
+    private static final Map<RepositoryTypes, String> enum2Value = initEnum2Value();
 
-    private static Map<RepositoryTypes, PersonDAOInterface<Person>> enum2Dao = initEnum2Dao();
-
-    RepositoryTypes(String type, PersonDAOInterface<Person> dao) {
+    RepositoryTypes(String type) {
         this.type = type;
-        this.dao = dao;
     }
 
     public String getType() {
         return type;
     }
 
-    public PersonDAOInterface<Person> getDao() {
-        return dao;
-    }
-
-    private static Map<RepositoryTypes, PersonDAOInterface<Person>> initEnum2Dao() {
-        RepositoryTypes[] values = RepositoryTypes.values();
-        Map<RepositoryTypes, PersonDAOInterface<Person>> map = new HashMap<>(values.length);
-        for (RepositoryTypes enumElement : values) {
-            map.put(enumElement, enumElement.getDao());
-        }
-        return Collections.unmodifiableMap(map);
-    }
 
     private static Map<String, RepositoryTypes> initValue2Enum() {
         RepositoryTypes[] values = RepositoryTypes.values();
@@ -73,7 +58,4 @@ public enum  RepositoryTypes {
         return enum2Value.get(type);
     }
 
-    public static PersonDAOInterface<Person> getDaoByType(RepositoryTypes type) {
-        return enum2Dao.get(type);
-    }
 }

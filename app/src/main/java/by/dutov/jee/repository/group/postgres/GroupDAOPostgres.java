@@ -4,12 +4,14 @@ import by.dutov.jee.group.Group;
 import by.dutov.jee.people.Role;
 import by.dutov.jee.people.Student;
 import by.dutov.jee.people.Teacher;
-import by.dutov.jee.repository.group.GroupDAO;
+import by.dutov.jee.repository.RepositoryDataSource;
+import by.dutov.jee.repository.group.GroupDAOInterface;
 import by.dutov.jee.repository.person.postgres.ConnectionType;
 import by.dutov.jee.service.exceptions.DataBaseException;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Repository;
 
-import javax.sql.DataSource;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -29,7 +31,8 @@ import static by.dutov.jee.utils.DataBaseUtils.closeQuietly;
 import static by.dutov.jee.utils.DataBaseUtils.rollBack;
 
 @Slf4j
-public class GroupDAOPostgres implements GroupDAO<Group> {
+@Repository
+public class GroupDAOPostgres implements GroupDAOInterface<Group> {
     //language=SQL
     private static final String SELECT_ID_GROUP = "select g.id g_id from \"group\" g where g.id = ?;";
     //language=SQL
@@ -90,22 +93,12 @@ public class GroupDAOPostgres implements GroupDAO<Group> {
 
 
     private static volatile GroupDAOPostgres instance;
-    private final DataSource dataSource;
+    private final RepositoryDataSource repositoryDataSource;
 
-    public GroupDAOPostgres(DataSource dataSource) {
-        this.dataSource = dataSource;
+    @Autowired
+    private GroupDAOPostgres(RepositoryDataSource repositoryDataSource) {
+        this.repositoryDataSource = repositoryDataSource;
         //singleton
-    }
-
-    public static GroupDAOPostgres getInstance(DataSource dataSource) {
-        if (instance == null) {
-            synchronized (GroupDAOPostgres.class) {
-                if (instance == null) {
-                    instance = new GroupDAOPostgres(dataSource);
-                }
-            }
-        }
-        return instance;
     }
 
     @Override
@@ -124,7 +117,7 @@ public class GroupDAOPostgres implements GroupDAO<Group> {
         PreparedStatement ps = null;
         ResultSet rs = null;
         try {
-            con = dataSource.getConnection();
+            con = repositoryDataSource.getConnection();
             ps = con.prepareStatement(INSERT_GROUP);
             ps.setInt(1, group.getTeacher().getId());
             rs = ps.executeQuery();
@@ -150,7 +143,7 @@ public class GroupDAOPostgres implements GroupDAO<Group> {
         Connection con = null;
         PreparedStatement ps = null;
         try {
-            con = dataSource.getConnection();
+            con = repositoryDataSource.getConnection();
             ps = con.prepareStatement(INSERT_STUDENT_IN_GROUP);
             ps.setInt(1, group.getId());
             ps.setInt(2, student.getId());
@@ -179,7 +172,7 @@ public class GroupDAOPostgres implements GroupDAO<Group> {
         PreparedStatement ps2 = null;
         ResultSet rs = null;
         try {
-            con = dataSource.getConnection();
+            con = repositoryDataSource.getConnection();
             ps = con.prepareStatement(SELECT_ID_GROUP);
             ps.setInt(1, id);
             rs = ps.executeQuery();
@@ -207,7 +200,7 @@ public class GroupDAOPostgres implements GroupDAO<Group> {
         Connection con = null;
         PreparedStatement ps = null;
         try {
-            con = dataSource.getConnection();
+            con = repositoryDataSource.getConnection();
             ps = con.prepareStatement(UPDATE_GROUP);
             ps.setInt(1, group.getTeacher().getId());
             ps.setInt(2, id);
@@ -233,7 +226,7 @@ public class GroupDAOPostgres implements GroupDAO<Group> {
         Connection con = null;
         PreparedStatement ps = null;
         try {
-            con = dataSource.getConnection();
+            con = repositoryDataSource.getConnection();
             ps = con.prepareStatement(UPDATE_STUDENT_IN_GROUP);
             ps.setInt(1, group.getId());
             ps.setInt(2, student.getId());
@@ -264,7 +257,7 @@ public class GroupDAOPostgres implements GroupDAO<Group> {
         PreparedStatement ps2 = null;
         PreparedStatement ps3 = null;
         try {
-            con = dataSource.getConnection();
+            con = repositoryDataSource.getConnection();
             ps1 = con.prepareStatement(UPDATE_STUDENT_IN_GROUP_FOR_DELETE);
             ps2 = con.prepareStatement(DELETE_STUDENT_IN_GROUP);
             ps3 = con.prepareStatement(DELETE_GROUP);
@@ -297,7 +290,7 @@ public class GroupDAOPostgres implements GroupDAO<Group> {
         PreparedStatement ps = null;
         ResultSet rs = null;
         try {
-            con = dataSource.getConnection();
+            con = repositoryDataSource.getConnection();
             ps = con.prepareStatement(SELECT_GROUP_ALL_FIELDS_FOR_TEACHER);
             rs = ps.executeQuery();
             result = resultSetToGroup(rs);
@@ -336,7 +329,7 @@ public class GroupDAOPostgres implements GroupDAO<Group> {
         ResultSet rs = null;
         Set<Student> students = new HashSet<>();
         try {
-            con = dataSource.getConnection();
+            con = repositoryDataSource.getConnection();
             ps = con.prepareStatement(SELECT_GROUP_FOR_STUDENT);
             ps.setInt(1, gId);
             rs = ps.executeQuery();
@@ -367,7 +360,7 @@ public class GroupDAOPostgres implements GroupDAO<Group> {
         PreparedStatement ps = null;
         ResultSet rs = null;
         try {
-            con = dataSource.getConnection();
+            con = repositoryDataSource.getConnection();
             ps = con.prepareStatement(SELECT_GROUP_FOR_TEACHER);
             ps.setInt(1, gId);
             rs = ps.executeQuery();

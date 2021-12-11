@@ -3,9 +3,12 @@ package by.dutov.jee.repository.group.jpa;
 import by.dutov.jee.group.Group;
 import by.dutov.jee.people.Student;
 import by.dutov.jee.repository.EntityManagerHelper;
-import by.dutov.jee.repository.group.GroupDAO;
+import by.dutov.jee.repository.group.GroupDAOInterface;
 import by.dutov.jee.service.exceptions.DataBaseException;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Repository;
 
 import javax.persistence.EntityManager;
 import javax.persistence.TypedQuery;
@@ -16,29 +19,21 @@ import static by.dutov.jee.utils.DataBaseUtils.closeQuietly;
 import static by.dutov.jee.utils.DataBaseUtils.rollBack;
 
 @Slf4j
-public class GroupDaoJpa implements GroupDAO<Group> {
+@Repository
+public class GroupDaoJpa implements GroupDAOInterface<Group> {
     public static final String ERROR_FROM_REMOVE = "Error from remove";
     public static final String ERROR_FROM_UPDATE = "Error from update";
     public static final String ERROR_FROM_SAVE = "Error from save";
     public static final String ERROR_FROM_FIND = "Error from find";
     public static final String ERROR_FROM_FIND_ALL = "Error from findAll";
-    protected final EntityManagerHelper helper = EntityManagerHelper.getInstance();
-    private static volatile GroupDaoJpa instance;
+    protected final EntityManagerHelper helper;
 
-    public GroupDaoJpa() {
+    @Autowired
+    private GroupDaoJpa(EntityManagerHelper entityManagerHelper) {
+        this.helper = entityManagerHelper;
         //singleton
     }
 
-    public static GroupDaoJpa getInstance() {
-        if (instance == null) {
-            synchronized (GroupDaoJpa.class) {
-                if (instance == null) {
-                    instance = new GroupDaoJpa();
-                }
-            }
-        }
-        return instance;
-    }
 
     @Override
     public Group save(Group group) {

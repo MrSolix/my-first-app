@@ -1,9 +1,12 @@
 package by.dutov.jee.service;
 
+import by.dutov.jee.MyAppContext;
 import by.dutov.jee.people.Person;
 import by.dutov.jee.utils.AppUtils;
 import by.dutov.jee.utils.CommandServletUtils;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
 import javax.servlet.DispatcherType;
 import javax.servlet.ServletException;
@@ -12,36 +15,26 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 
 @Slf4j
+@Service
 public class LoginService {
-    private static volatile LoginService instance;
+    private final CheckingService checkingService;
 
-    public LoginService() {
-        //singleton
-    }
-
-    public static LoginService getInstance() {
-        if (instance == null) {
-            synchronized (LoginService.class) {
-                if (instance == null) {
-                    instance = new LoginService();
-                }
-            }
-        }
-        return instance;
+    @Autowired
+    private LoginService(CheckingService checkingService) {
+        this.checkingService = checkingService;
     }
 
     public void getLoginedUser(HttpServletRequest req, HttpServletResponse resp, String userName, String password) throws ServletException, IOException {
-        CheckingService instance = CheckingService.getInstance();
-        Person person = instance.checkUser(userName);
+        Person person = checkingService.checkUser(userName);
         boolean checkPass = false;
         if (person != null) {
-            checkPass = instance.checkPassword(person, password);
+            checkPass = checkingService.checkPassword(person, password);
         }
         final String errorMessage = "errorMessage";
         final String path = "/loginPage.jsp";
         if (!checkPass) {
             log.info("person == null");
-            instance.setAttributeAndDispatcher(req, resp,
+            checkingService.setAttributeAndDispatcher(req, resp,
                     "Invalid userName or password",
                     errorMessage,
                     path,
@@ -49,7 +42,7 @@ public class LoginService {
             );
         } else if (AppUtils.getLoginedUser(req.getSession()) != null) {
             log.info("already logged in");
-            instance.setAttributeAndDispatcher(req, resp,
+            checkingService.setAttributeAndDispatcher(req, resp,
                     "You need logouted",
                     errorMessage,
                     path,
