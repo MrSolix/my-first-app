@@ -7,6 +7,7 @@ import by.dutov.jee.repository.group.GroupDAOInterface;
 import by.dutov.jee.service.exceptions.DataBaseException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Repository;
 
@@ -20,6 +21,7 @@ import static by.dutov.jee.utils.DataBaseUtils.rollBack;
 
 @Slf4j
 @Repository
+@Lazy
 public class GroupDaoJpa implements GroupDAOInterface<Group> {
     public static final String ERROR_FROM_REMOVE = "Error from remove";
     public static final String ERROR_FROM_UPDATE = "Error from update";

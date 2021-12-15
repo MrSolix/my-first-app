@@ -24,7 +24,7 @@ import static by.dutov.jee.utils.DataBaseUtils.closeQuietly;
 import static by.dutov.jee.utils.DataBaseUtils.rollBack;
 
 @Slf4j
-@Repository
+@Repository("jpaPerson")
 @Lazy
 public class PersonDaoJpa extends AbstractPersonDaoJpa<Person> {
     private Class<? extends Person> classType;

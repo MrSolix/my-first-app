@@ -1,12 +1,5 @@
 package by.dutov.jee.repository;
 
-import by.dutov.jee.MyAppContext;
-import by.dutov.jee.people.Person;
-import by.dutov.jee.repository.person.PersonDAOInterface;
-import by.dutov.jee.repository.person.jpa.PersonDaoJpa;
-import by.dutov.jee.repository.person.memory.PersonDAOInMemory;
-import by.dutov.jee.repository.person.postgres.PersonDAOPostgres;
-
 import java.util.Collections;
 import java.util.EnumMap;
 import java.util.HashMap;

@@ -42,7 +42,7 @@ import static by.dutov.jee.utils.DataBaseUtils.rollBack;
 
 
 @Slf4j
-@Repository
+@Repository("postgresPerson")
 @Lazy
 public class PersonDAOPostgres extends AbstractPersonDAOPostgres<Person> {
     public static final String DELETE_GRADES_BY_STUDENT_ID = "delete from grades gr where gr.student_id = ?;";

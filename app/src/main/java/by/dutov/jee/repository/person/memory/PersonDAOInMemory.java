@@ -23,7 +23,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
 @Slf4j
-@Repository
+@Repository("memoryPerson")
 @Lazy
 public class PersonDAOInMemory implements PersonDAOInterface<Person> {
     private static Integer ID = 1;

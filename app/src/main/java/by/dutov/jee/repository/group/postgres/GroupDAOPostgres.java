@@ -10,6 +10,7 @@ import by.dutov.jee.repository.person.postgres.ConnectionType;
 import by.dutov.jee.service.exceptions.DataBaseException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Repository;
 
 import java.sql.Connection;
@@ -31,7 +32,8 @@ import static by.dutov.jee.utils.DataBaseUtils.closeQuietly;
 import static by.dutov.jee.utils.DataBaseUtils.rollBack;
 
 @Slf4j
-@Repository
+@Repository("postgresGroup")
+@Lazy
 public class GroupDAOPostgres implements GroupDAOInterface<Group> {
     //language=SQL
     private static final String SELECT_ID_GROUP = "select g.id g_id from \"group\" g where g.id = ?;";
