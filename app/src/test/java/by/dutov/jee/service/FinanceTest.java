@@ -4,8 +4,6 @@ import by.dutov.jee.MyAppContext;
 import by.dutov.jee.people.Teacher;
 import org.junit.Before;
 import org.junit.Test;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
 
 import java.time.LocalDate;
 

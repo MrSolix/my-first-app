@@ -21,7 +21,7 @@
         <tr>
             <td colspan ="2">
                 <input type="submit" value="Submit"/>
-                <a href="${pageContext.request.contextPath}/homePage.jsp">Cancel</a>
+                <a href="${pageContext.request.contextPath}/main/homePage.jsp">Cancel</a>
             </td>
         </tr>
     </table>

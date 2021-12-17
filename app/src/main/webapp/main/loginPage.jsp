@@ -2,7 +2,7 @@
 <html>
 <head>
     <title>Login</title>
-    <jsp:include page="menu.jsp"/>
+    <jsp:include page="../menu.jsp"/>
 </head>
 <body>
 
@@ -10,7 +10,7 @@
 
 <p style="color: red;">${errorMessage}${loginedError}</p>
 
-<form action="${pageContext.request.contextPath}/login" method="post">
+<form action="${pageContext.request.contextPath}/main/login" method="post">
     <table>
         <tr>
             <td><b>Login</b></td>
@@ -23,7 +23,7 @@
         <tr>
             <td colspan ="2">
                 <input type="submit" value="Submit"/>
-                <a href="${pageContext.request.contextPath}/main/homePage.jspe.jsp">Cancel</a>
+                <a href="${pageContext.request.contextPath}/main/homePage.jsp">Cancel</a>
             </td>
         </tr>
     </table>

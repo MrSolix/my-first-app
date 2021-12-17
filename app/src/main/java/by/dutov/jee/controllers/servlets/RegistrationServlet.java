@@ -2,7 +2,6 @@ package by.dutov.jee.controllers.servlets;
 
 import by.dutov.jee.MyAppContext;
 import by.dutov.jee.people.Role;
-import by.dutov.jee.service.CheckingService;
 import by.dutov.jee.service.RegistrationService;
 import by.dutov.jee.utils.CommandServletUtils;
 import lombok.extern.slf4j.Slf4j;

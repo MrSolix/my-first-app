@@ -1,6 +1,5 @@
 package by.dutov.jee.service;
 
-import by.dutov.jee.MyAppContext;
 import by.dutov.jee.people.Person;
 import by.dutov.jee.utils.AppUtils;
 import by.dutov.jee.utils.CommandServletUtils;
@@ -31,7 +30,7 @@ public class LoginService {
             checkPass = checkingService.checkPassword(person, password);
         }
         final String errorMessage = "errorMessage";
-        final String path = "/loginPage.jsp";
+        final String path = "/main/loginPage.jsp";
         if (!checkPass) {
             log.info("person == null");
             checkingService.setAttributeAndDispatcher(req, resp,
@@ -52,7 +51,7 @@ public class LoginService {
             log.info("successful login");
             AppUtils.storeLoginedUser(req.getSession(), person);
 
-            CommandServletUtils.dispatcher(req, resp, "/homePage.jsp", DispatcherType.FORWARD);
+            CommandServletUtils.dispatcher(req, resp, "/main/homePage.jsp", DispatcherType.FORWARD);
         }
     }
 

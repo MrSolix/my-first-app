@@ -8,7 +8,7 @@
         function myFunction(id1, id2) {
             var checkBox = id1;
             var text = id2;
-            if (checkBox.checked == true) {
+            if (checkBox.checked === true) {
                 text.style.display = "block";
             } else {
                 text.style.display = "none";
@@ -71,7 +71,7 @@
         <tr>
             <td>
                 <input type="submit" value="Submit"/>
-                <a href="${pageContext.request.contextPath}/homePage.jsp">Cancel</a>
+                <a href="${pageContext.request.contextPath}/main/homePage.jsp">Cancel</a>
             </td>
         </tr>
     </table>

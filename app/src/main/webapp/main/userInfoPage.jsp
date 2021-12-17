@@ -2,7 +2,7 @@
 <html>
 <head>
     <title>User Info</title>
-    <jsp:include page="menu.jsp"/>
+    <jsp:include page="../menu.jsp"/>
 </head>
 <body>
 

@@ -19,7 +19,6 @@ import static by.dutov.jee.utils.DataBaseUtils.rollBack;
 
 
 @Slf4j
-@Repository
 public abstract class AbstractPersonDaoJpa<T extends Person> implements PersonDAOInterface<T> {
     public static final String ERROR_FROM_REMOVE = "Error from remove";
     public static final String ERROR_FROM_UPDATE = "Error from update";

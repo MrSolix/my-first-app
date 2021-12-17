@@ -40,7 +40,7 @@ public class CommandServletUtils {
         if (loginedUser == null || !Role.getStrByType(loginedUser.getRole()).equals(who)) {
             log.info("Access denied");
             CommandServletUtils.dispatcher(request, response,
-                    "/home", DispatcherType.FORWARD);
+                    "/main/homePage.jsp", DispatcherType.FORWARD);
         }
         chain.doFilter(request, response);
     }

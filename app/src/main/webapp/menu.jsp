@@ -23,11 +23,11 @@
 ||
     </c:when>
 </c:choose>
-<a href="${pageContext.request.contextPath}/main/home">
+<a href="${pageContext.request.contextPath}/main/homePage.jsp">
     Home Page
 </a>
 ||
-<a type="" href="${pageContext.request.contextPath}/main/user-info">
+<a type="" href="${pageContext.request.contextPath}/main/userInfoPage.jsp">
     User Info
 </a>
 ||
@@ -37,7 +37,7 @@
 </a>
 ||
 </c:if>
-<a href="${pageContext.request.contextPath}/main/login">
+<a href="${pageContext.request.contextPath}/main/loginPage.jsp">
     Login
 </a>
 ||

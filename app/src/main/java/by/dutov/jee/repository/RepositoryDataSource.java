@@ -1,15 +1,11 @@
 package by.dutov.jee.repository;
 
-import by.dutov.jee.MyAppContext;
 import by.dutov.jee.repository.person.postgres.ConnectionType;
 import by.dutov.jee.service.exceptions.ApplicationException;
 import com.mchange.v2.c3p0.ComboPooledDataSource;
 import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.context.annotation.AnnotationConfigApplicationContext;
-import org.springframework.context.annotation.Lazy;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.stereotype.Component;
 
