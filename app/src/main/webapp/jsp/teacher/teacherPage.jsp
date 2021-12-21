@@ -2,7 +2,7 @@
 <html>
 <head>
     <title>Teacher</title>
-    <jsp:include page="/menu.jsp"/>
+    <jsp:include page="../menu.jsp"/>
 </head>
 <body>
 <h2>Teacher Page</h2>

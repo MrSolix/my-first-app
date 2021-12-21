@@ -1,5 +1,6 @@
 package by.dutov.jee.service;
 
+import by.dutov.jee.MyAppContext;
 import by.dutov.jee.people.Person;
 import by.dutov.jee.people.Role;
 import by.dutov.jee.people.Teacher;
@@ -21,9 +22,8 @@ import java.util.concurrent.ConcurrentHashMap;
 
 @Slf4j
 @Component
-@Lazy
 public class Finance {
-    private Map<Teacher, Map<Integer, Double>> salaryHistory;
+    private static final Map<Teacher, Map<Integer, Double>> salaryHistory;
     private static final int CURRENT_MONTH = LocalDate.now().getMonthValue();
     private static final String MIN_RANGE = "minRange";
     private static final String MAX_RANGE = "maxRange";
@@ -32,30 +32,27 @@ public class Finance {
     @Autowired
     private Finance(RepositoryFactory repositoryFactory) {
         this.repositoryFactory = repositoryFactory;
-        saveSalary();
-        //singleton
+    }
+
+    static {
+        salaryHistory = new ConcurrentHashMap<>();
+        List<? extends Person> all = MyAppContext.getContext().getBean(RepositoryFactory.class).getPersonDaoRepository().findAll();
+        for (Person p : all) {
+            if (p.getRole().equals(Role.TEACHER)) {
+                Optional<? extends Person> user = MyAppContext.getContext().getBean(RepositoryFactory.class).getPersonDaoRepository().find(p.getId());
+                if (user.isPresent()) {
+                    Teacher teacher = (Teacher) user.get();
+                    for (int i = 1; i < CURRENT_MONTH; i++) {
+                        MyAppContext.getContext().getBean(Finance.class).saveSalary(teacher, i, i * 110.0);
+                    }
+                    MyAppContext.getContext().getBean(Finance.class).saveSalary(teacher, CURRENT_MONTH, teacher.getSalary());
+                }
+            }
+        }
     }
 
     public Map<Teacher, Map<Integer, Double>> getSalaryHistory() {
         return salaryHistory;
-    }
-
-
-    private void saveSalary() {
-        salaryHistory = new ConcurrentHashMap<>();
-        List<? extends Person> all = repositoryFactory.getPersonDaoRepository().findAll();
-        for (Person p : all) {
-            if (p.getRole().equals(Role.TEACHER)) {
-                Optional<? extends Person> user = repositoryFactory.getPersonDaoRepository().find(p.getId());
-                if (user.isPresent()) {
-                    Teacher teacher = (Teacher) user.get();
-                    for (int i = 1; i < CURRENT_MONTH; i++) {
-                        saveSalary(teacher, i, i * 110.0);
-                    }
-                    saveSalary(teacher, CURRENT_MONTH, teacher.getSalary());
-                }
-            }
-        }
     }
 
     public double averageSalary(Integer minRange, Integer maxRange, Teacher teacher) {

@@ -3,7 +3,7 @@
 <html>
 <head>
     <title>Update User</title>
-    <jsp:include page="/menu.jsp"/>
+    <jsp:include page="../menu.jsp"/>
     <script>
         function myFunction(id1, id2) {
             var checkBox = id1;
@@ -71,7 +71,7 @@
         <tr>
             <td>
                 <input type="submit" value="Submit"/>
-                <a href="${pageContext.request.contextPath}/main/homePage.jsp">Cancel</a>
+                <a href="${pageContext.request.contextPath}/main/home">Cancel</a>
             </td>
         </tr>
     </table>

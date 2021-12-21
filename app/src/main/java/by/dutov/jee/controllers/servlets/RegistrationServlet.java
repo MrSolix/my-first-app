@@ -1,30 +1,36 @@
 package by.dutov.jee.controllers.servlets;
 
-import by.dutov.jee.MyAppContext;
 import by.dutov.jee.people.Role;
 import by.dutov.jee.service.RegistrationService;
-import by.dutov.jee.utils.CommandServletUtils;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
 
-import javax.servlet.DispatcherType;
 import javax.servlet.ServletException;
-import javax.servlet.annotation.WebServlet;
-import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 
 @Slf4j
-@WebServlet("/registration")
-public class RegistrationServlet extends HttpServlet {
+@Controller
+@RequestMapping("/registration")
+public class RegistrationServlet {
+    private final RegistrationService registrationService;
 
-    @Override
-    protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        CommandServletUtils.dispatcher(req, resp, "/registrationPage.jsp", DispatcherType.FORWARD);
+    @Autowired
+    public RegistrationServlet(RegistrationService registrationService) {
+        this.registrationService = registrationService;
     }
 
-    @Override
-    protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+    @RequestMapping(method = RequestMethod.GET)
+    public String redirectRegistrationPage() {
+        return "/registrationPage";
+    }
+
+    @RequestMapping(method = RequestMethod.POST)
+    public void averageSalary(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         log.info("Entered Registration Page");
         log.info("Get parameters");
         String userName = req.getParameter("userName");
@@ -34,10 +40,6 @@ public class RegistrationServlet extends HttpServlet {
         Role role = Role.getTypeByStr(req.getParameter("status"));
         log.info("userName = {}, password = ***, name = {}, age = {}, role = {}", userName, name, age, role.getType());
         log.info("Set person from db");
-        MyAppContext.getContext().getBean(RegistrationService.class).registrationUser(
-                req, resp,
-                userName, password,
-                name, age, role
-                );
+        registrationService.registrationUser(req, resp, userName, password, name, age, role);
     }
 }

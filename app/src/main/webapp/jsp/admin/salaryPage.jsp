@@ -3,7 +3,7 @@
 <html>
 <head>
     <title>Salary</title>
-    <jsp:include page="/menu.jsp"/>
+    <jsp:include page="../menu.jsp"/>
 </head>
 <body>
 <h1>Salary Page</h1>
@@ -22,7 +22,7 @@
         <tr>
             <td colspan ="2">
                 <input type="submit" value="Submit"/>
-                <a href="${pageContext.request.contextPath}/main/homePage.jsp">Cancel</a>
+                <a href="${pageContext.request.contextPath}/main/home">Cancel</a>
             </td>
         </tr>
     </table>

@@ -6,6 +6,7 @@ import by.dutov.jee.people.Student;
 import by.dutov.jee.people.Teacher;
 import by.dutov.jee.repository.RepositoryFactory;
 import by.dutov.jee.service.exceptions.DataBaseException;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -19,15 +20,10 @@ import java.io.IOException;
 
 @Slf4j
 @Service
+@RequiredArgsConstructor
 public class RegistrationService {
     private final CheckingService checkingService;
     private final RepositoryFactory repositoryFactory;
-
-    @Autowired
-    private RegistrationService(CheckingService checkingService, RepositoryFactory repositoryFactory) {
-        this.checkingService = checkingService;
-        this.repositoryFactory = repositoryFactory;
-    }
 
     public void registrationUser(HttpServletRequest req, HttpServletResponse resp,
                                  String userName, String password,
@@ -43,7 +39,7 @@ public class RegistrationService {
                     req, resp,
                     "Login is busy or invalid data",
                     "errorMessage",
-                    "/registrationPage.jsp",
+                    "/jsp/registrationPage.jsp",
                     DispatcherType.INCLUDE);
             return;
         }
@@ -71,7 +67,7 @@ public class RegistrationService {
                     req, resp,
                     "Registration is failed",
                     "errorMessage",
-                    "/registrationPage.jsp",
+                    "/jsp/registrationPage.jsp",
                     DispatcherType.INCLUDE
             );
         }
@@ -80,7 +76,7 @@ public class RegistrationService {
                 req, resp,
                 "Registration is successful",
                 "successMessage",
-                "/registrationPage.jsp",
+                "/jsp/registrationPage.jsp",
                 DispatcherType.INCLUDE
         );
     }

@@ -1,8 +1,10 @@
 package by.dutov.jee;
 
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
+import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.support.AbstractApplicationContext;
 
+@ComponentScan
 public class MyAppContext {
     private static volatile MyAppContext instance;
     private final AbstractApplicationContext ctx;

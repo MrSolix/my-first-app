@@ -8,8 +8,8 @@ import by.dutov.jee.repository.RepositoryFactory;
 import by.dutov.jee.repository.person.PersonDAOInterface;
 import by.dutov.jee.service.encrypt.PasswordEncryptionService;
 import by.dutov.jee.service.exceptions.DataBaseException;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import javax.servlet.DispatcherType;
@@ -22,15 +22,10 @@ import java.security.spec.InvalidKeySpecException;
 
 @Slf4j
 @Service
+@RequiredArgsConstructor
 public class UpdateService {
     private final CheckingService checkingService;
     private final RepositoryFactory repositoryFactory;
-
-    @Autowired
-    private UpdateService(CheckingService checkingService, RepositoryFactory repositoryFactory) {
-        this.checkingService = checkingService;
-        this.repositoryFactory = repositoryFactory;
-    }
 
     public void updateUser(HttpServletRequest req, HttpServletResponse resp,
                            String userLogin) throws ServletException, IOException {
@@ -41,7 +36,7 @@ public class UpdateService {
                     req, resp,
                     "User with that userName is not find",
                     "errorMessage",
-                    "/admin/updateUserPage.jsp",
+                    "/jsp/admin/updateUserPage.jsp",
                     DispatcherType.INCLUDE
             );
             return;
@@ -77,7 +72,7 @@ public class UpdateService {
                     req, resp,
                     "Remained unchanged",
                     "errorMessage",
-                    "/admin/updateUserPage.jsp",
+                    "/jsp/admin/updateUserPage.jsp",
                     DispatcherType.INCLUDE
             );
             return;
@@ -135,7 +130,7 @@ public class UpdateService {
                     req, resp,
                     "changed failed",
                     "errorMessage",
-                    "/admin/updateUserPage.jsp",
+                    "/jsp/admin/updateUserPage.jsp",
                     DispatcherType.INCLUDE
             );
         }
@@ -144,7 +139,7 @@ public class UpdateService {
                 req, resp,
                 "changed successful",
                 "errorMessage",
-                "/admin/updateUserPage.jsp",
+                "/jsp/admin/updateUserPage.jsp",
                 DispatcherType.INCLUDE
         );
     }

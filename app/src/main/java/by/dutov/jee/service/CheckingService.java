@@ -6,6 +6,7 @@ import by.dutov.jee.service.encrypt.PasswordEncryptionService;
 import by.dutov.jee.service.exceptions.HashException;
 import by.dutov.jee.service.exceptions.PasswordException;
 import by.dutov.jee.utils.CommandServletUtils;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -19,13 +20,9 @@ import java.util.Optional;
 
 @Slf4j
 @Service
+@RequiredArgsConstructor
 public class CheckingService {
     private final RepositoryFactory repositoryFactory;
-
-    @Autowired
-    public CheckingService(RepositoryFactory repositoryFactory) {
-        this.repositoryFactory = repositoryFactory;
-    }
 
     public boolean checkPassword(Person person, String password) {
         final PasswordEncryptionService instance = PasswordEncryptionService.getInstance();

@@ -38,7 +38,7 @@
         <tr>
             <td>
                 <input type="submit" value="Submit"/>
-                <a href="${pageContext.request.contextPath}/main/homePage.jsp">Cancel</a>
+                <a href="${pageContext.request.contextPath}/main/home">Cancel</a>
             </td>
         </tr>
     </table>

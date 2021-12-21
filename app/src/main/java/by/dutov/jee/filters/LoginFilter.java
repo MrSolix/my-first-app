@@ -34,7 +34,7 @@ public class LoginFilter implements Filter {
             filterChain.doFilter(req, resp);
         } else {
             CommandServletUtils.dispatcher(req, resp,
-                    "/main/loginPage.jps", DispatcherType.FORWARD);
+                    "/jsp/loginPage.jsp", DispatcherType.FORWARD);
         }
     }
 

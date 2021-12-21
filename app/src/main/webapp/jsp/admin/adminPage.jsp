@@ -3,7 +3,7 @@
 <html>
 <head>
     <title>Admin</title>
-    <jsp:include page="/menu.jsp"/>
+    <jsp:include page="../menu.jsp"/>
 </head>
 <body>
 
