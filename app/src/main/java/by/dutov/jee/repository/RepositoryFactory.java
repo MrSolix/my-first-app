@@ -1,10 +1,10 @@
 package by.dutov.jee.repository;
 
-import by.dutov.jee.MyAppContext;
 import by.dutov.jee.group.Group;
 import by.dutov.jee.people.Person;
 import by.dutov.jee.repository.group.GroupDAOInterface;
 import by.dutov.jee.repository.person.PersonDAOInterface;
+import by.dutov.jee.service.MyAppContext;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Lazy;

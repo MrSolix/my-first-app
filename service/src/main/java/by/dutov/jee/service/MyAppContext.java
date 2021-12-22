@@ -1,4 +1,4 @@
-package by.dutov.jee;
+package by.dutov.jee.service;
 
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.context.annotation.ComponentScan;

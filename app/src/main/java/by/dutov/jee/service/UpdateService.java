@@ -84,7 +84,7 @@ public class UpdateService {
         if (isPass) {
             log.info("password changed");
             String pass = req.getParameter("password");
-            PasswordEncryptionService passwordEncryptionService = PasswordEncryptionService.getInstance();
+            PasswordEncryptionService passwordEncryptionService = MyAppContext.getContext().getBean("aaa", PasswordEncryptionService.class);
             try {
                 salt = passwordEncryptionService.generateSalt();
                 password = passwordEncryptionService.getEncryptedPassword(pass, salt);

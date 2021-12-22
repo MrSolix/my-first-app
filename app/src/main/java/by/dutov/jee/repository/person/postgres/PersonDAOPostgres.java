@@ -1,6 +1,5 @@
 package by.dutov.jee.repository.person.postgres;
 
-import by.dutov.jee.MyAppContext;
 import by.dutov.jee.group.Group;
 import by.dutov.jee.people.Admin;
 import by.dutov.jee.people.Person;
@@ -11,13 +10,11 @@ import by.dutov.jee.people.grades.Grade;
 import by.dutov.jee.repository.RepositoryDataSource;
 import by.dutov.jee.repository.RepositoryFactory;
 import by.dutov.jee.repository.group.GroupDAOInterface;
-import by.dutov.jee.repository.group.postgres.GroupDAOPostgres;
 import by.dutov.jee.service.exceptions.ApplicationException;
 import by.dutov.jee.service.exceptions.DataBaseException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
-import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Repository;
 
 import java.sql.Connection;

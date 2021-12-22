@@ -1,6 +1,5 @@
 package by.dutov.jee.service;
 
-import by.dutov.jee.MyAppContext;
 import by.dutov.jee.people.Person;
 import by.dutov.jee.people.Role;
 import by.dutov.jee.people.Teacher;
@@ -8,7 +7,6 @@ import by.dutov.jee.repository.RepositoryFactory;
 import by.dutov.jee.utils.CommandServletUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Component;
 
 import javax.servlet.http.HttpServletRequest;

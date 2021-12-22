@@ -1,6 +1,6 @@
 package by.dutov.jee.utils;
 
-import by.dutov.jee.MyAppContext;
+import by.dutov.jee.service.MyAppContext;
 import by.dutov.jee.repository.RepositoryDataSource;
 import lombok.extern.slf4j.Slf4j;
 

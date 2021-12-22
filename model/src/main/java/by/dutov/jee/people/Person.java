@@ -1,6 +1,7 @@
 package by.dutov.jee.people;
 
 import by.dutov.jee.AbstractEntity;
+import by.dutov.jee.service.MyAppContext;
 import by.dutov.jee.service.encrypt.PasswordEncryptionService;
 import by.dutov.jee.service.exceptions.PasswordException;
 import lombok.Data;
@@ -36,7 +37,7 @@ public abstract class Person extends AbstractEntity implements Printable {
     private Role role;
 
     protected void addPassword(String password, Person person){
-        PasswordEncryptionService instance = PasswordEncryptionService.getInstance();
+        PasswordEncryptionService instance = MyAppContext.getContext().getBean("aaa", PasswordEncryptionService.class);
         byte[] salt;
         byte[] encryptedPassword;
         if (this.getPassword() == null){

@@ -25,7 +25,7 @@ public class CheckingService {
     private final RepositoryFactory repositoryFactory;
 
     public boolean checkPassword(Person person, String password) {
-        final PasswordEncryptionService instance = PasswordEncryptionService.getInstance();
+        final PasswordEncryptionService instance = MyAppContext.getContext().getBean("aaa", PasswordEncryptionService.class);
         try {
             return instance.authenticate(password, person.getPassword(), person.getSalt());
         } catch (HashException e) {

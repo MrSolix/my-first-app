@@ -1,5 +1,6 @@
 package encrypt;
 
+import by.dutov.jee.service.MyAppContext;
 import by.dutov.jee.service.encrypt.PasswordEncryptionService;
 import by.dutov.jee.service.exceptions.HashException;
 import lombok.extern.slf4j.Slf4j;
@@ -17,7 +18,7 @@ public class PasswordEncryptionServiceTest {
     public void authenticate() {
         //creating test data
         String somePass = "Password";
-        PasswordEncryptionService instance = PasswordEncryptionService.getInstance();
+        PasswordEncryptionService instance = MyAppContext.getContext().getBean("aaa", PasswordEncryptionService.class);
         byte[] salt = null;
         byte[] encryptedPassword = null;
         try {
@@ -46,7 +47,7 @@ public class PasswordEncryptionServiceTest {
         //expected
         byte[] expected = null;
         try {
-            expected = PasswordEncryptionService.getInstance().generateSalt();
+            expected = MyAppContext.getContext().getBean("aaa", PasswordEncryptionService.class).generateSalt();
         } catch (NoSuchAlgorithmException e) {
             e.printStackTrace();
         }

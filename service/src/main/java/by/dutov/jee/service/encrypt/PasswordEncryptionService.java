@@ -1,6 +1,8 @@
 package by.dutov.jee.service.encrypt;
 
 import by.dutov.jee.service.exceptions.HashException;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.stereotype.Component;
 
 import javax.crypto.SecretKeyFactory;
 import javax.crypto.spec.PBEKeySpec;
@@ -10,23 +12,25 @@ import java.security.spec.InvalidKeySpecException;
 import java.security.spec.KeySpec;
 import java.util.Arrays;
 
+@Component
+@Qualifier("aaa")
 public class PasswordEncryptionService {
 
-    private static volatile PasswordEncryptionService instance;
-
-    public PasswordEncryptionService() {
-    }
-
-    public static PasswordEncryptionService getInstance(){
-        if (instance == null){
-            synchronized (PasswordEncryptionService.class){
-                if (instance == null){
-                    instance = new PasswordEncryptionService();
-                }
-            }
-        }
-        return instance;
-    }
+//    private static volatile PasswordEncryptionService instance;
+//
+//    public PasswordEncryptionService() {
+//    }
+//
+//    public static PasswordEncryptionService getInstance(){
+//        if (instance == null){
+//            synchronized (PasswordEncryptionService.class){
+//                if (instance == null){
+//                    instance = new PasswordEncryptionService();
+//                }
+//            }
+//        }
+//        return instance;
+//    }
 
     public boolean authenticate(String attemptedPassword, byte[] encryptedPassword, byte[] salt) throws HashException {
         byte[] encryptedAttemptedPassword;

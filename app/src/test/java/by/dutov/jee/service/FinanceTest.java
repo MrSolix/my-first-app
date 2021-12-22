@@ -1,6 +1,5 @@
 package by.dutov.jee.service;
 
-import by.dutov.jee.MyAppContext;
 import by.dutov.jee.people.Teacher;
 import org.junit.Before;
 import org.junit.Test;
