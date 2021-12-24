@@ -8,7 +8,10 @@ import org.junit.Test;
 import java.security.NoSuchAlgorithmException;
 import java.security.spec.InvalidKeySpecException;
 
-import static org.junit.Assert.*;
+import static by.dutov.jee.service.encrypt.PasswordEncryptionService.generateSalt;
+import static by.dutov.jee.service.encrypt.PasswordEncryptionService.getEncryptedPassword;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 
 @Slf4j
 public class PasswordEncryptionServiceTest {
@@ -17,12 +20,11 @@ public class PasswordEncryptionServiceTest {
     public void authenticate() {
         //creating test data
         String somePass = "Password";
-        PasswordEncryptionService instance = PasswordEncryptionService.getInstance();
         byte[] salt = null;
         byte[] encryptedPassword = null;
         try {
-            salt = instance.generateSalt();
-            encryptedPassword = instance.getEncryptedPassword(somePass, salt);
+            salt = generateSalt();
+            encryptedPassword = getEncryptedPassword(somePass, salt);
         } catch (NoSuchAlgorithmException | InvalidKeySpecException e) {
             log.error("Test password creation error", e);
         }
@@ -30,7 +32,7 @@ public class PasswordEncryptionServiceTest {
         //condition
         boolean condition = false;
             try {
-                condition = instance.authenticate(somePass, encryptedPassword, salt);
+                condition = PasswordEncryptionService.authenticate(somePass, encryptedPassword, salt);
             } catch (HashException e) {
                 e.printStackTrace();
                 log.error("Test password verification error");
@@ -46,7 +48,7 @@ public class PasswordEncryptionServiceTest {
         //expected
         byte[] expected = null;
         try {
-            expected = PasswordEncryptionService.getInstance().generateSalt();
+            expected = generateSalt();
         } catch (NoSuchAlgorithmException e) {
             e.printStackTrace();
         }

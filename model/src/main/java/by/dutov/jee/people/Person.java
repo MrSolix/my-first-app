@@ -16,6 +16,9 @@ import javax.persistence.MappedSuperclass;
 import java.security.NoSuchAlgorithmException;
 import java.security.spec.InvalidKeySpecException;
 
+import static by.dutov.jee.service.encrypt.PasswordEncryptionService.generateSalt;
+import static by.dutov.jee.service.encrypt.PasswordEncryptionService.getEncryptedPassword;
+
 @Data
 @NoArgsConstructor
 @EqualsAndHashCode(callSuper = true)
@@ -36,13 +39,12 @@ public abstract class Person extends AbstractEntity implements Printable {
     private Role role;
 
     protected void addPassword(String password, Person person){
-        PasswordEncryptionService instance = PasswordEncryptionService.getInstance();
         byte[] salt;
         byte[] encryptedPassword;
         if (this.getPassword() == null){
             try {
-                salt = instance.generateSalt();
-                encryptedPassword = instance.getEncryptedPassword(password, salt);
+                salt = generateSalt();
+                encryptedPassword = getEncryptedPassword(password, salt);
                 person.setSalt(salt);
                 person.setPassword(encryptedPassword);
             } catch (NoSuchAlgorithmException | InvalidKeySpecException e) {

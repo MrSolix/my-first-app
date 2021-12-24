@@ -1,14 +1,13 @@
-package by.dutov.jee.service;
+package by.dutov.jee.service.fasade;
 
 import by.dutov.jee.people.Person;
 import by.dutov.jee.people.Role;
 import by.dutov.jee.people.Student;
 import by.dutov.jee.people.Teacher;
-import by.dutov.jee.repository.RepositoryFactory;
 import by.dutov.jee.service.exceptions.DataBaseException;
+import by.dutov.jee.service.person.PersonDaoInstance;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import javax.servlet.DispatcherType;
@@ -23,7 +22,7 @@ import java.io.IOException;
 @RequiredArgsConstructor
 public class RegistrationService {
     private final CheckingService checkingService;
-    private final RepositoryFactory repositoryFactory;
+    private final PersonDaoInstance personDaoInstance;
 
     public void registrationUser(HttpServletRequest req, HttpServletResponse resp,
                                  String userName, String password,
@@ -45,7 +44,7 @@ public class RegistrationService {
         }
         final int age = checkingService.isEmpty(ageStr) ? 0 : Integer.parseInt(ageStr);
         try {
-            repositoryFactory.getPersonDaoRepository().save(
+            personDaoInstance.getRepository().save(
                     role == Role.STUDENT ?
                             new Student()
                                     .withUserName(userName)

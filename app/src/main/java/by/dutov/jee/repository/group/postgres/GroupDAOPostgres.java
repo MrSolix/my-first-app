@@ -34,7 +34,7 @@ import static by.dutov.jee.utils.DataBaseUtils.rollBack;
 @Slf4j
 @Repository("postgresGroup")
 @Lazy
-public class GroupDAOPostgres implements GroupDAOInterface<Group> {
+public class GroupDAOPostgres implements GroupDAOInterface {
     //language=SQL
     private static final String SELECT_ID_GROUP = "select g.id g_id from \"group\" g where g.id = ?;";
     //language=SQL
@@ -94,13 +94,11 @@ public class GroupDAOPostgres implements GroupDAOInterface<Group> {
     private static final int POSITION_ID = 1;
 
 
-    private static volatile GroupDAOPostgres instance;
     private final RepositoryDataSource repositoryDataSource;
 
     @Autowired
     private GroupDAOPostgres(RepositoryDataSource repositoryDataSource) {
         this.repositoryDataSource = repositoryDataSource;
-        //singleton
     }
 
     @Override

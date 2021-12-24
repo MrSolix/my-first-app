@@ -7,12 +7,12 @@ import by.dutov.jee.people.Role;
 import by.dutov.jee.people.Student;
 import by.dutov.jee.people.Teacher;
 import by.dutov.jee.people.grades.Grade;
+import by.dutov.jee.repository.DAOInterface;
 import by.dutov.jee.repository.EntityManagerHelper;
 import by.dutov.jee.service.exceptions.DataBaseException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
-import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Repository;
 
 import javax.persistence.EntityManager;
@@ -26,7 +26,7 @@ import static by.dutov.jee.utils.DataBaseUtils.rollBack;
 @Slf4j
 @Repository("jpaPerson")
 @Lazy
-public class PersonDaoJpa extends AbstractPersonDaoJpa<Person> {
+public class PersonDaoJpa extends AbstractPersonDaoJpa implements DAOInterface<Person> {
     private Class<? extends Person> classType;
     private String findAllJpql;
     private String namedQueryByName;
@@ -38,7 +38,7 @@ public class PersonDaoJpa extends AbstractPersonDaoJpa<Person> {
     }
 
     @Override
-    public Optional<? extends Person> find(Integer id) {
+    public Optional<Person> find(Integer id) {
         try {
             setParameters(Role.STUDENT);
             return super.find(id);
@@ -58,7 +58,7 @@ public class PersonDaoJpa extends AbstractPersonDaoJpa<Person> {
     }
 
     @Override
-    public Optional<? extends Person> find(String name) {
+    public Optional<Person> find(String name) {
         try {
             setParameters(Role.STUDENT);
             return super.find(name);
@@ -145,7 +145,7 @@ public class PersonDaoJpa extends AbstractPersonDaoJpa<Person> {
     }
 
     @Override
-    public List<? extends Person> findAll() {
+    public List<Person> findAll() {
         setParameters(Role.STUDENT);
         List<Person> personList = new ArrayList<>(super.findAll());
         setParameters(Role.TEACHER);

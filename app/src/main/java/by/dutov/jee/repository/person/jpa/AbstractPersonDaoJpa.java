@@ -5,9 +5,6 @@ import by.dutov.jee.repository.EntityManagerHelper;
 import by.dutov.jee.repository.person.PersonDAOInterface;
 import by.dutov.jee.service.exceptions.DataBaseException;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
-import org.springframework.stereotype.Repository;
 
 import javax.persistence.EntityManager;
 import javax.persistence.TypedQuery;
@@ -19,7 +16,7 @@ import static by.dutov.jee.utils.DataBaseUtils.rollBack;
 
 
 @Slf4j
-public abstract class AbstractPersonDaoJpa<T extends Person> implements PersonDAOInterface<T> {
+public abstract class AbstractPersonDaoJpa implements PersonDAOInterface {
     public static final String ERROR_FROM_REMOVE = "Error from remove";
     public static final String ERROR_FROM_UPDATE = "Error from update";
     public static final String ERROR_FROM_SAVE = "Error from save";
@@ -32,7 +29,7 @@ public abstract class AbstractPersonDaoJpa<T extends Person> implements PersonDA
     }
 
     @Override
-    public T save(T t) {
+    public Person save(Person t) {
         EntityManager em = null;
         try {
             em = helper.getEntityManager();
@@ -56,7 +53,7 @@ public abstract class AbstractPersonDaoJpa<T extends Person> implements PersonDA
     }
 
     @Override
-    public Optional<? extends Person> find(Integer id) {
+    public Optional<Person> find(Integer id) {
         EntityManager em = null;
         try {
             em = helper.getEntityManager();
@@ -64,7 +61,7 @@ public abstract class AbstractPersonDaoJpa<T extends Person> implements PersonDA
 
             TypedQuery<? extends Person> find = em.createNamedQuery(namedQueryById(), getType());
             find.setParameter("id", id);
-            T entity = (T) find.getSingleResult();
+            Person entity = find.getSingleResult();
 
             em.getTransaction().commit();
             return Optional.ofNullable(entity);
@@ -78,7 +75,7 @@ public abstract class AbstractPersonDaoJpa<T extends Person> implements PersonDA
     }
 
     @Override
-    public Optional<? extends Person> find(String name) {
+    public Optional<Person> find(String name) {
         EntityManager em = null;
         try {
             em = helper.getEntityManager();
@@ -86,7 +83,7 @@ public abstract class AbstractPersonDaoJpa<T extends Person> implements PersonDA
 
             TypedQuery<? extends Person> find = em.createNamedQuery(namedQueryByName(), getType());
             find.setParameter("name", name);
-            T entity = (T) find.getSingleResult();
+            Person entity = find.getSingleResult();
 
             em.getTransaction().commit();
             return Optional.ofNullable(entity);
@@ -100,7 +97,7 @@ public abstract class AbstractPersonDaoJpa<T extends Person> implements PersonDA
     }
 
     @Override
-    public T update(Integer id, T t) {
+    public Person update(Integer id, Person t) {
         EntityManager em = null;
         try {
             em = helper.getEntityManager();
@@ -120,7 +117,7 @@ public abstract class AbstractPersonDaoJpa<T extends Person> implements PersonDA
     }
 
     @Override
-    public T remove(T t) {
+    public Person remove(Person t) {
         EntityManager em = null;
         try {
             em = helper.getEntityManager();
@@ -140,14 +137,14 @@ public abstract class AbstractPersonDaoJpa<T extends Person> implements PersonDA
     }
 
     @Override
-    public List<? extends Person> findAll() {
-        List<? extends Person> entities;
+    public List<Person> findAll() {
+        List<Person> entities;
         EntityManager em = null;
         try {
             em = helper.getEntityManager();
             em.getTransaction().begin();
 
-            TypedQuery<? extends Person> query = em.createQuery(findAllJpql(), Person.class);
+            TypedQuery<Person> query = em.createQuery(findAllJpql(), Person.class);
             entities = query.getResultList();
 
             em.getTransaction().commit();

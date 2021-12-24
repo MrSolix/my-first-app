@@ -1,9 +1,11 @@
 package by.dutov.jee.service;
 
-import by.dutov.jee.MyAppContext;
 import by.dutov.jee.people.Teacher;
+import by.dutov.jee.service.fasade.Finance;
 import org.junit.Before;
 import org.junit.Test;
+import org.springframework.context.ConfigurableApplicationContext;
+import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 
 import java.time.LocalDate;
 
@@ -16,8 +18,8 @@ public class FinanceTest {
 
     @Before
     public void setUp() {
-//        finance = Finance.getInstance();
-        finance = MyAppContext.getContext().getBean("finance", Finance.class);
+        ConfigurableApplicationContext ctx = new AnnotationConfigApplicationContext("by\\dutov\\jee");
+        finance = ctx.getBean("finance", Finance.class);
         teacher = new Teacher()
                 .withId(3)
                 .withUserName("teacher")

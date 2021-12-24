@@ -1,16 +1,15 @@
-package by.dutov.jee.service;
+package by.dutov.jee.service.fasade;
 
-import by.dutov.jee.MyAppContext;
 import by.dutov.jee.people.Person;
 import by.dutov.jee.people.Role;
 import by.dutov.jee.people.Teacher;
-import by.dutov.jee.repository.RepositoryFactory;
+import by.dutov.jee.service.person.PersonDaoInstance;
 import by.dutov.jee.utils.CommandServletUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Component;
 
+import javax.annotation.PostConstruct;
 import javax.servlet.http.HttpServletRequest;
 import java.time.LocalDate;
 import java.util.HashMap;
@@ -23,29 +22,30 @@ import java.util.concurrent.ConcurrentHashMap;
 @Slf4j
 @Component
 public class Finance {
-    private static final Map<Teacher, Map<Integer, Double>> salaryHistory;
+    private final Map<Teacher, Map<Integer, Double>> salaryHistory;
     private static final int CURRENT_MONTH = LocalDate.now().getMonthValue();
     private static final String MIN_RANGE = "minRange";
     private static final String MAX_RANGE = "maxRange";
-    private final RepositoryFactory repositoryFactory;
+    private final PersonDaoInstance personDaoInstance;
 
     @Autowired
-    private Finance(RepositoryFactory repositoryFactory) {
-        this.repositoryFactory = repositoryFactory;
+    private Finance(PersonDaoInstance personDaoInstance) {
+        this.personDaoInstance = personDaoInstance;
+        salaryHistory = new ConcurrentHashMap<>();
     }
 
-    static {
-        salaryHistory = new ConcurrentHashMap<>();
-        List<? extends Person> all = MyAppContext.getContext().getBean(RepositoryFactory.class).getPersonDaoRepository().findAll();
+    @PostConstruct
+    private void init(){
+        List<? extends Person> all = personDaoInstance.getRepository().findAll();
         for (Person p : all) {
             if (p.getRole().equals(Role.TEACHER)) {
-                Optional<? extends Person> user = MyAppContext.getContext().getBean(RepositoryFactory.class).getPersonDaoRepository().find(p.getId());
+                Optional<? extends Person> user = personDaoInstance.getRepository().find(p.getId());
                 if (user.isPresent()) {
                     Teacher teacher = (Teacher) user.get();
                     for (int i = 1; i < CURRENT_MONTH; i++) {
-                        MyAppContext.getContext().getBean(Finance.class).saveSalary(teacher, i, i * 110.0);
+                        saveSalary(teacher, i, i * 110.0);
                     }
-                    MyAppContext.getContext().getBean(Finance.class).saveSalary(teacher, CURRENT_MONTH, teacher.getSalary());
+                    saveSalary(teacher, CURRENT_MONTH, teacher.getSalary());
                 }
             }
         }
@@ -84,7 +84,7 @@ public class Finance {
     }
 
     public void getSalary(HttpServletRequest req, String userName) {
-        Optional<? extends Person> person = repositoryFactory.getPersonDaoRepository().find(userName);
+        Optional<? extends Person> person = personDaoInstance.getRepository().find(userName);
         if (person.isEmpty() || !Role.TEACHER.equals(person.get().getRole())) {
             log.info("person == null or person role != \"TEACHER\"");
             String errorString = "the teacher's login is incorrect";
@@ -105,7 +105,7 @@ public class Finance {
         }
         log.info("userName = {}, minRange = {}, maxRange = {}", userName, minRange, maxRange);
 
-        Optional<? extends Person> person = repositoryFactory.getPersonDaoRepository().find(userName);
+        Optional<? extends Person> person = personDaoInstance.getRepository().find(userName);
         log.info("Get person from db");
 
         if (person.isEmpty() || !Role.TEACHER.equals(person.get().getRole())) {

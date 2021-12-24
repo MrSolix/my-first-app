@@ -1,6 +1,5 @@
 package by.dutov.jee.repository.person.postgres;
 
-import by.dutov.jee.MyAppContext;
 import by.dutov.jee.group.Group;
 import by.dutov.jee.people.Admin;
 import by.dutov.jee.people.Person;
@@ -8,16 +7,16 @@ import by.dutov.jee.people.Role;
 import by.dutov.jee.people.Student;
 import by.dutov.jee.people.Teacher;
 import by.dutov.jee.people.grades.Grade;
+import by.dutov.jee.repository.DAOInterface;
 import by.dutov.jee.repository.RepositoryDataSource;
-import by.dutov.jee.repository.RepositoryFactory;
 import by.dutov.jee.repository.group.GroupDAOInterface;
-import by.dutov.jee.repository.group.postgres.GroupDAOPostgres;
 import by.dutov.jee.service.exceptions.ApplicationException;
 import by.dutov.jee.service.exceptions.DataBaseException;
+import by.dutov.jee.service.group.GroupDaoInstance;
+import by.dutov.jee.utils.DataBaseUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
-import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Repository;
 
 import java.sql.Connection;
@@ -36,7 +35,6 @@ import java.util.concurrent.ConcurrentHashMap;
 import static by.dutov.jee.repository.RepositoryDataSource.commitMany;
 import static by.dutov.jee.repository.RepositoryDataSource.commitSingle;
 import static by.dutov.jee.repository.RepositoryDataSource.connectionType;
-import static by.dutov.jee.utils.DataBaseUtils.closeAndRemove;
 import static by.dutov.jee.utils.DataBaseUtils.closeQuietly;
 import static by.dutov.jee.utils.DataBaseUtils.rollBack;
 
@@ -44,7 +42,7 @@ import static by.dutov.jee.utils.DataBaseUtils.rollBack;
 @Slf4j
 @Repository("postgresPerson")
 @Lazy
-public class PersonDAOPostgres extends AbstractPersonDAOPostgres<Person> {
+public class PersonDAOPostgres extends AbstractPersonDAOPostgres implements DAOInterface<Person> {
     public static final String DELETE_GRADES_BY_STUDENT_ID = "delete from grades gr where gr.student_id = ?;";
     public static final String DELETE_STUDENT_FROM_GROUP = "delete from group_student gs where gs.student_id = ?;";
     public static final String DELETE_TEACHER_FROM_GROUP = "update \"group\" g set teacher_id = null where teacher_id = ?";
@@ -110,13 +108,15 @@ public class PersonDAOPostgres extends AbstractPersonDAOPostgres<Person> {
     public static final String S_SALARY = "s_salary";
 
     private final RepositoryDataSource repositoryDataSource;
-    private final RepositoryFactory repositoryFactory;
+    private final GroupDaoInstance groupDaoInstance;
+    private final DataBaseUtils dataBaseUtils;
 
     @Autowired
-    public PersonDAOPostgres(RepositoryDataSource repositoryDataSource, RepositoryFactory repositoryFactory) {
-        super(repositoryDataSource);
+    public PersonDAOPostgres(RepositoryDataSource repositoryDataSource, GroupDaoInstance groupDaoInstance, DataBaseUtils dataBaseUtils) {
+        super(repositoryDataSource, dataBaseUtils);
         this.repositoryDataSource = repositoryDataSource;
-        this.repositoryFactory = repositoryFactory;
+        this.groupDaoInstance = groupDaoInstance;
+        this.dataBaseUtils = dataBaseUtils;
     }
 
     @Override
@@ -146,7 +146,7 @@ public class PersonDAOPostgres extends AbstractPersonDAOPostgres<Person> {
             throw new ApplicationException(e);
         } finally {
             closeQuietly(ps);
-            closeAndRemove(con);
+            dataBaseUtils.closeAndRemove(con);
         }
     }
 
@@ -165,12 +165,12 @@ public class PersonDAOPostgres extends AbstractPersonDAOPostgres<Person> {
     }
 
     @Override
-    public Optional<? extends Person> find(String name) {
+    public Optional<Person> find(String name) {
         return getUser(name, null);
     }
 
     @Override
-    public Optional<? extends Person> find(Integer id) {
+    public Optional<Person> find(Integer id) {
         return getUser(null, id);
     }
 
@@ -205,12 +205,12 @@ public class PersonDAOPostgres extends AbstractPersonDAOPostgres<Person> {
             throw new DataBaseException(e);
         } finally {
             closeQuietly(ps);
-            closeAndRemove(con);
+            dataBaseUtils.closeAndRemove(con);
         }
     }
 
     @Override
-    protected List<? extends Person> resultSetToEntities(ResultSet rs) throws SQLException {
+    protected List<Person> resultSetToEntities(ResultSet rs) throws SQLException {
         Map<Integer, Person> personMap = new ConcurrentHashMap<>();
         while (rs.next()) {
             final int id = rs.getInt(U_ID);
@@ -286,11 +286,11 @@ public class PersonDAOPostgres extends AbstractPersonDAOPostgres<Person> {
         return SELECT_USER_BY_NAME;
     }
 
-    private Optional<? extends Person> getUser(String name, Integer id) {
+    private Optional<Person> getUser(String name, Integer id) {
         connectionType = ConnectionType.MANY;
         Connection con = null;
         try {
-            Optional<? extends Person> person;
+            Optional<Person> person;
             if (name != null) {
                 person = super.find(name);
             } else {
@@ -315,7 +315,7 @@ public class PersonDAOPostgres extends AbstractPersonDAOPostgres<Person> {
                 return Optional.of(teacher);
             } else {
                 commitMany(con);
-                return Optional.of(((Admin) user));
+                return Optional.of(user);
             }
         } catch (DataBaseException e) {
             rollBack(con);
@@ -325,13 +325,13 @@ public class PersonDAOPostgres extends AbstractPersonDAOPostgres<Person> {
             log.error("Ошибка в общем методе поиска пользователя", s);
             throw new DataBaseException(s);
         } finally {
-            closeAndRemove(con);
+            dataBaseUtils.closeAndRemove(con);
         }
     }
 
 
     private Set<Group> getGroup(Person user, String sql) {
-        GroupDAOInterface<Group> instance = repositoryFactory.getGroupDaoRepository();
+        GroupDAOInterface instance = groupDaoInstance.getRepository();
         Connection con;
         PreparedStatement ps = null;
         ResultSet rs = null;
@@ -359,7 +359,6 @@ public class PersonDAOPostgres extends AbstractPersonDAOPostgres<Person> {
         PreparedStatement ps = null;
         ResultSet rs = null;
         try {
-//            con = MyAppContext.getInstance().getContext().getBean(RepositoryDataSource.class).getConnection();
             con = repositoryDataSource.getConnection();
             ps = con.prepareStatement(SELECT_GRADES_BY_USERNAME);
             ps.setString(1, name);
@@ -390,7 +389,6 @@ public class PersonDAOPostgres extends AbstractPersonDAOPostgres<Person> {
         PreparedStatement ps = null;
         ResultSet rs = null;
         try {
-//            con = MyAppContext.getInstance().getContext().getBean(RepositoryDataSource.class).getConnection();
             con = repositoryDataSource.getConnection();
             ps = con.prepareStatement(SELECT_SALARY_BY_TEACHER_ID);
             ps.setDouble(1, id);

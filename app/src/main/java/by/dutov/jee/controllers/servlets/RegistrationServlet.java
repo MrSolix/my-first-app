@@ -1,7 +1,7 @@
 package by.dutov.jee.controllers.servlets;
 
 import by.dutov.jee.people.Role;
-import by.dutov.jee.service.RegistrationService;
+import by.dutov.jee.service.fasade.RegistrationService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;

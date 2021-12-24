@@ -1,14 +1,13 @@
-package by.dutov.jee.service;
+package by.dutov.jee.service.fasade;
 
 import by.dutov.jee.people.Person;
-import by.dutov.jee.repository.RepositoryFactory;
 import by.dutov.jee.service.encrypt.PasswordEncryptionService;
 import by.dutov.jee.service.exceptions.HashException;
 import by.dutov.jee.service.exceptions.PasswordException;
+import by.dutov.jee.service.person.PersonDaoInstance;
 import by.dutov.jee.utils.CommandServletUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import javax.servlet.DispatcherType;
@@ -22,12 +21,11 @@ import java.util.Optional;
 @Service
 @RequiredArgsConstructor
 public class CheckingService {
-    private final RepositoryFactory repositoryFactory;
+    private final PersonDaoInstance personDaoInstance;
 
     public boolean checkPassword(Person person, String password) {
-        final PasswordEncryptionService instance = PasswordEncryptionService.getInstance();
         try {
-            return instance.authenticate(password, person.getPassword(), person.getSalt());
+            return PasswordEncryptionService.authenticate(password, person.getPassword(), person.getSalt());
         } catch (HashException e) {
             log.error(e.getMessage(), e);
             throw new PasswordException(e);
@@ -44,7 +42,7 @@ public class CheckingService {
     }
 
     public Person checkUser(String userName) {
-        Optional<? extends Person> person = repositoryFactory.getPersonDaoRepository().find(userName);
+        Optional<? extends Person> person = personDaoInstance.getRepository().find(userName);
         return person.orElse(null);
     }
 

@@ -1,6 +1,6 @@
 package by.dutov.jee.controllers.servlets.admin;
 
-import by.dutov.jee.service.DeleteService;
+import by.dutov.jee.service.fasade.DeleteService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;

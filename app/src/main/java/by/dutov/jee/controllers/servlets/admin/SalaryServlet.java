@@ -1,6 +1,6 @@
 package by.dutov.jee.controllers.servlets.admin;
 
-import by.dutov.jee.service.Finance;
+import by.dutov.jee.service.fasade.Finance;
 import by.dutov.jee.utils.CommandServletUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;

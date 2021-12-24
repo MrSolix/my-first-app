@@ -21,7 +21,7 @@ import static by.dutov.jee.utils.DataBaseUtils.rollBack;
 @Slf4j
 @Repository
 @Lazy
-public class GroupDaoJpa implements GroupDAOInterface<Group> {
+public class GroupDaoJpa implements GroupDAOInterface {
     public static final String ERROR_FROM_REMOVE = "Error from remove";
     public static final String ERROR_FROM_UPDATE = "Error from update";
     public static final String ERROR_FROM_SAVE = "Error from save";
@@ -32,7 +32,6 @@ public class GroupDaoJpa implements GroupDAOInterface<Group> {
     @Autowired
     private GroupDaoJpa(EntityManagerHelper entityManagerHelper) {
         this.helper = entityManagerHelper;
-        //singleton
     }
 
 

@@ -5,6 +5,7 @@ import by.dutov.jee.people.Role;
 import by.dutov.jee.repository.RepositoryDataSource;
 import by.dutov.jee.repository.person.PersonDAOInterface;
 import by.dutov.jee.service.exceptions.DataBaseException;
+import by.dutov.jee.utils.DataBaseUtils;
 import lombok.extern.slf4j.Slf4j;
 
 import java.sql.Connection;
@@ -16,27 +17,28 @@ import java.util.Optional;
 
 import static by.dutov.jee.repository.RepositoryDataSource.commitSingle;
 import static by.dutov.jee.repository.RepositoryDataSource.connectionType;
-import static by.dutov.jee.utils.DataBaseUtils.closeAndRemove;
 import static by.dutov.jee.utils.DataBaseUtils.closeQuietly;
 import static by.dutov.jee.utils.DataBaseUtils.rollBack;
 
 @Slf4j
-public abstract class AbstractPersonDAOPostgres<T extends Person> implements PersonDAOInterface<T> {
+public abstract class AbstractPersonDAOPostgres implements PersonDAOInterface {
     private static final int POSITION_ID = 1;
     private final RepositoryDataSource repositoryDataSource;
+    private final DataBaseUtils dataBaseUtils;
 
-    public AbstractPersonDAOPostgres(RepositoryDataSource repositoryDataSource) {
+    public AbstractPersonDAOPostgres(RepositoryDataSource repositoryDataSource, DataBaseUtils dataBaseUtils) {
         this.repositoryDataSource = repositoryDataSource;
+        this.dataBaseUtils = dataBaseUtils;
     }
 
     @Override
-    public T save(T t) {
+    public Person save(Person t) {
         return t.getId() == null ? insert(t) : update(t.getId(), t);
     }
 
     @Override
-    public Optional<? extends Person> find(String name) {
-        List<? extends Person> result;
+    public Optional<Person> find(String name) {
+        List<Person> result;
         Connection con = null;
         PreparedStatement ps = null;
         PreparedStatement ps2 = null;
@@ -60,14 +62,14 @@ public abstract class AbstractPersonDAOPostgres<T extends Person> implements Per
         } finally {
             closeQuietly(rs, ps2, ps);
             if (ConnectionType.SINGLE.equals(connectionType)) {
-                closeAndRemove(con);
+                dataBaseUtils.closeAndRemove(con);
             }
         }
     }
 
     @Override
-    public Optional<? extends Person> find(Integer id) {
-        List<? extends Person> result;
+    public Optional<Person> find(Integer id) {
+        List<Person> result;
         Connection con = null;
         PreparedStatement ps = null;
         PreparedStatement ps2 = null;
@@ -91,13 +93,13 @@ public abstract class AbstractPersonDAOPostgres<T extends Person> implements Per
         } finally {
             closeQuietly(rs, ps2, ps);
             if (ConnectionType.SINGLE.equals(connectionType)) {
-                closeAndRemove(con);
+                dataBaseUtils.closeAndRemove(con);
             }
         }
     }
 
 
-    private void setterInsertOrUpdate(PreparedStatement ps, T t) throws SQLException {
+    private void setterInsertOrUpdate(PreparedStatement ps, Person t) throws SQLException {
         ps.setString(1, t.getUserName());
         ps.setBytes(2, t.getPassword());
         ps.setBytes(3, t.getSalt());
@@ -110,7 +112,7 @@ public abstract class AbstractPersonDAOPostgres<T extends Person> implements Per
         ps.setString(6, Role.getStrByType(t.getRole()));
     }
 
-    private T insert(T t) {
+    private Person insert(Person t) {
         Connection con = null;
         PreparedStatement ps = null;
         ResultSet rs = null;
@@ -121,7 +123,7 @@ public abstract class AbstractPersonDAOPostgres<T extends Person> implements Per
             rs = ps.executeQuery();
             if (rs.next()) {
                 commitSingle(con);
-                return (T) t.withId(rs.getInt(POSITION_ID));
+                return (Person) t.withId(rs.getInt(POSITION_ID));
             }
             rollBack(con);
             log.error("Не удалось записать пользователя.");
@@ -133,13 +135,13 @@ public abstract class AbstractPersonDAOPostgres<T extends Person> implements Per
         } finally {
             closeQuietly(rs, ps);
             if (ConnectionType.SINGLE.equals(connectionType)) {
-                closeAndRemove(con);
+                dataBaseUtils.closeAndRemove(con);
             }
         }
     }
 
     @Override
-    public T update(Integer id, T t) {
+    public Person update(Integer id, Person t) {
         Connection con = null;
         PreparedStatement ps = null;
         PreparedStatement ps2 = null;
@@ -162,13 +164,13 @@ public abstract class AbstractPersonDAOPostgres<T extends Person> implements Per
         } finally {
             closeQuietly(ps2, ps);
             if (ConnectionType.SINGLE.equals(connectionType)) {
-                closeAndRemove(con);
+                dataBaseUtils.closeAndRemove(con);
             }
         }
     }
 
     @Override
-    public T remove(T t) {
+    public Person remove(Person t) {
         Connection con = null;
         PreparedStatement ps = null;
         try {
@@ -188,14 +190,14 @@ public abstract class AbstractPersonDAOPostgres<T extends Person> implements Per
         } finally {
             closeQuietly(ps);
             if (ConnectionType.SINGLE.equals(connectionType)) {
-                closeAndRemove(con);
+                dataBaseUtils.closeAndRemove(con);
             }
         }
     }
 
     @Override
-    public List<? extends Person> findAll() {
-        List<? extends Person> result;
+    public List<Person> findAll() {
+        List<Person> result;
         Connection con = null;
         PreparedStatement ps = null;
         ResultSet rs = null;
@@ -217,12 +219,12 @@ public abstract class AbstractPersonDAOPostgres<T extends Person> implements Per
         } finally {
             closeQuietly(rs, ps);
             if (ConnectionType.SINGLE.equals(connectionType)) {
-                closeAndRemove(con);
+                dataBaseUtils.closeAndRemove(con);
             }
         }
     }
 
-    protected abstract List<? extends Person> resultSetToEntities(ResultSet rs) throws SQLException;
+    protected abstract List<Person> resultSetToEntities(ResultSet rs) throws SQLException;
 
     protected abstract String selectUser();
 

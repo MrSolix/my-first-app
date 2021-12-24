@@ -1,13 +1,13 @@
-package by.dutov.jee.service;
+package by.dutov.jee.service.fasade;
 
 import by.dutov.jee.people.Person;
 import by.dutov.jee.people.Role;
 import by.dutov.jee.people.Student;
 import by.dutov.jee.people.Teacher;
-import by.dutov.jee.repository.RepositoryFactory;
 import by.dutov.jee.repository.person.PersonDAOInterface;
 import by.dutov.jee.service.encrypt.PasswordEncryptionService;
 import by.dutov.jee.service.exceptions.DataBaseException;
+import by.dutov.jee.service.person.PersonDaoInstance;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -25,7 +25,7 @@ import java.security.spec.InvalidKeySpecException;
 @RequiredArgsConstructor
 public class UpdateService {
     private final CheckingService checkingService;
-    private final RepositoryFactory repositoryFactory;
+    private final PersonDaoInstance personDaoInstance;
 
     public void updateUser(HttpServletRequest req, HttpServletResponse resp,
                            String userLogin) throws ServletException, IOException {
@@ -84,10 +84,9 @@ public class UpdateService {
         if (isPass) {
             log.info("password changed");
             String pass = req.getParameter("password");
-            PasswordEncryptionService passwordEncryptionService = PasswordEncryptionService.getInstance();
             try {
-                salt = passwordEncryptionService.generateSalt();
-                password = passwordEncryptionService.getEncryptedPassword(pass, salt);
+                salt = PasswordEncryptionService.generateSalt();
+                password = PasswordEncryptionService.getEncryptedPassword(pass, salt);
             } catch (NoSuchAlgorithmException | InvalidKeySpecException e) {
                 log.error(e.getMessage());
             }
@@ -101,7 +100,7 @@ public class UpdateService {
             final String ageParam = req.getParameter("age");
             age = checkingService.isEmpty(ageParam) ? 0 : Integer.parseInt(ageParam);
         }
-        PersonDAOInterface<Person> daoRepository = repositoryFactory.getPersonDaoRepository();
+        PersonDAOInterface daoRepository = personDaoInstance.getRepository();
         try {
             if (role.equals(Role.STUDENT)) {
                 daoRepository.save(

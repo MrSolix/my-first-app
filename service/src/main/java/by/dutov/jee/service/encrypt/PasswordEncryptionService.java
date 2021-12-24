@@ -12,23 +12,7 @@ import java.util.Arrays;
 
 public class PasswordEncryptionService {
 
-    private static volatile PasswordEncryptionService instance;
-
-    public PasswordEncryptionService() {
-    }
-
-    public static PasswordEncryptionService getInstance(){
-        if (instance == null){
-            synchronized (PasswordEncryptionService.class){
-                if (instance == null){
-                    instance = new PasswordEncryptionService();
-                }
-            }
-        }
-        return instance;
-    }
-
-    public boolean authenticate(String attemptedPassword, byte[] encryptedPassword, byte[] salt) throws HashException {
+    public static boolean authenticate(String attemptedPassword, byte[] encryptedPassword, byte[] salt) throws HashException {
         byte[] encryptedAttemptedPassword;
         try {
             encryptedAttemptedPassword = getEncryptedPassword(attemptedPassword, salt);
@@ -38,7 +22,7 @@ public class PasswordEncryptionService {
         }
     }
 
-    public byte[] getEncryptedPassword(String password, byte[] salt)
+    public static byte[] getEncryptedPassword(String password, byte[] salt)
             throws NoSuchAlgorithmException, InvalidKeySpecException {
         String algorithm = "PBKDF2WithHmacSHA1";
         int derivedKeyLength = 160;
@@ -51,7 +35,7 @@ public class PasswordEncryptionService {
         return f.generateSecret(spec).getEncoded();
     }
 
-    public byte[] generateSalt() throws NoSuchAlgorithmException {
+    public static byte[] generateSalt() throws NoSuchAlgorithmException {
         SecureRandom random = SecureRandom.getInstance("SHA1PRNG");
 
         byte[] salt = new byte[8];

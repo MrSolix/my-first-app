@@ -1,22 +1,20 @@
 package by.dutov.jee.controllers.servlets;
 
-import by.dutov.jee.service.LoginService;
+import by.dutov.jee.service.fasade.LoginService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.servlet.ModelAndView;
 
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServlet;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import java.io.IOException;
+import javax.servlet.http.HttpSession;
 
 @Slf4j
 @Controller
 @RequestMapping(value = {"/", "/login"})
-public class LoginServlet extends HttpServlet {
+public class LoginServlet {
     private final LoginService loginService;
 
     @Autowired
@@ -30,14 +28,15 @@ public class LoginServlet extends HttpServlet {
     }
 
     @RequestMapping(method = RequestMethod.POST)
-    public void login(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+    public ModelAndView login(@RequestParam("userName") String userName, @RequestParam("password") String pass,
+                              HttpSession httpSession) {
+        ModelAndView modelAndView = new ModelAndView();
         log.info("Entered Login Page");
         log.info("Get parameters");
-        String userName = req.getParameter("userName");
-        String password = req.getParameter("password");
         log.info("userName = {}, password = ***", userName);
         log.info("Get person from db");
-        loginService.getLoginedUser(req, resp, userName, password);
+        loginService.getLoginedUser(httpSession, modelAndView, userName, pass);
+        return modelAndView;
     }
 
 

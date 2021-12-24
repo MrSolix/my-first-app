@@ -1,12 +1,11 @@
-package by.dutov.jee.service;
+package by.dutov.jee.service.fasade;
 
 import by.dutov.jee.people.Person;
 import by.dutov.jee.people.Role;
-import by.dutov.jee.repository.RepositoryFactory;
 import by.dutov.jee.repository.person.PersonDAOInterface;
+import by.dutov.jee.service.person.PersonDaoInstance;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import javax.servlet.DispatcherType;
@@ -20,7 +19,7 @@ import java.io.IOException;
 @RequiredArgsConstructor
 public class DeleteService {
     private final CheckingService checkingService;
-    private final RepositoryFactory repositoryFactory;
+    private final PersonDaoInstance personDaoInstance;
 
     public void deleteUser(HttpServletRequest req, HttpServletResponse resp,
                            String userLogin) throws ServletException, IOException {
@@ -38,7 +37,7 @@ public class DeleteService {
         }
         log.info("User is finded");
         req.setAttribute("user", person);
-        PersonDAOInterface<Person> daoRepository = repositoryFactory.getPersonDaoRepository();
+        PersonDAOInterface daoRepository = personDaoInstance.getRepository();
         daoRepository.remove(person);
         checkingService.setAttributeAndDispatcher(
                 req, resp,

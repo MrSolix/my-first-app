@@ -25,7 +25,7 @@ import java.util.stream.Collectors;
 @Slf4j
 @Repository("memoryPerson")
 @Lazy
-public class PersonDAOInMemory implements PersonDAOInterface<Person> {
+public class PersonDAOInMemory implements PersonDAOInterface {
     private static Integer ID = 1;
     private Integer id;
     private final Map<Integer, Person> accounts;
@@ -45,7 +45,7 @@ public class PersonDAOInMemory implements PersonDAOInterface<Person> {
     }
 
     @Override
-    public Optional<? extends Person> find(String name) {
+    public Optional<Person> find(String name) {
         for (Person person : accounts.values()) {
             if (person.getUserName().equals(name)) {
                 return Optional.of(person);
