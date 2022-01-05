@@ -8,12 +8,9 @@ import lombok.extern.slf4j.Slf4j;
 
 import javax.persistence.EntityManager;
 import javax.persistence.TypedQuery;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-
-import static by.dutov.jee.utils.DataBaseUtils.closeQuietly;
-import static by.dutov.jee.utils.DataBaseUtils.rollBack;
-
 
 @Slf4j
 public abstract class AbstractPersonDaoJpa implements PersonDAOInterface {
@@ -29,26 +26,26 @@ public abstract class AbstractPersonDaoJpa implements PersonDAOInterface {
     }
 
     @Override
-    public Person save(Person t) {
+    public Person save(Person person) {
         EntityManager em = null;
         try {
             em = helper.getEntityManager();
-            em.getTransaction().begin();
+            helper.begin(em);
 
-            if (t.getId() == null) {
-                em.persist(t);
+            if (person.getId() == null) {
+                em.persist(person);
             } else {
-                update(t.getId(), t);
+                update(person.getId(), person);
             }
 
-            em.getTransaction().commit();
-            return t;
+            helper.commitSingle(em);
+            return person;
         } catch (Exception e) {
-            rollBack(em);
+            helper.rollBack(em);
             log.error(ERROR_FROM_SAVE);
             throw new DataBaseException(ERROR_FROM_SAVE, e);
         } finally {
-            closeQuietly(em);
+            helper.closeQuietly(em);
         }
     }
 
@@ -57,20 +54,20 @@ public abstract class AbstractPersonDaoJpa implements PersonDAOInterface {
         EntityManager em = null;
         try {
             em = helper.getEntityManager();
-            em.getTransaction().begin();
+            helper.begin(em);
 
             TypedQuery<? extends Person> find = em.createNamedQuery(namedQueryById(), getType());
             find.setParameter("id", id);
             Person entity = find.getSingleResult();
 
-            em.getTransaction().commit();
+            helper.commitSingle(em);
             return Optional.ofNullable(entity);
         } catch (Exception e) {
-            rollBack(em);
+            helper.rollBack(em);
             log.error(ERROR_FROM_FIND);
-            throw new DataBaseException(ERROR_FROM_FIND, e);
+            return Optional.empty();
         } finally {
-            closeQuietly(em);
+            helper.closeQuietly(em);
         }
     }
 
@@ -79,60 +76,60 @@ public abstract class AbstractPersonDaoJpa implements PersonDAOInterface {
         EntityManager em = null;
         try {
             em = helper.getEntityManager();
-            em.getTransaction().begin();
+            helper.begin(em);
 
             TypedQuery<? extends Person> find = em.createNamedQuery(namedQueryByName(), getType());
             find.setParameter("name", name);
             Person entity = find.getSingleResult();
 
-            em.getTransaction().commit();
+            helper.commitSingle(em);
             return Optional.ofNullable(entity);
         } catch (Exception e) {
-            rollBack(em);
+            helper.rollBack(em);
             log.error(ERROR_FROM_FIND);
-            throw new DataBaseException(ERROR_FROM_FIND, e);
+            return Optional.empty();
         } finally {
-            closeQuietly(em);
+            helper.closeQuietly(em);
         }
     }
 
     @Override
-    public Person update(Integer id, Person t) {
+    public Person update(Integer id, Person person) {
         EntityManager em = null;
         try {
             em = helper.getEntityManager();
-            em.getTransaction().begin();
+            helper.begin(em);
 
-            em.merge(t);
+            em.merge(person);
 
-            em.getTransaction().commit();
-            return t;
+            helper.commitSingle(em);
+            return person;
         } catch (Exception e) {
-            rollBack(em);
+            helper.rollBack(em);
             log.error(ERROR_FROM_UPDATE);
             throw new DataBaseException(ERROR_FROM_UPDATE);
         } finally {
-            closeQuietly(em);
+            helper.closeQuietly(em);
         }
     }
 
     @Override
-    public Person remove(Person t) {
+    public Person remove(Person person) {
         EntityManager em = null;
         try {
             em = helper.getEntityManager();
-            em.getTransaction().begin();
+            helper.begin(em);
 
-            em.remove(t);
+            em.remove(person);
 
-            em.getTransaction().commit();
-            return t;
+            helper.commitSingle(em);
+            return person;
         } catch (Exception e) {
-            rollBack(em);
+            helper.rollBack(em);
             log.error(ERROR_FROM_REMOVE);
             throw new DataBaseException(ERROR_FROM_REMOVE);
         } finally {
-            closeQuietly(em);
+            helper.closeQuietly(em);
         }
     }
 
@@ -142,18 +139,18 @@ public abstract class AbstractPersonDaoJpa implements PersonDAOInterface {
         EntityManager em = null;
         try {
             em = helper.getEntityManager();
-            em.getTransaction().begin();
+            helper.begin(em);
 
             TypedQuery<Person> query = em.createQuery(findAllJpql(), Person.class);
             entities = query.getResultList();
 
-            em.getTransaction().commit();
+            helper.commitSingle(em);
         } catch (Exception e) {
-            rollBack(em);
+            helper.rollBack(em);
             log.error(ERROR_FROM_FIND_ALL);
-            throw new DataBaseException(ERROR_FROM_FIND_ALL);
+            return new ArrayList<>();
         } finally {
-            closeQuietly(em);
+            helper.closeQuietly(em);
         }
         return entities;
     }

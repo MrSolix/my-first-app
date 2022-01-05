@@ -4,6 +4,7 @@ package by.dutov.jee.group;
 import by.dutov.jee.AbstractEntity;
 import by.dutov.jee.people.Student;
 import by.dutov.jee.people.Teacher;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
@@ -28,26 +29,19 @@ import java.util.Set;
 public class Group extends AbstractEntity {
     @ToString.Exclude
     @EqualsAndHashCode.Exclude
-    @OneToOne(cascade = {CascadeType.MERGE,
-            CascadeType.PERSIST,
-            CascadeType.DETACH,
-            CascadeType.REFRESH})
+    @OneToOne(cascade = {CascadeType.MERGE, CascadeType.REFRESH})
+    @JsonIgnore
     private Teacher teacher;
     @ToString.Exclude
     @EqualsAndHashCode.Exclude
-    @ManyToMany(cascade = {CascadeType.MERGE,
-            CascadeType.PERSIST,
-            CascadeType.DETACH,
-            CascadeType.REFRESH})
+    @ManyToMany
     @JoinTable(
             name = "group_student",
             joinColumns = @JoinColumn(name = "group_id"),
             inverseJoinColumns = @JoinColumn(name = "student_id"))
-    private Set<Student> students;
+    @JsonIgnore
+    private Set<Student> students = new HashSet<>();
 
-    {
-        students = new HashSet<>();
-    }
 
     public Group withId(Integer id) {
         setId(id);

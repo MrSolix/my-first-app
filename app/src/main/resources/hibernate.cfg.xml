@@ -31,7 +31,6 @@
         <mapping class="by.dutov.jee.people.Teacher"/>
         <mapping class="by.dutov.jee.people.Admin"/>
         <mapping class="by.dutov.jee.people.grades.Grade"/>
-        <mapping class="by.dutov.jee.people.grades.Grade$Theme"/>
 
 
     </session-factory>

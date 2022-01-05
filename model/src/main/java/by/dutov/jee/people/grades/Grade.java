@@ -1,46 +1,49 @@
 package by.dutov.jee.people.grades;
 
-import by.dutov.jee.AbstractEntity;
 import by.dutov.jee.people.Student;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
 
-import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
-import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import java.io.Serializable;
-import java.util.Set;
 
-@EqualsAndHashCode(callSuper = true)
+@EqualsAndHashCode
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
 @Entity
 @Table(name = "grades")
-public class Grade extends AbstractEntity {
+public class Grade implements Serializable {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @EqualsAndHashCode.Include
+    private Integer id;
 
-    @ManyToOne(cascade = {CascadeType.MERGE,
-            CascadeType.PERSIST,
-            CascadeType.DETACH,
-            CascadeType.REFRESH})
-    @JoinColumn(name = "theme_id")
+    @Column(name = "theme_name")
     @ToString.Include
-    private Theme themeName;
+    @EqualsAndHashCode.Exclude
+    private String themeName;
 
     @Column(name = "grade")
+    @EqualsAndHashCode.Exclude
     private Integer grade;
 
     @ManyToOne
     @JoinColumn(name = "student_id")
     @ToString.Exclude
     @EqualsAndHashCode.Exclude
+    @JsonIgnore
     private Student student;
 
     public Grade withId(Integer id) {
@@ -49,7 +52,7 @@ public class Grade extends AbstractEntity {
     }
 
     public Grade withName(String themeName) {
-        setThemeName(new Theme().withName(themeName));
+        setThemeName(themeName);
         return this;
     }
 
@@ -59,28 +62,9 @@ public class Grade extends AbstractEntity {
     }
 
     public String getThemeName() {
-        return themeName.getName();
+        return themeName;
     }
 
-    @EqualsAndHashCode(callSuper = true)
-    @Data
-    @AllArgsConstructor
-    @NoArgsConstructor
-    @Entity
-    @Table(name = "theme")
-    private static class Theme extends AbstractEntity implements Serializable {
-        private String name;
-        @OneToMany(cascade = {CascadeType.MERGE,
-                CascadeType.PERSIST,
-                CascadeType.DETACH,
-                CascadeType.REFRESH}, mappedBy = "themeName")
-        @ToString.Exclude
-        private Set<Grade> grades;
-
-        public Theme withName(String themeName) {
-            setName(themeName);
-            return this;
-        }
-    }
+//
 
 }

@@ -29,11 +29,8 @@ import javax.persistence.Table;
 public class Teacher extends Person {
     @ToString.Include
     @EqualsAndHashCode.Include
-    @OneToOne(cascade = {CascadeType.MERGE,
-            CascadeType.PERSIST,
-            CascadeType.DETACH,
-            CascadeType.REFRESH},
-            mappedBy = "teacher")
+    @OneToOne(mappedBy = "teacher",
+            cascade = {CascadeType.MERGE, CascadeType.REFRESH})
     private Group group;
     @Column(table = "salaries", name = "salary")
     private Double salary;
@@ -111,8 +108,13 @@ public class Teacher extends Person {
         this.group = group;
     }
 
+    public void removeGroup(Group group) {
+        this.group = null;
+        group.setTeacher(null);
+    }
+
     @Override
-    public String getInfo() {
+    public String infoGet() {
         return "Name: \"" + getName() +
                 "\"<br>Age: \"" + getAge() +
                 "\"<br>Role: \"" + getRole() +

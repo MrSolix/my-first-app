@@ -15,10 +15,6 @@ import java.io.IOException;
 @Slf4j
 public class CommandServletUtils {
 
-    public static void errorMessage(HttpServletRequest req, String error, String nameAttribute) {
-        req.setAttribute(nameAttribute, error);
-    }
-
     public static void dispatcher(HttpServletRequest req, HttpServletResponse resp, String path, DispatcherType type) throws ServletException, IOException {
         RequestDispatcher dispatcher = req.getServletContext()
                 .getRequestDispatcher(path);
@@ -32,7 +28,7 @@ public class CommandServletUtils {
         }
     }
 
-    public static void filtredAccess(HttpServletRequest request, HttpServletResponse response, FilterChain chain, String who) throws ServletException, IOException {
+    public static void filteredAccess(HttpServletRequest request, HttpServletResponse response, FilterChain chain, String who) throws ServletException, IOException {
         log.info("Worked {} filter", who);
 
         Person loginedUser = AppUtils.getLoginedUser(request.getSession());

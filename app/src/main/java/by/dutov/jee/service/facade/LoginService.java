@@ -1,4 +1,4 @@
-package by.dutov.jee.service.fasade;
+package by.dutov.jee.service.facade;
 
 import by.dutov.jee.people.Person;
 import by.dutov.jee.utils.AppUtils;

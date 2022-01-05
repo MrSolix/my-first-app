@@ -2,14 +2,13 @@ package by.dutov.jee.repository.person.memory;
 
 import by.dutov.jee.group.Group;
 import by.dutov.jee.people.Admin;
-import by.dutov.jee.people.grades.Grade;
 import by.dutov.jee.people.Person;
 import by.dutov.jee.people.Role;
 import by.dutov.jee.people.Student;
 import by.dutov.jee.people.Teacher;
+import by.dutov.jee.people.grades.Grade;
 import by.dutov.jee.repository.person.PersonDAOInterface;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Repository;
 
@@ -28,16 +27,13 @@ import java.util.stream.Collectors;
 public class PersonDAOInMemory implements PersonDAOInterface {
     private static Integer ID = 1;
     private Integer id;
-    private final Map<Integer, Person> accounts;
+    private final Map<Integer, Person> accounts = new ConcurrentHashMap<>();
 
-    @Autowired
-    private PersonDAOInMemory() {
-        accounts = new ConcurrentHashMap<>();
-    }
 
     @Override
     public Person save(Person person) {
         if (person != null) {
+            person.setId(id=ID++);
             accounts.put(person.getId(), person);
             return accounts.get(id);
         }

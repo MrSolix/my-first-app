@@ -26,10 +26,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
-import static by.dutov.jee.repository.RepositoryDataSource.commitSingle;
 import static by.dutov.jee.repository.RepositoryDataSource.connectionType;
-import static by.dutov.jee.utils.DataBaseUtils.closeQuietly;
-import static by.dutov.jee.utils.DataBaseUtils.rollBack;
 
 @Slf4j
 @Repository("postgresGroup")
@@ -39,21 +36,19 @@ public class GroupDAOPostgres implements GroupDAOInterface {
     private static final String SELECT_ID_GROUP = "select g.id g_id from \"group\" g where g.id = ?;";
     //language=SQL
     private static final String SELECT_GROUP_ALL_FIELDS_FOR_STUDENT = "select " +
-            "g.id g_id, " +
             "u.id u_id, u.user_name u_user_name, u.password u_pass, " +
             "u.salt u_salt, u.name u_name, u.age u_age, u.roles u_role " +
-            "from \"group\" g " +
+            "from users u " +
             "left join group_student gs " +
-            "on g.id = gs.group_id " +
-            "left join users u " +
-            "on u.id = gs.student_id ";
+            "on u.id = gs.student_id " +
+            "left join \"group\" g " +
+            "on g.id = gs.group_id ";
     //language=SQL
     private static final String SELECT_GROUP_ALL_FIELDS_FOR_TEACHER = "select " +
-            "g.id g_id, " +
             "u.id u_id, u.user_name u_user_name, u.password u_pass, " +
             "u.salt u_salt, u.name u_name, u.age u_age, u.roles u_role, t.salary t_salary " +
-            "from \"group\" g " +
-            "left join users u " +
+            "from users u " +
+            "left join \"group\" g " +
             "on u.id = g.teacher_id " +
             "left join salaries t " +
             "on t.teacher_id = u.id";
@@ -107,9 +102,14 @@ public class GroupDAOPostgres implements GroupDAOInterface {
     }
 
     public boolean saveStudentInGroup(Group group, Student student) {
-        return (find(group.getId()).isEmpty())
-                ? insertStudentInGroup(group, student)
-                : updateStudentInGroup(group, student);
+        Optional<Group> optionalGroup = find(group.getId());
+        if (optionalGroup.isPresent()) {
+            Group newGroup = optionalGroup.get();
+            if (!newGroup.getStudents().contains(student)) {
+                return insertStudentInGroup(newGroup, student);
+            }
+        }
+        return false;
     }
 
     private Group insert(Group group) {
@@ -119,22 +119,26 @@ public class GroupDAOPostgres implements GroupDAOInterface {
         try {
             con = repositoryDataSource.getConnection();
             ps = con.prepareStatement(INSERT_GROUP);
-            ps.setInt(1, group.getTeacher().getId());
+            if (group.getTeacher() != null) {
+                ps.setInt(1, group.getTeacher().getId());
+            } else {
+                ps.setObject(1, null);
+            }
             rs = ps.executeQuery();
             if (rs.next()) {
-                commitSingle(con);
+                repositoryDataSource.commitSingle(con);
                 return group.withId(rs.getInt(POSITION_ID));
             }
-            rollBack(con);
+            repositoryDataSource.rollBack(con);
             throw new DataBaseException("Не удалось записать группу в базу");
         } catch (SQLException e) {
-            rollBack(con);
+            repositoryDataSource.rollBack(con);
             log.error(e.getMessage());
             throw new DataBaseException(e);
         } finally {
-            closeQuietly(rs, ps);
+            repositoryDataSource.closeQuietly(rs, ps);
             if (ConnectionType.SINGLE.equals(connectionType)) {
-                closeQuietly(con);
+                repositoryDataSource.closeQuietly(con);
             }
         }
     }
@@ -148,19 +152,19 @@ public class GroupDAOPostgres implements GroupDAOInterface {
             ps.setInt(1, group.getId());
             ps.setInt(2, student.getId());
             if (ps.executeUpdate() > 0) {
-                commitSingle(con);
+                repositoryDataSource.commitSingle(con);
                 return true;
             }
-            rollBack(con);
+            repositoryDataSource.rollBack(con);
             throw new DataBaseException("Не удалось записать студента в группу");
         } catch (SQLException e) {
-            rollBack(con);
+            repositoryDataSource.rollBack(con);
             log.error(e.getMessage());
             throw new DataBaseException(e);
         } finally {
-            closeQuietly(ps);
+            repositoryDataSource.closeQuietly(ps);
             if (ConnectionType.SINGLE.equals(connectionType)) {
-                closeQuietly(con);
+                repositoryDataSource.closeQuietly(con);
             }
         }
     }
@@ -169,7 +173,6 @@ public class GroupDAOPostgres implements GroupDAOInterface {
     public Optional<Group> find(Integer id) {
         Connection con = null;
         PreparedStatement ps = null;
-        PreparedStatement ps2 = null;
         ResultSet rs = null;
         try {
             con = repositoryDataSource.getConnection();
@@ -178,19 +181,19 @@ public class GroupDAOPostgres implements GroupDAOInterface {
             rs = ps.executeQuery();
             List<Group> groups = resultSetToGroup(rs);
             if (!(groups.isEmpty())) {
-                commitSingle(con);
+                repositoryDataSource.commitSingle(con);
                 return groups.stream().findAny();
             }
-            rollBack(con);
+            repositoryDataSource.rollBack(con);
             return Optional.empty();
         } catch (SQLException e) {
-            rollBack(con);
+            repositoryDataSource.rollBack(con);
             log.error(e.getMessage());
             throw new DataBaseException(e);
         } finally {
-            closeQuietly(rs, ps);
+            repositoryDataSource.closeQuietly(rs, ps);
             if (ConnectionType.SINGLE.equals(connectionType)) {
-                closeQuietly(con);
+                repositoryDataSource.closeQuietly(con);
             }
         }
     }
@@ -205,47 +208,19 @@ public class GroupDAOPostgres implements GroupDAOInterface {
             ps.setInt(1, group.getTeacher().getId());
             ps.setInt(2, id);
             if (ps.executeUpdate() > 0) {
-                commitSingle(con);
+                repositoryDataSource.commitSingle(con);
                 return group;
             }
-            rollBack(con);
+            repositoryDataSource.rollBack(con);
             throw new DataBaseException("Не удалось изменить группу");
         } catch (SQLException e) {
-            rollBack(con);
+            repositoryDataSource.rollBack(con);
             log.error(e.getMessage());
             throw new DataBaseException(e);
         } finally {
-            closeQuietly(ps);
+            repositoryDataSource.closeQuietly(ps);
             if (ConnectionType.SINGLE.equals(connectionType)) {
-                closeQuietly(con);
-            }
-        }
-    }
-
-    public boolean updateStudentInGroup(Group group, Student student) {
-        Connection con = null;
-        PreparedStatement ps = null;
-        try {
-            con = repositoryDataSource.getConnection();
-            ps = con.prepareStatement(UPDATE_STUDENT_IN_GROUP);
-            ps.setInt(1, group.getId());
-            ps.setInt(2, student.getId());
-            ps.setInt(3, group.getId());
-            ps.setInt(4, student.getId());
-            if (ps.executeUpdate() > 0) {
-                commitSingle(con);
-                return true;
-            }
-            rollBack(con);
-            throw new DataBaseException("Не удалось изменить студента в группе");
-        } catch (SQLException e) {
-            rollBack(con);
-            log.error(e.getMessage());
-            throw new DataBaseException(e);
-        } finally {
-            closeQuietly(ps);
-            if (ConnectionType.SINGLE.equals(connectionType)) {
-                closeQuietly(con);
+                repositoryDataSource.closeQuietly(con);
             }
         }
     }
@@ -266,19 +241,19 @@ public class GroupDAOPostgres implements GroupDAOInterface {
             if (!(ps1.executeUpdate() > 0)
                     || !(ps2.executeUpdate() > 0)
                     || !(ps3.executeUpdate() > 0)) {
-                rollBack(con);
+                repositoryDataSource.rollBack(con);
                 throw new DataBaseException("Не удалось удалить группу");
             }
-            commitSingle(con);
+            repositoryDataSource.commitSingle(con);
             return group;
         } catch (SQLException e) {
-            rollBack(con);
+            repositoryDataSource.rollBack(con);
             log.error(e.getMessage());
             throw new DataBaseException(e);
         } finally {
-            closeQuietly(ps3, ps2, ps1);
+            repositoryDataSource.closeQuietly(ps3, ps2, ps1);
             if (ConnectionType.SINGLE.equals(connectionType)) {
-                closeQuietly(con);
+                repositoryDataSource.closeQuietly(con);
             }
         }
     }
@@ -294,15 +269,15 @@ public class GroupDAOPostgres implements GroupDAOInterface {
             ps = con.prepareStatement(SELECT_GROUP_ALL_FIELDS_FOR_TEACHER);
             rs = ps.executeQuery();
             result = resultSetToGroup(rs);
-            commitSingle(con);
+            repositoryDataSource.commitSingle(con);
         } catch (SQLException e) {
-            rollBack(con);
+            repositoryDataSource.rollBack(con);
             log.error(e.getMessage());
             throw new DataBaseException(e);
         } finally {
-            closeQuietly(rs, ps);
+            repositoryDataSource.closeQuietly(rs, ps);
             if (ConnectionType.SINGLE.equals(connectionType)) {
-                closeQuietly(con);
+                repositoryDataSource.closeQuietly(con);
             }
         }
         return result;
@@ -333,24 +308,26 @@ public class GroupDAOPostgres implements GroupDAOInterface {
             ps = con.prepareStatement(SELECT_GROUP_FOR_STUDENT);
             ps.setInt(1, gId);
             rs = ps.executeQuery();
-            if (rs.next()) {
-                students.add(new Student()
+            while (rs.next()) {
+                Student student = new Student()
                         .withId(rs.getInt(U_ID))
                         .withUserName(rs.getString(U_USER_NAME))
                         .withBytePass(rs.getBytes(U_PASS))
                         .withSalt(rs.getBytes(U_SALT))
                         .withName(rs.getString(U_NAME))
                         .withAge(rs.getInt(U_AGE))
-                        .withRole(Role.getTypeByStr(rs.getString(U_ROLE))));
+                        .withRole(Role.getTypeByStr(rs.getString(U_ROLE)));
+                student.addGroup(new Group().withId(gId));
+                students.add(student);
             }
             return students;
         } catch (SQLException e) {
-            log.error("Ошибка поиска учителя для группы", e);
-            throw new DataBaseException("Ошибка поиска учителя для группы", e);
+            log.error("Ошибка поиска студентов для группы", e);
+            throw new DataBaseException("Ошибка поиска студентов для группы", e);
         } finally {
-            closeQuietly(rs, ps);
+            repositoryDataSource.closeQuietly(rs, ps);
             if (connectionType.equals(ConnectionType.SINGLE)) {
-                closeQuietly(con);
+                repositoryDataSource.closeQuietly(con);
             }
         }
     }
@@ -373,25 +350,20 @@ public class GroupDAOPostgres implements GroupDAOInterface {
                         .withName(rs.getString(U_NAME))
                         .withAge(rs.getInt(U_AGE))
                         .withRole(Role.getTypeByStr(rs.getString(U_ROLE)))
-                        .withSalary(rs.getDouble(T_SALARY));
+                        .withSalary(rs.getDouble(T_SALARY))
+                        .withGroup(new Group()
+                                .withId(gId)
+                        );
             }
         } catch (SQLException e) {
             log.error("Ошибка поиска учителя для группы", e);
             throw new DataBaseException("Ошибка поиска учителя для группы", e);
         } finally {
-            closeQuietly(rs, ps);
+            repositoryDataSource.closeQuietly(rs, ps);
             if (connectionType.equals(ConnectionType.SINGLE)) {
-                closeQuietly(con);
+                repositoryDataSource.closeQuietly(con);
             }
         }
-        throw new DataBaseException("Учитель не найден");
-    }
-
-    private static <K, V> V putIfAbsentAndReturn(Map<K, V> map, K key, V value) {
-        if (key == null) {
-            return null;
-        }
-        map.putIfAbsent(key, value);
-        return map.get(key);
+        return null;
     }
 }

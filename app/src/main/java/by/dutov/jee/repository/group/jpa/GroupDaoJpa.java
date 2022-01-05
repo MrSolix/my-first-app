@@ -15,8 +15,6 @@ import javax.persistence.TypedQuery;
 import java.util.List;
 import java.util.Optional;
 
-import static by.dutov.jee.utils.DataBaseUtils.closeQuietly;
-import static by.dutov.jee.utils.DataBaseUtils.rollBack;
 
 @Slf4j
 @Repository
@@ -40,7 +38,7 @@ public class GroupDaoJpa implements GroupDAOInterface {
         EntityManager em = null;
         try {
             em = helper.getEntityManager();
-            em.getTransaction().begin();
+            helper.begin(em);
 
             if (group.getId() == null) {
                 em.persist(group);
@@ -48,14 +46,14 @@ public class GroupDaoJpa implements GroupDAOInterface {
                 update(group.getId(), group);
             }
 
-            em.getTransaction().commit();
+            helper.commitSingle(em);
             return group;
         } catch (Exception e) {
-            rollBack(em);
+            helper.rollBack(em);
             log.error(ERROR_FROM_SAVE);
             throw new DataBaseException(ERROR_FROM_SAVE, e);
         } finally {
-            closeQuietly(em);
+            helper.closeQuietly(em);
         }
     }
 
@@ -64,18 +62,18 @@ public class GroupDaoJpa implements GroupDAOInterface {
         EntityManager em = null;
         try {
             em = helper.getEntityManager();
-            em.getTransaction().begin();
+            helper.begin(em);
 
             Group entity = em.find(Group.class, id);
 
-            em.getTransaction().commit();
+            helper.commitSingle(em);
             return Optional.ofNullable(entity);
         } catch (Exception e) {
-            rollBack(em);
+            helper.rollBack(em);
             log.error(ERROR_FROM_FIND);
-            throw new DataBaseException(ERROR_FROM_FIND, e);
+            return Optional.empty();
         } finally {
-            closeQuietly(em);
+            helper.closeQuietly(em);
         }
     }
 
@@ -84,18 +82,18 @@ public class GroupDaoJpa implements GroupDAOInterface {
         EntityManager em = null;
         try {
             em = helper.getEntityManager();
-            em.getTransaction().begin();
+            helper.begin(em);
 
             em.merge(group);
 
-            em.getTransaction().commit();
+            helper.commitSingle(em);
             return group;
         } catch (Exception e) {
-            rollBack(em);
+            helper.rollBack(em);
             log.error(ERROR_FROM_UPDATE);
             throw new DataBaseException(ERROR_FROM_UPDATE);
         } finally {
-            closeQuietly(em);
+            helper.closeQuietly(em);
         }
     }
 
@@ -104,7 +102,7 @@ public class GroupDaoJpa implements GroupDAOInterface {
         EntityManager em = null;
         try {
             em = helper.getEntityManager();
-            em.getTransaction().begin();
+            helper.begin(em);
 
             Group naturalGroup = em.find(Group.class, group.getId());
             for (int i = 0; i < naturalGroup.getStudents().size(); i++) {
@@ -114,14 +112,14 @@ public class GroupDaoJpa implements GroupDAOInterface {
 
             em.remove(naturalGroup);
 
-            em.getTransaction().commit();
+            helper.commitSingle(em);
             return naturalGroup;
         } catch (Exception e) {
-            rollBack(em);
+            helper.rollBack(em);
             log.error(ERROR_FROM_REMOVE);
             throw new DataBaseException(ERROR_FROM_REMOVE);
         } finally {
-            closeQuietly(em);
+            helper.closeQuietly(em);
         }
     }
 
@@ -131,18 +129,18 @@ public class GroupDaoJpa implements GroupDAOInterface {
         EntityManager em = null;
         try {
             em = helper.getEntityManager();
-            em.getTransaction().begin();
+            helper.begin(em);
 
             TypedQuery<Group> query = em.createQuery("from Group ", Group.class);
             entities = query.getResultList();
 
-            em.getTransaction().commit();
+            helper.commitSingle(em);
         } catch (Exception e) {
-            rollBack(em);
+            helper.rollBack(em);
             log.error(ERROR_FROM_FIND_ALL);
             throw new DataBaseException(ERROR_FROM_FIND_ALL);
         } finally {
-            closeQuietly(em);
+            helper.closeQuietly(em);
         }
         return entities;
     }

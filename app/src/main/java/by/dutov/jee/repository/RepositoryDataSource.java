@@ -22,7 +22,7 @@ import java.util.logging.Logger;
 @Slf4j
 @Component
 @PropertySource("classpath:app.properties")
-public class RepositoryDataSource implements DataSource {
+public class RepositoryDataSource extends AbstractGeneralTransaction<Connection> implements DataSource {
     @Value("${postgres.driver}")
     private String driver;
     @Value("${postgres.uri}")
@@ -32,8 +32,6 @@ public class RepositoryDataSource implements DataSource {
     @Value("${postgres.password}")
     private String password;
     private static ComboPooledDataSource ds;
-    private ThreadLocal<Connection> threadLocal;
-    public static ConnectionType connectionType = ConnectionType.SINGLE;
 
     @PostConstruct
     private void init() {
@@ -50,18 +48,29 @@ public class RepositoryDataSource implements DataSource {
         ds.setMinPoolSize(5);
         ds.setAcquireIncrement(5);
         ds.setMaxPoolSize(20);
-        threadLocal = new ThreadLocal<>();
     }
 
-    public static void commitSingle(Connection connection) throws SQLException {
+    @Override
+    public void commitSingle(Connection connection) throws SQLException {
         if (ConnectionType.SINGLE.equals(connectionType)) {
             connection.commit();
         }
     }
 
-    public static void commitMany(Connection connection) throws SQLException {
+    public void commitMany(Connection connection) throws SQLException {
         connection.commit();
         connectionType = ConnectionType.SINGLE;
+    }
+
+    @Override
+    public void rollBack(Connection con) {
+        if (con != null) {
+            try {
+                con.rollback();
+            } catch (SQLException e) {
+                log.error("Failed to rollback ", e);
+            }
+        }
     }
 
     @Override
@@ -75,9 +84,22 @@ public class RepositoryDataSource implements DataSource {
         return connection;
     }
 
-    public void removeConnection() {
+    @Override
+    public void remove() {
         if (threadLocal.get() != null) {
             threadLocal.remove();
+        }
+    }
+
+    @Override
+    public void close(Connection con) {
+        try {
+            if (con != null) {
+                con.close();
+                remove();
+            }
+        } catch (Exception e) {
+            log.error("Couldn't close and remove connection", e);
         }
     }
 

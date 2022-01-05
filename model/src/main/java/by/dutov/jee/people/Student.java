@@ -40,25 +40,22 @@ public class Student extends Person {
     @ManyToMany(cascade =
             {CascadeType.MERGE,
             CascadeType.PERSIST,
-            CascadeType.DETACH,
             CascadeType.REFRESH})
     @JoinTable(
             name = "group_student",
             joinColumns = @JoinColumn(name = "student_id"),
             inverseJoinColumns = @JoinColumn(name = "group_id"))
-
-    private Set<Group> groups;
+    private Set<Group> groups = new HashSet<>();
     @ToString.Include
     @EqualsAndHashCode.Include
     @OneToMany(
             mappedBy = "student",
-            cascade = CascadeType.ALL,
-            orphanRemoval = true)
-    private List<Grade> grades;
+            cascade = {CascadeType.REFRESH, CascadeType.MERGE, CascadeType.PERSIST, CascadeType.REMOVE},
+            orphanRemoval = true
+    )
+    private List<Grade> grades = new ArrayList<>();
 
     {
-        groups = new HashSet<>();
-        grades = new ArrayList<>();
         setRole(Role.STUDENT);
     }
 
@@ -107,9 +104,8 @@ public class Student extends Person {
         return this;
     }
 
-    public Student addGroup(Group group) {
+    public void addGroup(Group group) {
         groups.add(group);
-        return this;
     }
 
     public void removeGroup(Group group) {
@@ -118,8 +114,16 @@ public class Student extends Person {
     }
 
     public Student withGrades(List<Grade> grades) {
-        this.grades = grades;
+        setGrades(grades);
         return this;
+    }
+
+    public void setGrades(List<Grade> grades) {
+        if (grades != null) {
+            this.grades.clear();
+            this.grades.addAll(grades);
+            grades.forEach(grade -> grade.setStudent(this));
+        }
     }
 
     public void addGrade(Grade grade) {
@@ -133,7 +137,7 @@ public class Student extends Person {
     }
 
     @Override
-    public String getInfo() {
+    public String infoGet() {
         return "Name: \"" + getName() +
                 "\"<br>Age: \"" + getAge() +
                 "\"<br>Role: \"" + getRole() +

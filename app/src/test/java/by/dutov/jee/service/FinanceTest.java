@@ -1,7 +1,7 @@
 package by.dutov.jee.service;
 
 import by.dutov.jee.people.Teacher;
-import by.dutov.jee.service.fasade.Finance;
+import by.dutov.jee.service.facade.Finance;
 import org.junit.Before;
 import org.junit.Test;
 import org.springframework.context.ConfigurableApplicationContext;
@@ -18,7 +18,7 @@ public class FinanceTest {
 
     @Before
     public void setUp() {
-        ConfigurableApplicationContext ctx = new AnnotationConfigApplicationContext("by\\dutov\\jee");
+        ConfigurableApplicationContext ctx = new AnnotationConfigApplicationContext(Finance.class);
         finance = ctx.getBean("finance", Finance.class);
         teacher = new Teacher()
                 .withId(3)

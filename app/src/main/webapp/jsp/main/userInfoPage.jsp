@@ -8,7 +8,7 @@
 
 <h2>User Info Page</h2>
 
-<b>${loginedUser.getInfo()}</b>
+<b>${loginedUser.infoGet()}</b>
 
 </body>
 </html>

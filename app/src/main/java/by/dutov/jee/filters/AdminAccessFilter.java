@@ -17,7 +17,7 @@ public class AdminAccessFilter implements Filter {
 
     @Override
     public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain) throws IOException, ServletException {
-        CommandServletUtils.filtredAccess((HttpServletRequest) request,
+        CommandServletUtils.filteredAccess((HttpServletRequest) request,
                 (HttpServletResponse) response, chain, "ADMIN");
     }
 }

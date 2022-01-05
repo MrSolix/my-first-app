@@ -1,11 +1,12 @@
 package by.dutov.jee.controllers.servlets;
 
-import by.dutov.jee.service.fasade.LoginService;
+import by.dutov.jee.service.facade.LoginService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.ModelAndView;
 
@@ -22,12 +23,12 @@ public class LoginServlet {
         this.loginService = loginService;
     }
 
-    @RequestMapping(method = RequestMethod.GET)
+    @GetMapping
     public String redirectLoginPage() {
         return "/loginPage";
     }
 
-    @RequestMapping(method = RequestMethod.POST)
+    @PostMapping
     public ModelAndView login(@RequestParam("userName") String userName, @RequestParam("password") String pass,
                               HttpSession httpSession) {
         ModelAndView modelAndView = new ModelAndView();
@@ -35,9 +36,7 @@ public class LoginServlet {
         log.info("Get parameters");
         log.info("userName = {}, password = ***", userName);
         log.info("Get person from db");
-        loginService.getLoginedUser(httpSession, modelAndView, userName, pass);
-        return modelAndView;
+        return loginService.getLoginedUser(httpSession, modelAndView, userName, pass);
     }
-
 
 }

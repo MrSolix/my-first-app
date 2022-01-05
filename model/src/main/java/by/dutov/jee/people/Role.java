@@ -12,9 +12,9 @@ public enum Role {
 
     private final String type;
 
-    private static Map<String, Role> value2Enum = initValue2Enum();
+    private static final Map<String, Role> value2Enum = initValue2Enum();
 
-    private static Map<Role, String> enum2Value = initEnum2Value();
+    private static final Map<Role, String> enum2Value = initEnum2Value();
 
     Role(String type) {
         this.type = type;

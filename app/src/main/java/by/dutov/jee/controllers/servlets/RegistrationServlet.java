@@ -1,17 +1,15 @@
 package by.dutov.jee.controllers.servlets;
 
 import by.dutov.jee.people.Role;
-import by.dutov.jee.service.fasade.RegistrationService;
+import by.dutov.jee.service.facade.RegistrationService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import java.io.IOException;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.servlet.ModelAndView;
 
 @Slf4j
 @Controller
@@ -24,22 +22,21 @@ public class RegistrationServlet {
         this.registrationService = registrationService;
     }
 
-    @RequestMapping(method = RequestMethod.GET)
+    @GetMapping
     public String redirectRegistrationPage() {
         return "/registrationPage";
     }
 
-    @RequestMapping(method = RequestMethod.POST)
-    public void averageSalary(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+    @PostMapping
+    public ModelAndView registration(@RequestParam("userName") String userName, @RequestParam("password") String password,
+                                     @RequestParam("name") String name, @RequestParam("age") String age,
+                                     @RequestParam("status") String roleStr) {
+        ModelAndView modelAndView = new ModelAndView();
         log.info("Entered Registration Page");
         log.info("Get parameters");
-        String userName = req.getParameter("userName");
-        String password = req.getParameter("password");
-        String name = req.getParameter("name");
-        String age = req.getParameter("age");
-        Role role = Role.getTypeByStr(req.getParameter("status"));
+        Role role = Role.getTypeByStr(roleStr);
         log.info("userName = {}, password = ***, name = {}, age = {}, role = {}", userName, name, age, role.getType());
         log.info("Set person from db");
-        registrationService.registrationUser(req, resp, userName, password, name, age, role);
+        return registrationService.registrationUser(modelAndView, userName, password, name, age, role);
     }
 }

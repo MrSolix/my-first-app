@@ -1,10 +1,10 @@
-package by.dutov.jee.service.fasade;
+package by.dutov.jee.service.facade;
 
 import by.dutov.jee.people.Person;
 import by.dutov.jee.service.encrypt.PasswordEncryptionService;
 import by.dutov.jee.service.exceptions.HashException;
 import by.dutov.jee.service.exceptions.PasswordException;
-import by.dutov.jee.service.person.PersonDaoInstance;
+import by.dutov.jee.service.person.PersonService;
 import by.dutov.jee.utils.CommandServletUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -21,7 +21,7 @@ import java.util.Optional;
 @Service
 @RequiredArgsConstructor
 public class CheckingService {
-    private final PersonDaoInstance personDaoInstance;
+    private final PersonService personService;
 
     public boolean checkPassword(Person person, String password) {
         try {
@@ -42,12 +42,18 @@ public class CheckingService {
     }
 
     public Person checkUser(String userName) {
-        Optional<? extends Person> person = personDaoInstance.getRepository().find(userName);
+        Optional<? extends Person> person = personService.find(userName);
         return person.orElse(null);
     }
 
-    public boolean isEmpty(String string) {
-        return "".equals(string.trim());
+    public boolean isEmpty(String... string) {
+        int i = 0;
+        for (String s : string) {
+            if ("".equals(s.trim())) {
+                i++;
+            }
+        }
+        return i > 0;
     }
 
 

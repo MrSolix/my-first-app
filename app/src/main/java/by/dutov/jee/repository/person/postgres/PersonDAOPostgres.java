@@ -9,11 +9,9 @@ import by.dutov.jee.people.Teacher;
 import by.dutov.jee.people.grades.Grade;
 import by.dutov.jee.repository.DAOInterface;
 import by.dutov.jee.repository.RepositoryDataSource;
-import by.dutov.jee.repository.group.GroupDAOInterface;
+import by.dutov.jee.repository.group.postgres.GroupDAOPostgres;
 import by.dutov.jee.service.exceptions.ApplicationException;
 import by.dutov.jee.service.exceptions.DataBaseException;
-import by.dutov.jee.service.group.GroupDaoInstance;
-import by.dutov.jee.utils.DataBaseUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
@@ -25,6 +23,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -32,11 +31,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
-import static by.dutov.jee.repository.RepositoryDataSource.commitMany;
-import static by.dutov.jee.repository.RepositoryDataSource.commitSingle;
 import static by.dutov.jee.repository.RepositoryDataSource.connectionType;
-import static by.dutov.jee.utils.DataBaseUtils.closeQuietly;
-import static by.dutov.jee.utils.DataBaseUtils.rollBack;
 
 
 @Slf4j
@@ -66,12 +61,10 @@ public class PersonDAOPostgres extends AbstractPersonDAOPostgres implements DAOI
                     "from users u";
     //language=SQL
     public static final String SELECT_GRADES = "select " +
-            "g.grade g_grade, t.name t_name " +
+            "g.grade g_grade, g.theme_name g_theme_name, g.id g_id " +
             "from grades g " +
             "left join users u " +
-            "on u.id = g.student_id " +
-            "left join theme t " +
-            "on t.id = g.theme_id";
+            "on u.id = g.student_id ";
     //language=SQL
     public static final String SELECT_SALARY = "select s.salary s_salary from salaries s";
     //language=SQL
@@ -104,19 +97,19 @@ public class PersonDAOPostgres extends AbstractPersonDAOPostgres implements DAOI
     public static final String U_AGE = "u_age";
     public static final String U_ROLE = "u_role";
     public static final String G_GRADE = "g_grade";
-    public static final String T_NAME = "t_name";
+    public static final String G_THEME_NAME = "g_theme_name";
     public static final String S_SALARY = "s_salary";
+    public static final String UPDATE_GRADES_BY_STUDENT_ID = "update grades g set theme_name = ?, grade = ? where g.student_id = ? and g.id = ?";
+    public static final String INSERT_GRADES_BY_STUDENT_ID = "insert into grades (theme_name, grade, student_id) values (?, ?, ?)";
 
     private final RepositoryDataSource repositoryDataSource;
-    private final GroupDaoInstance groupDaoInstance;
-    private final DataBaseUtils dataBaseUtils;
+    private final GroupDAOPostgres groupDAOPostgres;
 
     @Autowired
-    public PersonDAOPostgres(RepositoryDataSource repositoryDataSource, GroupDaoInstance groupDaoInstance, DataBaseUtils dataBaseUtils) {
-        super(repositoryDataSource, dataBaseUtils);
+    public PersonDAOPostgres(RepositoryDataSource repositoryDataSource, GroupDAOPostgres groupDAOPostgres) {
+        super(repositoryDataSource);
         this.repositoryDataSource = repositoryDataSource;
-        this.groupDaoInstance = groupDaoInstance;
-        this.dataBaseUtils = dataBaseUtils;
+        this.groupDAOPostgres = groupDAOPostgres;
     }
 
     @Override
@@ -128,25 +121,21 @@ public class PersonDAOPostgres extends AbstractPersonDAOPostgres implements DAOI
             con = repositoryDataSource.getConnection();
             Person user = super.save(person);
             if (Role.TEACHER.equals(person.getRole())) {
-                Teacher teacher = ((Teacher) user);
-                int executeUpdate = saveSalary(teacher, con, ps);
-                if (executeUpdate <= 0) {
-                    throw new DataBaseException("Не удалось сохранить или изменить зарплату");
-                }
+                saveSalary(((Teacher) person), con, ps);
             }
-            commitMany(con);
+            repositoryDataSource.commitMany(con);
             return user;
         } catch (DataBaseException e) {
-            rollBack(con);
+            repositoryDataSource.rollBack(con);
             log.error("Пользователь не сохранен", e);
             throw new DataBaseException(e);
         } catch (SQLException e) {
-            rollBack(con);
+            repositoryDataSource.rollBack(con);
             log.error("Ошибка с сохранением", e);
             throw new ApplicationException(e);
         } finally {
-            closeQuietly(ps);
-            dataBaseUtils.closeAndRemove(con);
+            repositoryDataSource.closeQuietly(ps);
+            repositoryDataSource.close(con);
         }
     }
 
@@ -176,8 +165,182 @@ public class PersonDAOPostgres extends AbstractPersonDAOPostgres implements DAOI
 
     @Override
     public Person update(Integer id, Person person) {
-        person.setId(id);
-        return super.update(person.getId(), person);
+
+        Connection con = null;
+        PreparedStatement ps = null;
+        try {
+            Optional<Person> optionalPerson = super.find(id);
+            Person oldPerson = optionalPerson.get();
+            con = repositoryDataSource.getConnection();
+            Person newPerson = setPersonFields(oldPerson, person);
+            super.update(newPerson.getId(), newPerson);
+            if (Role.STUDENT.equals(newPerson.getRole())) {
+                return updateStudent(((Student) oldPerson), ((Student) newPerson), ((Student) person), con, ps);
+            }
+            if (Role.TEACHER.equals(newPerson.getRole())) {
+                return updateTeacher(((Teacher) newPerson), ((Teacher) person), con, ps);
+            }
+            return newPerson;
+        } catch (DataBaseException dataBaseException) {
+            repositoryDataSource.rollBack(con);
+            log.error(dataBaseException.getMessage(), dataBaseException);
+            throw new DataBaseException(dataBaseException);
+        } catch (SQLException e) {
+            repositoryDataSource.rollBack(con);
+            log.error("Ошибка в общем методе изменения пользователя", e);
+            throw new DataBaseException(e);
+        } finally {
+            repositoryDataSource.closeQuietly(ps);
+        }
+    }
+
+    private Teacher updateTeacher(Teacher newTeacher, Teacher teacher, Connection con, PreparedStatement ps) throws SQLException {
+        Double salary = teacher.getSalary();
+        Group group = teacher.getGroup();
+        if (group != null) {
+            saveGroup(newTeacher, teacher, con, ps);
+        }
+        if (salary != null) {
+            newTeacher.setSalary(salary);
+            saveSalary(newTeacher, con, ps);
+        }
+        return newTeacher;
+    }
+
+    private void saveGroup(Teacher newTeacher, Teacher teacher, Connection con, PreparedStatement ps) throws SQLException {
+        Optional<Group> optionalGroup = groupDAOPostgres.find(teacher.getGroup().getId());
+        if (optionalGroup.isPresent()) {
+            Group group = optionalGroup.get();
+            if (group.getTeacher() == null) {
+                Optional<Person> person = super.find(teacher.getId());
+                if (person.isPresent()) {
+                    removeTeacherFromGroup(con, ps, ((Teacher) person.get()));
+                }
+                group.setTeacher(teacher);
+                groupDAOPostgres.save(group);
+                newTeacher.setGroup(group);
+            }
+        }
+    }
+
+    private Student updateStudent(Student oldStudent, Student newStudent, Student student, Connection con, PreparedStatement ps) throws SQLException {
+        Set<Group> groups = student.getGroups();
+        List<Grade> grades = student.getGrades();
+        if (groups != null && !groups.isEmpty()) {
+            newStudent.setGroups(groups);
+            groups.forEach(group -> groupDAOPostgres.saveStudentInGroup(group, newStudent));
+        }
+        if (grades != null && !grades.isEmpty()) {
+            List<Grade> newGrades = saveGrades(oldStudent, student, con, ps);
+            newStudent.setGrades(newGrades);
+        }
+        return newStudent;
+    }
+
+    private List<Grade> saveGrades(Student oldStudent, Student student, Connection con, PreparedStatement ps) throws SQLException {
+        List<Grade> grades = getGrades(oldStudent.getUserName());
+        List<Grade> studentGrades = student.getGrades();
+        Set<Grade> allGrades = new HashSet<>(grades);
+        allGrades.removeAll(studentGrades);
+        allGrades.addAll(studentGrades);
+        if (allGrades.isEmpty()) {
+            return new ArrayList<>();
+        }
+        List<Grade> updateGrades = equalsGradeLists(grades, new ArrayList<>(allGrades));
+        for (Grade g : updateGrades) {
+            saveOneGrade(student, con, g, UPDATE_GRADES_BY_STUDENT_ID, ps);
+        }
+        List<Grade> newGrades = checkNewGrades(allGrades, updateGrades);
+        for (Grade g : newGrades) {
+            saveOneGrade(student, con, g, INSERT_GRADES_BY_STUDENT_ID, ps);
+        }
+        List<Grade> result = new ArrayList<>();
+        result.addAll(updateGrades);
+        result.addAll(newGrades);
+        return result;
+    }
+
+    private void saveOneGrade(Student student, Connection con, Grade g, String sql, PreparedStatement ps) throws SQLException {
+        ps = con.prepareStatement(sql);
+        if (g.getId() != null) {
+            ps.setInt(4, g.getId());
+        }
+        ps.setString(1, g.getThemeName());
+        ps.setInt(2, g.getGrade());
+        ps.setInt(3, student.getId());
+        if (ps.executeUpdate() <= 0) {
+            throw new DataBaseException("Ошибка с записью оценок");
+        }
+    }
+
+    private List<Grade> checkNewGrades(Set<Grade> allGrades, List<Grade> updateGrades) {
+        List<Grade> result = new ArrayList<>();
+        allGrades.removeAll(updateGrades);
+        for (Grade allGrade : allGrades) {
+            Grade newGrade = new Grade();
+            if (allGrade.getThemeName() != null) {
+                newGrade.setThemeName(allGrade.getThemeName());
+            } else {
+                newGrade.setThemeName("Math");
+            }
+            if (allGrade.getGrade() != null) {
+                newGrade.setGrade(allGrade.getGrade());
+            } else {
+                newGrade.setGrade(0);
+            }
+            result.add(newGrade);
+        }
+        return result;
+    }
+
+    private List<Grade> equalsGradeLists(List<Grade> oldGrades, List<Grade> allGrades) {
+        List<Grade> result = new ArrayList<>();
+        Map<Integer, Grade> mapGrades = new HashMap<>();
+        oldGrades.forEach(grade -> mapGrades.putIfAbsent(grade.getId(), grade));
+        for (Grade allGrade : allGrades) {
+            if (oldGrades.contains(allGrade)) {
+                Grade oldGrade = mapGrades.get(allGrade.getId());
+                Grade newGrade = new Grade();
+                newGrade.setId(oldGrade.getId());
+                if (allGrade.getThemeName() != null) {
+                    newGrade.setThemeName(allGrade.getThemeName());
+                } else {
+                    newGrade.setThemeName(oldGrade.getThemeName());
+                }
+                if (allGrade.getGrade() != null) {
+                    newGrade.setGrade(allGrade.getGrade());
+                } else {
+                    newGrade.setGrade(oldGrade.getGrade());
+                }
+                result.add(newGrade);
+
+            }
+        }
+        return result;
+    }
+
+    private Person setPersonFields(Person oldPerson, Person person) {
+        String userName = person.getUserName();
+        byte[] password = person.getPassword();
+        byte[] salt = person.getSalt();
+        String name = person.getName();
+        Integer age = person.getAge();
+        if (userName != null) {
+            oldPerson.setUserName(userName);
+        }
+        if (password != null) {
+            oldPerson.setPassword(password);
+        }
+        if (salt != null) {
+            oldPerson.setSalt(salt);
+        }
+        if (name != null) {
+            oldPerson.setName(name);
+        }
+        if (age != null) {
+            oldPerson.setAge(age);
+        }
+        return oldPerson;
     }
 
     @Override
@@ -197,15 +360,15 @@ public class PersonDAOPostgres extends AbstractPersonDAOPostgres implements DAOI
                 removeTeacherFromGroup(con, ps, teacher);
             }
             super.remove(person);
-            commitMany(con);
+            repositoryDataSource.commitMany(con);
             return person;
         } catch (DataBaseException | SQLException e) {
-            rollBack(con);
+            repositoryDataSource.rollBack(con);
             log.error("Не удалось удалить пользователя.");
             throw new DataBaseException(e);
         } finally {
-            closeQuietly(ps);
-            dataBaseUtils.closeAndRemove(con);
+            repositoryDataSource.closeQuietly(ps);
+            repositoryDataSource.close(con);
         }
     }
 
@@ -301,37 +464,36 @@ public class PersonDAOPostgres extends AbstractPersonDAOPostgres implements DAOI
             if (Role.STUDENT.equals(user.getRole())) {
                 Student student = (Student) user;
                 student.setGrades(getGrades(user.getUserName()));
-                Set<Group> groups = getGroup(student, SELECT_GROUP_BY_STUDENT_ID);
+                Set<Group> groups = getGroup(student.getId(), SELECT_GROUP_BY_STUDENT_ID);
                 student.setGroups(groups);
-                commitMany(con);
+                repositoryDataSource.commitMany(con);
                 return Optional.of(student);
             } else if (Role.TEACHER.equals(user.getRole())) {
                 Teacher teacher = (Teacher) user;
                 teacher.setSalary(findSalary(teacher.getId()));
-                Group group = getGroup(teacher, SELECT_GROUP_BY_TEACHER_ID)
+                Group group = getGroup(teacher.getId(), SELECT_GROUP_BY_TEACHER_ID)
                         .stream().findFirst().orElse(null);
                 teacher.setGroup(group);
-                commitMany(con);
+                repositoryDataSource.commitMany(con);
                 return Optional.of(teacher);
             } else {
-                commitMany(con);
+                repositoryDataSource.commitMany(con);
                 return Optional.of(user);
             }
         } catch (DataBaseException e) {
-            rollBack(con);
+            repositoryDataSource.rollBack(con);
             return Optional.empty();
         } catch (SQLException s) {
-            rollBack(con);
+            repositoryDataSource.rollBack(con);
             log.error("Ошибка в общем методе поиска пользователя", s);
             throw new DataBaseException(s);
         } finally {
-            dataBaseUtils.closeAndRemove(con);
+            repositoryDataSource.close(con);
         }
     }
 
 
-    private Set<Group> getGroup(Person user, String sql) {
-        GroupDAOInterface instance = groupDaoInstance.getRepository();
+    private Set<Group> getGroup(Integer userId, String sql) {
         Connection con;
         PreparedStatement ps = null;
         ResultSet rs = null;
@@ -339,16 +501,16 @@ public class PersonDAOPostgres extends AbstractPersonDAOPostgres implements DAOI
         try {
             con = repositoryDataSource.getConnection();
             ps = con.prepareStatement(sql);
-            ps.setInt(1, user.getId());
+            ps.setInt(1, userId);
             rs = ps.executeQuery();
             while (rs.next()) {
                 int gId = rs.getInt(G_ID);
-                instance.find(gId).ifPresent(group -> putIfAbsentAndReturn(groupMap, gId, group));
+                groupDAOPostgres.find(gId).ifPresent(group -> putIfAbsentAndReturn(groupMap, gId, group));
             }
         } catch (SQLException e) {
             log.error("Ошибка при получении группы", e);
         } finally {
-            closeQuietly(rs, ps);
+            repositoryDataSource.closeQuietly(rs, ps);
         }
         Collection<Group> values = groupMap.values();
         return values.isEmpty() ? new HashSet<>() : new HashSet<>(values);
@@ -365,22 +527,25 @@ public class PersonDAOPostgres extends AbstractPersonDAOPostgres implements DAOI
             rs = ps.executeQuery();
             List<Grade> grades = new ArrayList<>();
             while (rs.next()) {
-                String tName = rs.getString(T_NAME);
+                int gId = rs.getInt(G_ID);
+                String tName = rs.getString(G_THEME_NAME);
                 int gGrade = rs.getInt(G_GRADE);
 
+
                 grades.add(new Grade()
+                        .withId(gId)
                         .withName(tName)
                         .withGrade(gGrade)
                 );
             }
-            commitSingle(con);
+            repositoryDataSource.commitSingle(con);
             return grades;
         } catch (SQLException e) {
-            rollBack(con);
+            repositoryDataSource.rollBack(con);
             log.error(e.getMessage());
             throw new DataBaseException(e);
         } finally {
-            closeQuietly(rs, ps);
+            repositoryDataSource.closeQuietly(rs, ps);
         }
     }
 
@@ -398,16 +563,16 @@ public class PersonDAOPostgres extends AbstractPersonDAOPostgres implements DAOI
             }
             return -1;
         } catch (SQLException e) {
-            rollBack(con);
+            repositoryDataSource.rollBack(con);
             log.error(e.getMessage());
             throw new DataBaseException(e);
         } finally {
-            closeQuietly(rs, ps);
+            repositoryDataSource.closeQuietly(rs, ps);
         }
     }
 
     private void removeTeacherFromGroup(Connection con, PreparedStatement ps, Teacher teacher) throws SQLException {
-        Set<Group> group = getGroup(teacher, SELECT_GROUP_BY_TEACHER_ID);
+        Set<Group> group = getGroup(teacher.getId(), SELECT_GROUP_BY_TEACHER_ID);
         if (!group.isEmpty()) {
             ps = con.prepareStatement(DELETE_TEACHER_FROM_GROUP);
             ps.setInt(1, teacher.getId());
@@ -430,7 +595,7 @@ public class PersonDAOPostgres extends AbstractPersonDAOPostgres implements DAOI
     }
 
     private void removeStudentFromGroups(Connection con, PreparedStatement ps, Student student) throws SQLException {
-        Set<Group> group = getGroup(student, SELECT_GROUP_BY_STUDENT_ID);
+        Set<Group> group = getGroup(student.getId(), SELECT_GROUP_BY_STUDENT_ID);
         if (!group.isEmpty()) {
             ps = con.prepareStatement(DELETE_STUDENT_FROM_GROUP);
             ps.setInt(1, student.getId());

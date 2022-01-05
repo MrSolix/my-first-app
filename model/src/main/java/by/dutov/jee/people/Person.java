@@ -1,8 +1,8 @@
 package by.dutov.jee.people;
 
 import by.dutov.jee.AbstractEntity;
-import by.dutov.jee.service.encrypt.PasswordEncryptionService;
 import by.dutov.jee.service.exceptions.PasswordException;
+import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
@@ -21,6 +21,7 @@ import static by.dutov.jee.service.encrypt.PasswordEncryptionService.getEncrypte
 
 @Data
 @NoArgsConstructor
+@AllArgsConstructor
 @EqualsAndHashCode(callSuper = true)
 @ToString(callSuper = true)
 @Slf4j

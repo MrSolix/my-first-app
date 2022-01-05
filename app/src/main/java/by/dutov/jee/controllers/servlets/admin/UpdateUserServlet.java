@@ -1,16 +1,16 @@
 package by.dutov.jee.controllers.servlets.admin;
 
-import by.dutov.jee.service.fasade.UpdateService;
+import by.dutov.jee.service.facade.UpdateService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.servlet.ModelAndView;
 
-import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import java.io.IOException;
 
 @Slf4j
 @Controller
@@ -23,16 +23,16 @@ public class UpdateUserServlet {
         this.updateService = updateService;
     }
 
-    @RequestMapping(method = RequestMethod.GET)
+    @GetMapping
     public String redirectUpdateUserPage() {
         return "/admin/updateUserPage";
     }
 
-    @RequestMapping(method = RequestMethod.POST)
-    public void updateUser(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+    @PostMapping
+    public ModelAndView updateUser(@RequestParam("userLogin") String userLogin, HttpServletRequest req) {
+        ModelAndView modelAndView = new ModelAndView();
         log.info("Entered Update User Page");
         log.info("Get parameter");
-        String userLogin = req.getParameter("userLogin");
-        updateService.updateUser(req, resp, userLogin);
+        return updateService.updateUser(modelAndView, userLogin, req);
     }
 }

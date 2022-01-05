@@ -64,7 +64,7 @@ public class Admin extends Person{
     }
 
     @Override
-    public String getInfo() {
+    public String infoGet() {
         return "Name: \"" + getName() +
                 "\"<br>Age: \"" + getAge() +
                 "\"<br>Role: \"" + getRole() +
