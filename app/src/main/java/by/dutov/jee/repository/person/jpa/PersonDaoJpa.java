@@ -1,5 +1,6 @@
 package by.dutov.jee.repository.person.jpa;
 
+import by.dutov.jee.aspect.JpaTransaction;
 import by.dutov.jee.group.Group;
 import by.dutov.jee.people.Admin;
 import by.dutov.jee.people.Person;
@@ -10,11 +11,9 @@ import by.dutov.jee.people.grades.Grade;
 import by.dutov.jee.repository.DAOInterface;
 import by.dutov.jee.repository.EntityManagerHelper;
 import by.dutov.jee.repository.group.jpa.GroupDaoJpa;
-import by.dutov.jee.repository.person.postgres.ConnectionType;
 import by.dutov.jee.service.exceptions.DataBaseException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Repository;
 
 import javax.persistence.EntityManager;
@@ -26,11 +25,8 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 
-import static by.dutov.jee.repository.AbstractGeneralTransaction.connectionType;
-
 @Slf4j
 @Repository("jpaPerson")
-@Lazy
 public class PersonDaoJpa extends AbstractPersonDaoJpa implements DAOInterface<Person> {
     public static final String ERROR_FROM_FIND_GRADES = "Error from find grades";
     public static final String ERROR_FROM_SAVE_GRADES = "Error from save grades";
@@ -53,49 +49,26 @@ public class PersonDaoJpa extends AbstractPersonDaoJpa implements DAOInterface<P
     }
 
     @Override
+    @JpaTransaction
     public Person save(Person person) {
-        connectionType = ConnectionType.MANY;
-        EntityManager em = null;
-        try {
-            em = helper.getEntityManager();
-            helper.begin(em);
-
-            Person savedPerson = super.save(person);
-
-            helper.commitMany(em);
-            return savedPerson;
-        } catch (Exception e) {
-            helper.rollBack(em);
-            log.error(ERROR_FROM_SAVE, e);
-            throw new DataBaseException(ERROR_FROM_SAVE, e);
-        } finally {
-            helper.close(em);
-        }
+        return super.save(person);
     }
 
     @Override
+    @JpaTransaction
     public Optional<Person> find(Integer id) {
-        connectionType = ConnectionType.MANY;
-        EntityManager em = null;
-        try {
-            em = helper.getEntityManager();
-            helper.begin(em);
-
-            Optional<Person> student1 = getPerson(id, null, em, Role.STUDENT);
-            if (student1.isPresent()) return student1;
-            Optional<Person> teacher = getPerson(id, null, em, Role.TEACHER);
-            if (teacher.isPresent()) return teacher;
-            return getPerson(id, null, em, Role.ADMIN);
-        } catch (Exception e) {
-            helper.rollBack(em);
-            log.error(ERROR_FROM_FIND);
-            throw new DataBaseException(ERROR_FROM_FIND);
-        } finally {
-            helper.close(em);
+        Optional<Person> student = getPerson(id, null, Role.STUDENT);
+        if (student.isPresent()) {
+            return student;
         }
+        Optional<Person> teacher = getPerson(id, null, Role.TEACHER);
+        if (teacher.isPresent()) {
+            return teacher;
+        }
+        return getPerson(id, null, Role.ADMIN);
     }
 
-    private Optional<Person> getPerson(Integer id, String name, EntityManager em, Role personRole) {
+    private Optional<Person> getPerson(Integer id, String name, Role personRole) {
         setParameters(personRole);
         if (id != null) {
             return super.find(id);
@@ -105,76 +78,43 @@ public class PersonDaoJpa extends AbstractPersonDaoJpa implements DAOInterface<P
     }
 
     @Override
+    @JpaTransaction
     public Optional<Person> find(String name) {
-        connectionType = ConnectionType.MANY;
-        EntityManager em = null;
-        try {
-            em = helper.getEntityManager();
-            helper.begin(em);
-
-            Optional<Person> student1 = getPerson(null, name, em, Role.STUDENT);
-            if (student1.isPresent()) return student1;
-            Optional<Person> teacher = getPerson(null, name, em, Role.TEACHER);
-            if (teacher.isPresent()) return teacher;
-            return getPerson(null, name, em, Role.ADMIN);
-        } catch (Exception e) {
-            helper.rollBack(em);
-            log.error(ERROR_FROM_FIND);
-            throw new DataBaseException(ERROR_FROM_FIND);
-        } finally {
-            helper.close(em);
+        Optional<Person> student = getPerson(null, name, Role.STUDENT);
+        if (student.isPresent()) {
+            return student;
         }
+        Optional<Person> teacher = getPerson(null, name, Role.TEACHER);
+        if (teacher.isPresent()) {
+            return teacher;
+        }
+        return getPerson(null, name, Role.ADMIN);
     }
 
     @Override
+    @JpaTransaction
     public Person remove(Person person) {
-        connectionType = ConnectionType.MANY;
-        EntityManager em = null;
-        try {
-            em = helper.getEntityManager();
-            helper.begin(em);
-
-            if (Role.STUDENT.equals(person.getRole())) {
-                Student student = removeStudent(em, (Student) person);
-                helper.commitMany(em);
-                return student;
-            }
-            if (Role.TEACHER.equals(person.getRole())) {
-                Teacher teacher = removeTeacher((Teacher) person);
-                helper.commitMany(em);
-                return teacher;
-            }
-
-            helper.commitMany(em);
-            throw new DataBaseException(PERSON_NOT_FOUND);
-        } catch (Exception e) {
-            helper.rollBack(em);
-            log.error(ERROR_FROM_REMOVE);
-            throw new DataBaseException(ERROR_FROM_REMOVE);
-        } finally {
-            helper.close(em);
+        EntityManager em = helper.getEntityManager();
+        if (Role.STUDENT.equals(person.getRole())) {
+            return removeStudent(em, (Student) person);
         }
+        if (Role.TEACHER.equals(person.getRole())) {
+            return removeTeacher((Teacher) person);
+        }
+        throw new DataBaseException(PERSON_NOT_FOUND);
     }
 
     private Teacher removeTeacher(Teacher teacher) {
-        EntityManager em = null;
-        try {
-            em = helper.getEntityManager();
-
-            Group group = teacher.getGroup();
-            if (group != null) {
-                Query query = em.createQuery(REMOVE_TEACHER_FROM_GROUP);
-                query.setParameter("id", group.getId());
-                query.setParameter("teacher_id", teacher.getId());
-                query.executeUpdate();
-                teacher.removeGroup(group);
-            }
-            return (Teacher) super.remove(teacher);
-        } catch (Exception e) {
-            helper.rollBack(em);
-            log.error(ERROR_FROM_REMOVE_TEACHER, e);
-            throw new DataBaseException(ERROR_FROM_REMOVE_TEACHER, e);
+        EntityManager em = helper.getEntityManager();
+        Group group = teacher.getGroup();
+        if (group != null) {
+            Query query = em.createQuery(REMOVE_TEACHER_FROM_GROUP);
+            query.setParameter("id", group.getId());
+            query.setParameter("teacher_id", teacher.getId());
+            query.executeUpdate();
+            teacher.removeGroup(group);
         }
+        return (Teacher) super.remove(teacher);
     }
 
     private Student removeStudent(EntityManager em, Student student) {
@@ -190,34 +130,26 @@ public class PersonDaoJpa extends AbstractPersonDaoJpa implements DAOInterface<P
     }
 
     @Override
+    @JpaTransaction
     public Person update(Integer id, Person person) {
-        EntityManager em = null;
-        try {
-            em = helper.getEntityManager();
-            helper.begin(em);
-
-            if (Role.STUDENT.equals(person.getRole())) {
-                Optional<Person> oldStudent = getPerson(id, null, em, Role.STUDENT);
-                if (oldStudent.isPresent()) {
-                    Student student = updateStudent(((Student) oldStudent.get()), ((Student) person));
-                    em.merge(student);
-                    return student;
-                }
+        EntityManager em = helper.getEntityManager();
+        if (Role.STUDENT.equals(person.getRole())) {
+            Optional<Person> oldStudent = getPerson(id, null, Role.STUDENT);
+            if (oldStudent.isPresent()) {
+                Student student = updateStudent(((Student) oldStudent.get()), ((Student) person));
+                em.merge(student);
+                return student;
             }
-            if (Role.TEACHER.equals(person.getRole())) {
-                Optional<Person> oldTeacher = getPerson(id, null, em, Role.TEACHER);
-                if (oldTeacher.isPresent()) {
-                    Teacher teacher = updateTeacher(((Teacher) oldTeacher.get()), ((Teacher) person));
-                    em.merge(teacher);
-                    return teacher;
-                }
-            }
-            throw new DataBaseException(PERSON_NOT_FOUND);
-        } catch (Exception e) {
-            helper.rollBack(em);
-            log.error(ERROR_FROM_UPDATE);
-            throw new DataBaseException(ERROR_FROM_UPDATE);
         }
+        if (Role.TEACHER.equals(person.getRole())) {
+            Optional<Person> oldTeacher = getPerson(id, null, Role.TEACHER);
+            if (oldTeacher.isPresent()) {
+                Teacher teacher = updateTeacher(((Teacher) oldTeacher.get()), ((Teacher) person));
+                em.merge(teacher);
+                return teacher;
+            }
+        }
+        throw new DataBaseException(PERSON_NOT_FOUND);
     }
 
     private Teacher updateTeacher(Teacher oldTeacher, Teacher teacher) {
@@ -241,21 +173,14 @@ public class PersonDaoJpa extends AbstractPersonDaoJpa implements DAOInterface<P
     }
 
     private void saveGroup(Teacher oldTeacher, Teacher teacher) {
-        EntityManager em = helper.getEntityManager();
         Group newGroup = teacher.getGroup();
         Group oldGroup = oldTeacher.getGroup();
-        try {
-            Optional<Group> group = groupDaoJpa.find(newGroup.getId());
-            if (group.isPresent() && group.get().getTeacher() == null) {
-                if (oldGroup != null) {
-                    oldGroup.setTeacher(null);
-                }
-                oldTeacher.setGroup(newGroup);
+        Optional<Group> group = groupDaoJpa.find(newGroup.getId());
+        if (group.isPresent() && group.get().getTeacher() == null) {
+            if (oldGroup != null) {
+                oldGroup.setTeacher(null);
             }
-        } catch (Exception e) {
-            helper.rollBack(em);
-            log.error(ERROR_FROM_SAVE_GROUP, e);
-            throw new DataBaseException(ERROR_FROM_SAVE_GROUP, e);
+            oldTeacher.setGroup(newGroup);
         }
     }
 
@@ -272,42 +197,28 @@ public class PersonDaoJpa extends AbstractPersonDaoJpa implements DAOInterface<P
     }
 
     private void saveGroups(Student oldStudent, Set<Group> studentGroups) {
-        EntityManager em = helper.getEntityManager();
         Set<Group> oldGroups = oldStudent.getGroups();
-        try {
-            if (!studentGroups.isEmpty()) {
-                for (Group g : studentGroups) {
-                    if (!oldGroups.contains(g)) {
-                        Optional<Group> group = groupDaoJpa.find(g.getId());
-                        group.ifPresent(oldStudent::addGroup);
-                    }
+        if (!studentGroups.isEmpty()) {
+            for (Group g : studentGroups) {
+                if (!oldGroups.contains(g)) {
+                    Optional<Group> group = groupDaoJpa.find(g.getId());
+                    group.ifPresent(oldStudent::addGroup);
                 }
             }
-        } catch (Exception e) {
-            helper.rollBack(em);
-            log.error(ERROR_FROM_SAVE_GROUPS, e);
-            throw new DataBaseException(ERROR_FROM_SAVE_GROUPS, e);
         }
     }
 
     private void saveGrades(Student oldStudent, List<Grade> studentGrades) {
-        EntityManager em = helper.getEntityManager();
         List<Grade> oldGrades = oldStudent.getGrades();
         List<Grade> allGrades = new ArrayList<>(oldGrades);
         allGrades.removeAll(studentGrades);
         allGrades.addAll(studentGrades);
-        try {
-            if (allGrades.isEmpty()) {
-                return;
-            }
-            List<Grade> updateGrades = equalsGradeLists(oldGrades, allGrades);
-            List<Grade> newGrades = checkNewGrades(allGrades, updateGrades);
-            oldStudent.setGrades(newGrades);
-        } catch (Exception e) {
-            helper.rollBack(em);
-            log.error(ERROR_FROM_SAVE_GRADES, e);
-            throw new DataBaseException(ERROR_FROM_SAVE_GRADES, e);
+        if (allGrades.isEmpty()) {
+            return;
         }
+        List<Grade> updateGrades = equalsGradeLists(oldGrades, allGrades);
+        List<Grade> newGrades = checkNewGrades(allGrades, updateGrades);
+        oldStudent.setGrades(newGrades);
     }
 
     private List<Grade> checkNewGrades(List<Grade> allGrades, List<Grade> updateGrades) {
@@ -357,27 +268,13 @@ public class PersonDaoJpa extends AbstractPersonDaoJpa implements DAOInterface<P
     }
 
     @Override
+    @JpaTransaction
     public List<Person> findAll() {
-        connectionType = ConnectionType.MANY;
-        EntityManager em = null;
-        try {
-            em = helper.getEntityManager();
-            helper.begin(em);
-
-            setParameters(Role.STUDENT);
-            List<Person> personList = new ArrayList<>(super.findAll());
-            setParameters(Role.TEACHER);
-            personList.addAll(super.findAll());
-
-            helper.commitMany(em);
-            return personList;
-        } catch (Exception e) {
-            helper.rollBack(em);
-            log.error(ERROR_FROM_FIND_ALL);
-            throw new DataBaseException(ERROR_FROM_FIND_ALL);
-        } finally {
-            helper.close(em);
-        }
+        setParameters(Role.STUDENT);
+        List<Person> personList = new ArrayList<>(super.findAll());
+        setParameters(Role.TEACHER);
+        personList.addAll(super.findAll());
+        return personList;
     }
 
     @Override

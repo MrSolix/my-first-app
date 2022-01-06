@@ -55,7 +55,6 @@ public class EntityManagerHelper extends AbstractGeneralTransaction<EntityManage
         if (entityManager.getTransaction() != null) {
             entityManager.getTransaction().rollback();
         }
-
     }
 
     @Override
@@ -81,8 +80,6 @@ public class EntityManagerHelper extends AbstractGeneralTransaction<EntityManage
         try {
             if (entityManager != null && ConnectionType.SINGLE.equals(connectionType)) {
                 entityManager.close();
-            } else {
-
             }
         } catch (Exception e) {
             log.error("Couldn't close ", e);

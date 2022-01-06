@@ -27,7 +27,7 @@ public class SalaryServlet{
     }
 
     @PostMapping
-    public ModelAndView salary(@RequestParam("userName") String userName) {
+    public ModelAndView getSalary(@RequestParam("userName") String userName) {
         ModelAndView modelAndView = new ModelAndView();
         log.info("Get parameters");
         log.info("userName = {}", userName);

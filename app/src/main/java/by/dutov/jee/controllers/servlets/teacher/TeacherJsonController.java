@@ -1,13 +1,19 @@
 package by.dutov.jee.controllers.servlets.teacher;
 
-import by.dutov.jee.controllers.servlets.AbstractJsonController;
 import by.dutov.jee.people.Person;
 import by.dutov.jee.people.Role;
 import by.dutov.jee.people.Teacher;
 import by.dutov.jee.service.person.PersonService;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -18,11 +24,12 @@ import java.util.Optional;
 @RestController
 @RequestMapping(path = "/json/teachers", produces = MediaType.APPLICATION_JSON_VALUE)
 @RequiredArgsConstructor
-public class TeacherJsonController implements AbstractJsonController<Teacher> {
+@Slf4j
+public class TeacherJsonController {
 
     private final PersonService personService;
 
-    @Override
+    @GetMapping
     public List<Teacher> getAll() {
         List<Person> all = personService.findAll();
         List<Teacher> teachers = new ArrayList<>();
@@ -35,8 +42,8 @@ public class TeacherJsonController implements AbstractJsonController<Teacher> {
         return teachers;
     }
 
-    @Override
-    public ResponseEntity<Teacher> getEntity(int id) {
+    @GetMapping("/{id}")
+    public ResponseEntity<Teacher> getTeacher(@PathVariable int id) {
         Optional<Person> personOptional = personService.find(id);
         if (personOptional.isPresent()) {
             Person person = personOptional.get();
@@ -47,16 +54,16 @@ public class TeacherJsonController implements AbstractJsonController<Teacher> {
         return ResponseEntity.notFound().build();
     }
 
-    @Override
-    public ResponseEntity<Teacher> saveEntity(Teacher teacher) {
+    @PostMapping
+    public ResponseEntity<Teacher> saveTeacher(@RequestBody Teacher teacher) {
         if (Role.TEACHER.equals(teacher.getRole())) {
             return ResponseEntity.ok((Teacher) personService.save(teacher));
         }
         return ResponseEntity.badRequest().build();
     }
 
-    @Override
-    public ResponseEntity<?> updateEntity(int id, Teacher teacher) {
+    @PutMapping("/{id}")
+    public ResponseEntity<?> updateTeacher(@PathVariable int id, @RequestBody Teacher teacher) {
         if (teacher != null) {
             if (id != teacher.getId()) {
                 return ResponseEntity
@@ -73,8 +80,8 @@ public class TeacherJsonController implements AbstractJsonController<Teacher> {
         return ResponseEntity.notFound().build();
     }
 
-    @Override
-    public ResponseEntity<Teacher> deleteEntity(int id) {
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Teacher> deleteTeacher(@PathVariable int id) {
         Optional<Person> person = personService.find(id);
         if (person.isPresent() && Role.TEACHER.equals(person.get().getRole())) {
             return ResponseEntity.of(Optional.of(((Teacher) personService.remove(person.get()))));

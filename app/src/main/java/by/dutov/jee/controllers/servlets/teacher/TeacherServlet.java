@@ -9,7 +9,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 public class TeacherServlet {
 
     @GetMapping("/teacher/teacher")
-    public String student() {
+    public String redirectTeacherPage() {
         log.info("Entered Teacher Page");
         return "/teacher/teacherPage";
     }

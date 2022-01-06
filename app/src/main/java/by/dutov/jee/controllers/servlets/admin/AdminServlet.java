@@ -8,7 +8,7 @@ import javax.servlet.http.HttpServlet;
 
 @Slf4j
 @Controller
-public class AdminServlet extends HttpServlet {
+public class AdminServlet {
 
     @GetMapping("/admin/admin")
     public String redirectAdminPage() {

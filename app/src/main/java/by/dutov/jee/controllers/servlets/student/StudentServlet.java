@@ -8,10 +8,10 @@ import javax.servlet.http.HttpServlet;
 
 @Slf4j
 @Controller
-public class StudentServlet extends HttpServlet {
+public class StudentServlet {
 
     @GetMapping("/student/student")
-    public String student() {
+    public String redirectStudentPage() {
         log.info("Entered Student Page");
         return "/student/studentPage";
     }
