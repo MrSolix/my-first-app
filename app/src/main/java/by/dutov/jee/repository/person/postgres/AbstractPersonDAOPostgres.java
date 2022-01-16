@@ -15,10 +15,10 @@ import java.util.List;
 import java.util.Optional;
 
 import static by.dutov.jee.repository.AbstractGeneralTransaction.connectionType;
+import static by.dutov.jee.repository.ConstantsClass.POSITION_ID;
 
 @Slf4j
 public abstract class AbstractPersonDAOPostgres implements PersonDAOInterface {
-    private static final int POSITION_ID = 1;
     private final RepositoryDataSource repositoryDataSource;
 
     public AbstractPersonDAOPostgres(RepositoryDataSource repositoryDataSource) {

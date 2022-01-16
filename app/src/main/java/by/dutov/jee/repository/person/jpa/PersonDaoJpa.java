@@ -28,13 +28,7 @@ import java.util.Set;
 @Slf4j
 @Repository("jpaPerson")
 public class PersonDaoJpa extends AbstractPersonDaoJpa implements DAOInterface<Person> {
-    public static final String ERROR_FROM_FIND_GRADES = "Error from find grades";
-    public static final String ERROR_FROM_SAVE_GRADES = "Error from save grades";
-    public static final String ERROR_FROM_SAVE_GROUPS = "Error from save groups";
-    public static final String ERROR_FROM_SAVE_GROUP = "Error from save group";
-    public static final String ERROR_FROM_SAVE_SALARY = "Error from save salary";
     public static final String PERSON_NOT_FOUND = "Person not found";
-    public static final String ERROR_FROM_REMOVE_TEACHER = "Error from remove teacher";
     public static final String REMOVE_TEACHER_FROM_GROUP = "update Group g set g.teacher = null where g.id = :id and g.teacher.id = :teacher_id";
     private Class<? extends Person> classType;
     private String findAllJpql;
@@ -43,9 +37,9 @@ public class PersonDaoJpa extends AbstractPersonDaoJpa implements DAOInterface<P
     private final GroupDaoJpa groupDaoJpa;
 
     @Autowired
-    public PersonDaoJpa(EntityManagerHelper entityManagerHelper, GroupDaoJpa groupDaoJpa) {
-        super(entityManagerHelper);
-        this.groupDaoJpa = groupDaoJpa;
+    public PersonDaoJpa(EntityManagerHelper jpaEntityManager, GroupDaoJpa jpaGroup) {
+        super(jpaEntityManager);
+        this.groupDaoJpa = jpaGroup;
     }
 
     @Override
@@ -94,7 +88,7 @@ public class PersonDaoJpa extends AbstractPersonDaoJpa implements DAOInterface<P
     @Override
     @JpaTransaction
     public Person remove(Person person) {
-        EntityManager em = helper.getEntityManager();
+        EntityManager em = helper.getObject();
         if (Role.STUDENT.equals(person.getRole())) {
             return removeStudent(em, (Student) person);
         }
@@ -105,7 +99,7 @@ public class PersonDaoJpa extends AbstractPersonDaoJpa implements DAOInterface<P
     }
 
     private Teacher removeTeacher(Teacher teacher) {
-        EntityManager em = helper.getEntityManager();
+        EntityManager em = helper.getObject();
         Group group = teacher.getGroup();
         if (group != null) {
             Query query = em.createQuery(REMOVE_TEACHER_FROM_GROUP);
@@ -132,7 +126,7 @@ public class PersonDaoJpa extends AbstractPersonDaoJpa implements DAOInterface<P
     @Override
     @JpaTransaction
     public Person update(Integer id, Person person) {
-        EntityManager em = helper.getEntityManager();
+        EntityManager em = helper.getObject();
         if (Role.STUDENT.equals(person.getRole())) {
             Optional<Person> oldStudent = getPerson(id, null, Role.STUDENT);
             if (oldStudent.isPresent()) {

@@ -4,6 +4,7 @@ import by.dutov.jee.repository.person.postgres.ConnectionType;
 import by.dutov.jee.service.exceptions.ApplicationException;
 import com.mchange.v2.c3p0.ComboPooledDataSource;
 import lombok.NoArgsConstructor;
+import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.PropertySource;
@@ -74,7 +75,13 @@ public class RepositoryDataSource extends AbstractGeneralTransaction<Connection>
     }
 
     @Override
-    public Connection getConnection() throws SQLException {
+    public Connection getConnection() {
+        return getObject();
+    }
+
+    @Override
+    @SneakyThrows
+    public Connection getObject() {
         Connection connection = threadLocal.get();
         if (connection == null) {
             connection = ds.getConnection();

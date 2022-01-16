@@ -14,4 +14,6 @@ public interface GeneralTransaction<T> {
     void remove();
 
     void close(T t);
+
+    T getObject();
 }

@@ -2,8 +2,8 @@ package by.dutov.jee.aspect;
 
 import by.dutov.jee.repository.EntityManagerHelper;
 import by.dutov.jee.repository.person.postgres.ConnectionType;
+import by.dutov.jee.service.AbstractDaoInstance;
 import by.dutov.jee.service.exceptions.DataBaseException;
-import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.aspectj.lang.ProceedingJoinPoint;
@@ -11,7 +11,9 @@ import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
 import org.springframework.stereotype.Component;
 
+import javax.annotation.PostConstruct;
 import javax.persistence.EntityManager;
+import java.util.Map;
 import java.util.Optional;
 
 import static by.dutov.jee.repository.AbstractGeneralTransaction.connectionType;
@@ -19,10 +21,20 @@ import static by.dutov.jee.repository.AbstractGeneralTransaction.connectionType;
 @Aspect
 @Slf4j
 @Component
-@RequiredArgsConstructor
-public class JpaTransactionAspect {
+public class JpaTransactionAspect extends AbstractDaoInstance {
 
-    private final EntityManagerHelper helper;
+    private final String SUFFIX = "EntityManager";
+    private EntityManagerHelper helper;
+    private final Map<String, EntityManagerHelper> emMap;
+
+    public JpaTransactionAspect(Map<String, EntityManagerHelper> emMap) {
+        this.emMap = emMap;
+    }
+
+    @PostConstruct
+    private void init() {
+        helper = emMap.get(repositoryType + SUFFIX);
+    }
 
     @SneakyThrows
     @Around("@annotation(JpaTransaction)")
@@ -33,7 +45,7 @@ public class JpaTransactionAspect {
         connectionType = ConnectionType.MANY;
         EntityManager em = null;
         try {
-            em = helper.getEntityManager();
+            em = helper.getObject();
             helper.begin(em);
 
             result = jp.proceed();

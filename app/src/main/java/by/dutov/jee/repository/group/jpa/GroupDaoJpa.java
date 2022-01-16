@@ -17,7 +17,7 @@ import java.util.Optional;
 
 
 @Slf4j
-@Repository
+@Repository("jpaGroup")
 @Lazy
 public class GroupDaoJpa implements GroupDAOInterface {
     public static final String ERROR_FROM_REMOVE = "Error from remove";
@@ -28,8 +28,8 @@ public class GroupDaoJpa implements GroupDAOInterface {
     protected final EntityManagerHelper helper;
 
     @Autowired
-    private GroupDaoJpa(EntityManagerHelper entityManagerHelper) {
-        this.helper = entityManagerHelper;
+    public GroupDaoJpa(EntityManagerHelper jpaEntityManager) {
+        this.helper = jpaEntityManager;
     }
 
 
@@ -37,7 +37,7 @@ public class GroupDaoJpa implements GroupDAOInterface {
     public Group save(Group group) {
         EntityManager em = null;
         try {
-            em = helper.getEntityManager();
+            em = helper.getObject();
             helper.begin(em);
 
             if (group.getId() == null) {
@@ -61,7 +61,7 @@ public class GroupDaoJpa implements GroupDAOInterface {
     public Optional<Group> find(Integer id) {
         EntityManager em = null;
         try {
-            em = helper.getEntityManager();
+            em = helper.getObject();
             helper.begin(em);
 
             Group entity = em.find(Group.class, id);
@@ -81,7 +81,7 @@ public class GroupDaoJpa implements GroupDAOInterface {
     public Group update(Integer id, Group group) {
         EntityManager em = null;
         try {
-            em = helper.getEntityManager();
+            em = helper.getObject();
             helper.begin(em);
 
             em.merge(group);
@@ -101,7 +101,7 @@ public class GroupDaoJpa implements GroupDAOInterface {
     public Group remove(Group group) {
         EntityManager em = null;
         try {
-            em = helper.getEntityManager();
+            em = helper.getObject();
             helper.begin(em);
 
             Group naturalGroup = em.find(Group.class, group.getId());
@@ -128,7 +128,7 @@ public class GroupDaoJpa implements GroupDAOInterface {
         List<Group> entities;
         EntityManager em = null;
         try {
-            em = helper.getEntityManager();
+            em = helper.getObject();
             helper.begin(em);
 
             TypedQuery<Group> query = em.createQuery("from Group ", Group.class);

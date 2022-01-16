@@ -26,68 +26,32 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
+import static by.dutov.jee.repository.ConstantsClass.DELETE_GROUP;
+import static by.dutov.jee.repository.ConstantsClass.DELETE_STUDENT_IN_GROUP;
+import static by.dutov.jee.repository.ConstantsClass.G_ID;
+import static by.dutov.jee.repository.ConstantsClass.INSERT_GROUP;
+import static by.dutov.jee.repository.ConstantsClass.INSERT_STUDENT_IN_GROUP;
+import static by.dutov.jee.repository.ConstantsClass.POSITION_ID;
+import static by.dutov.jee.repository.ConstantsClass.SELECT_GROUP_ALL_FIELDS_FOR_TEACHER;
+import static by.dutov.jee.repository.ConstantsClass.SELECT_ID_GROUP;
+import static by.dutov.jee.repository.ConstantsClass.SELECT_STUDENT_FOR_GROUP;
+import static by.dutov.jee.repository.ConstantsClass.SELECT_TEACHER_FOR_GROUP;
+import static by.dutov.jee.repository.ConstantsClass.T_SALARY;
+import static by.dutov.jee.repository.ConstantsClass.UPDATE_GROUP;
+import static by.dutov.jee.repository.ConstantsClass.UPDATE_STUDENT_IN_GROUP_FOR_DELETE;
+import static by.dutov.jee.repository.ConstantsClass.U_AGE;
+import static by.dutov.jee.repository.ConstantsClass.U_ID;
+import static by.dutov.jee.repository.ConstantsClass.U_NAME;
+import static by.dutov.jee.repository.ConstantsClass.U_PASS;
+import static by.dutov.jee.repository.ConstantsClass.U_ROLE;
+import static by.dutov.jee.repository.ConstantsClass.U_SALT;
+import static by.dutov.jee.repository.ConstantsClass.U_USER_NAME;
 import static by.dutov.jee.repository.RepositoryDataSource.connectionType;
 
 @Slf4j
 @Repository("postgresGroup")
 @Lazy
 public class GroupDAOPostgres implements GroupDAOInterface {
-    //language=SQL
-    private static final String SELECT_ID_GROUP = "select g.id g_id from \"group\" g where g.id = ?;";
-    //language=SQL
-    private static final String SELECT_GROUP_ALL_FIELDS_FOR_STUDENT = "select " +
-            "u.id u_id, u.user_name u_user_name, u.password u_pass, " +
-            "u.salt u_salt, u.name u_name, u.age u_age, u.roles u_role " +
-            "from users u " +
-            "left join group_student gs " +
-            "on u.id = gs.student_id " +
-            "left join \"group\" g " +
-            "on g.id = gs.group_id ";
-    //language=SQL
-    private static final String SELECT_GROUP_ALL_FIELDS_FOR_TEACHER = "select " +
-            "u.id u_id, u.user_name u_user_name, u.password u_pass, " +
-            "u.salt u_salt, u.name u_name, u.age u_age, u.roles u_role, t.salary t_salary " +
-            "from users u " +
-            "left join \"group\" g " +
-            "on u.id = g.teacher_id " +
-            "left join salaries t " +
-            "on t.teacher_id = u.id";
-    //language=SQL
-    private static final String INSERT_GROUP = "insert into \"group\" (teacher_id) " +
-            "values (?) returning id;";
-    //language=SQL
-    private static final String INSERT_STUDENT_IN_GROUP = "insert into group_student " +
-            "(group_id, student_id) values (?, ?);";
-    //language=SQL
-    private static final String WHERE_ID = " where g.id = ?;";
-    //language=SQL
-    private static final String WHERE_GROUP_ID = " where gs.group_id = ? ";
-    //language=SQL
-    private static final String UPDATE_GROUP = "update \"group\" g set teacher_id = ?" + WHERE_ID;
-    //language=SQL
-    private static final String UPDATE_STUDENT_IN_GROUP = "update group_student gs set group_id = ?, student_id = ?" + WHERE_GROUP_ID +
-            "and gs.student_id = ?;";
-    //language=SQL
-    private static final String DELETE_GROUP = "delete from \"group\" g " + WHERE_ID;
-    //language=SQL
-    private static final String DELETE_STUDENT_IN_GROUP = "delete from group_student gs where gs.group_id isnull";
-    //language=SQL
-    private static final String UPDATE_STUDENT_IN_GROUP_FOR_DELETE = "update group_student gs " +
-            "set group_id = null, student_id = null" + WHERE_GROUP_ID + ";";
-    //language=SQL
-    private static final String SELECT_GROUP_FOR_TEACHER = SELECT_GROUP_ALL_FIELDS_FOR_TEACHER + WHERE_ID;
-    private static final String SELECT_GROUP_FOR_STUDENT = SELECT_GROUP_ALL_FIELDS_FOR_STUDENT + WHERE_ID;
-    public static final String G_ID = "g_id";
-    public static final String U_ID = "u_id";
-    public static final String U_USER_NAME = "u_user_name";
-    public static final String U_PASS = "u_pass";
-    public static final String U_SALT = "u_salt";
-    public static final String U_NAME = "u_name";
-    public static final String U_AGE = "u_age";
-    public static final String U_ROLE = "u_role";
-    public static final String T_SALARY = "t_salary";
-    private static final int POSITION_ID = 1;
-
 
     private final RepositoryDataSource repositoryDataSource;
 
@@ -305,7 +269,7 @@ public class GroupDAOPostgres implements GroupDAOInterface {
         Set<Student> students = new HashSet<>();
         try {
             con = repositoryDataSource.getConnection();
-            ps = con.prepareStatement(SELECT_GROUP_FOR_STUDENT);
+            ps = con.prepareStatement(SELECT_STUDENT_FOR_GROUP);
             ps.setInt(1, gId);
             rs = ps.executeQuery();
             while (rs.next()) {
@@ -338,7 +302,7 @@ public class GroupDAOPostgres implements GroupDAOInterface {
         ResultSet rs = null;
         try {
             con = repositoryDataSource.getConnection();
-            ps = con.prepareStatement(SELECT_GROUP_FOR_TEACHER);
+            ps = con.prepareStatement(SELECT_TEACHER_FOR_GROUP);
             ps.setInt(1, gId);
             rs = ps.executeQuery();
             if (rs.next()) {

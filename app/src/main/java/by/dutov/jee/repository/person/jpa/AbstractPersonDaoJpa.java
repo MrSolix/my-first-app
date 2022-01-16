@@ -29,7 +29,7 @@ public abstract class AbstractPersonDaoJpa implements PersonDAOInterface {
     public Person save(Person person) {
         EntityManager em = null;
         try {
-            em = helper.getEntityManager();
+            em = helper.getObject();
             helper.begin(em);
 
             if (person.getId() == null) {
@@ -53,7 +53,7 @@ public abstract class AbstractPersonDaoJpa implements PersonDAOInterface {
     public Optional<Person> find(Integer id) {
         EntityManager em = null;
         try {
-            em = helper.getEntityManager();
+            em = helper.getObject();
             helper.begin(em);
 
             TypedQuery<? extends Person> find = em.createNamedQuery(namedQueryById(), getType());
@@ -75,7 +75,7 @@ public abstract class AbstractPersonDaoJpa implements PersonDAOInterface {
     public Optional<Person> find(String name) {
         EntityManager em = null;
         try {
-            em = helper.getEntityManager();
+            em = helper.getObject();
             helper.begin(em);
 
             TypedQuery<? extends Person> find = em.createNamedQuery(namedQueryByName(), getType());
@@ -97,7 +97,7 @@ public abstract class AbstractPersonDaoJpa implements PersonDAOInterface {
     public Person update(Integer id, Person person) {
         EntityManager em = null;
         try {
-            em = helper.getEntityManager();
+            em = helper.getObject();
             helper.begin(em);
 
             em.merge(person);
@@ -117,7 +117,7 @@ public abstract class AbstractPersonDaoJpa implements PersonDAOInterface {
     public Person remove(Person person) {
         EntityManager em = null;
         try {
-            em = helper.getEntityManager();
+            em = helper.getObject();
             helper.begin(em);
 
             em.remove(person);
@@ -138,7 +138,7 @@ public abstract class AbstractPersonDaoJpa implements PersonDAOInterface {
         List<Person> entities;
         EntityManager em = null;
         try {
-            em = helper.getEntityManager();
+            em = helper.getObject();
             helper.begin(em);
 
             TypedQuery<Person> query = em.createQuery(findAllJpql(), Person.class);

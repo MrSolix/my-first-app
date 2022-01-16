@@ -31,6 +31,32 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
+import static by.dutov.jee.repository.ConstantsClass.DELETE_GRADES_BY_STUDENT_ID;
+import static by.dutov.jee.repository.ConstantsClass.DELETE_STUDENT_FROM_GROUP;
+import static by.dutov.jee.repository.ConstantsClass.DELETE_TEACHER_FROM_GROUP;
+import static by.dutov.jee.repository.ConstantsClass.DELETE_USER_BY_ID;
+import static by.dutov.jee.repository.ConstantsClass.G_GRADE;
+import static by.dutov.jee.repository.ConstantsClass.G_ID;
+import static by.dutov.jee.repository.ConstantsClass.G_THEME_NAME;
+import static by.dutov.jee.repository.ConstantsClass.INSERT_GRADES_BY_STUDENT_ID;
+import static by.dutov.jee.repository.ConstantsClass.INSERT_USER;
+import static by.dutov.jee.repository.ConstantsClass.SELECT_GRADES_BY_USERNAME;
+import static by.dutov.jee.repository.ConstantsClass.SELECT_GROUP_BY_STUDENT_ID;
+import static by.dutov.jee.repository.ConstantsClass.SELECT_GROUP_BY_TEACHER_ID;
+import static by.dutov.jee.repository.ConstantsClass.SELECT_SALARY_BY_TEACHER_ID;
+import static by.dutov.jee.repository.ConstantsClass.SELECT_USER;
+import static by.dutov.jee.repository.ConstantsClass.SELECT_USER_BY_ID;
+import static by.dutov.jee.repository.ConstantsClass.SELECT_USER_BY_NAME;
+import static by.dutov.jee.repository.ConstantsClass.S_SALARY;
+import static by.dutov.jee.repository.ConstantsClass.UPDATE_GRADES_BY_STUDENT_ID;
+import static by.dutov.jee.repository.ConstantsClass.UPDATE_USER_BY_ID;
+import static by.dutov.jee.repository.ConstantsClass.U_AGE;
+import static by.dutov.jee.repository.ConstantsClass.U_ID;
+import static by.dutov.jee.repository.ConstantsClass.U_NAME;
+import static by.dutov.jee.repository.ConstantsClass.U_PASS;
+import static by.dutov.jee.repository.ConstantsClass.U_ROLE;
+import static by.dutov.jee.repository.ConstantsClass.U_SALT;
+import static by.dutov.jee.repository.ConstantsClass.U_USER_NAME;
 import static by.dutov.jee.repository.RepositoryDataSource.connectionType;
 
 
@@ -38,69 +64,6 @@ import static by.dutov.jee.repository.RepositoryDataSource.connectionType;
 @Repository("postgresPerson")
 @Lazy
 public class PersonDAOPostgres extends AbstractPersonDAOPostgres implements DAOInterface<Person> {
-    public static final String DELETE_GRADES_BY_STUDENT_ID = "delete from grades gr where gr.student_id = ?;";
-    public static final String DELETE_STUDENT_FROM_GROUP = "delete from group_student gs where gs.student_id = ?;";
-    public static final String DELETE_TEACHER_FROM_GROUP = "update \"group\" g set teacher_id = null where teacher_id = ?";
-    //language=SQL
-    public static final String SELECT_GROUP_FOR_STUDENT = "select " +
-            "g.id g_id from users u " +
-            "left join group_student gs " +
-            "on u.id = gs.student_id " +
-            "left join \"group\" g " +
-            "on g.id = gs.group_id ";
-    //language=SQL
-    public static final String SELECT_GROUP_FOR_TEACHER = "select " +
-            "g.id g_id from users u " +
-            "left join \"group\" g " +
-            "on g.teacher_id = u.id ";
-    public static final String SELECT_USER =
-            "select " +
-                    "u.id u_id, " +
-                    "u.user_name u_user_name, u.password u_pass, u.salt u_salt, " +
-                    "u.name u_name, u.age u_age, u.roles u_role " +
-                    "from users u";
-    //language=SQL
-    public static final String SELECT_GRADES = "select " +
-            "g.grade g_grade, g.theme_name g_theme_name, g.id g_id " +
-            "from grades g " +
-            "left join users u " +
-            "on u.id = g.student_id ";
-    //language=SQL
-    public static final String SELECT_SALARY = "select s.salary s_salary from salaries s";
-    //language=SQL
-    public static final String INSERT_USER = "insert into users (user_name, password, salt, \"name\", age, roles)" +
-            " values (?, ?, ?, ?, ?, ?) returning id;";
-    //language=SQL
-    public static final String UPDATE_USER = "update users u " +
-            "set user_name = ?, password = ?, salt = ?, name = ?, age = ?, roles = ?";
-    //language=SQL
-    public static final String DELETE_USER = "delete from users u ";
-    public static final String WHERE_TEACHER_ID = " where s.teacher_id = ?;";
-    public static final String WHERE_USER_NAME = " where u.user_name = ? ";
-    public static final String WHERE_USER_ID = " where u.id = ? ";
-    //language=SQL
-    public static final String SELECT_USER_BY_NAME = SELECT_USER + WHERE_USER_NAME;
-    public static final String SELECT_USER_BY_ID = SELECT_USER + WHERE_USER_ID;
-    public static final String SELECT_GRADES_BY_USERNAME = SELECT_GRADES + WHERE_USER_NAME;
-    public static final String SELECT_SALARY_BY_TEACHER_ID = SELECT_SALARY + WHERE_TEACHER_ID;
-    public static final String SELECT_GROUP_BY_TEACHER_ID = SELECT_GROUP_FOR_TEACHER + WHERE_USER_ID;
-    public static final String SELECT_GROUP_BY_STUDENT_ID = SELECT_GROUP_FOR_STUDENT + WHERE_USER_ID;
-    public static final String UPDATE_USER_BY_ID = UPDATE_USER + WHERE_USER_ID;
-    public static final String DELETE_USER_BY_ID = DELETE_USER + WHERE_USER_NAME;
-
-    public static final String G_ID = "g_id";
-    public static final String U_USER_NAME = "u_user_name";
-    public static final String U_PASS = "u_pass";
-    public static final String U_SALT = "u_salt";
-    public static final String U_ID = "u_id";
-    public static final String U_NAME = "u_name";
-    public static final String U_AGE = "u_age";
-    public static final String U_ROLE = "u_role";
-    public static final String G_GRADE = "g_grade";
-    public static final String G_THEME_NAME = "g_theme_name";
-    public static final String S_SALARY = "s_salary";
-    public static final String UPDATE_GRADES_BY_STUDENT_ID = "update grades g set theme_name = ?, grade = ? where g.student_id = ? and g.id = ?";
-    public static final String INSERT_GRADES_BY_STUDENT_ID = "insert into grades (theme_name, grade, student_id) values (?, ?, ?)";
 
     private final RepositoryDataSource repositoryDataSource;
     private final GroupDAOPostgres groupDAOPostgres;
@@ -273,7 +236,7 @@ public class PersonDAOPostgres extends AbstractPersonDAOPostgres implements DAOI
         }
     }
 
-    private List<Grade> checkNewGrades(Set<Grade> allGrades, List<Grade> updateGrades) {
+    public List<Grade> checkNewGrades(Set<Grade> allGrades, List<Grade> updateGrades) {
         List<Grade> result = new ArrayList<>();
         allGrades.removeAll(updateGrades);
         for (Grade allGrade : allGrades) {
@@ -293,7 +256,7 @@ public class PersonDAOPostgres extends AbstractPersonDAOPostgres implements DAOI
         return result;
     }
 
-    private List<Grade> equalsGradeLists(List<Grade> oldGrades, List<Grade> allGrades) {
+    public List<Grade> equalsGradeLists(List<Grade> oldGrades, List<Grade> allGrades) {
         List<Grade> result = new ArrayList<>();
         Map<Integer, Grade> mapGrades = new HashMap<>();
         oldGrades.forEach(grade -> mapGrades.putIfAbsent(grade.getId(), grade));

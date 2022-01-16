@@ -12,7 +12,7 @@ import org.springframework.web.servlet.view.InternalResourceViewResolver;
 @Configuration
 @ComponentScan("by.dutov.jee")
 @EnableWebMvc
-@EnableAspectJAutoProxy
+@EnableAspectJAutoProxy(proxyTargetClass = true)
 public class ApplicationConfig {
     @Bean
     public InternalResourceViewResolver internalResourceViewResolver(@Autowired ApplicationContext ctx) {

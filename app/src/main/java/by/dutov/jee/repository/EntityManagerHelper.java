@@ -8,17 +8,18 @@ import org.springframework.stereotype.Component;
 
 import javax.persistence.EntityManager;
 
-@Component
+@Component("jpaEntityManager")
 @Slf4j
 public class EntityManagerHelper extends AbstractGeneralTransaction<EntityManager> {
     private final SessionFactory factory;
 
-    private EntityManagerHelper() {
+    public EntityManagerHelper() {
         Configuration cfg = new Configuration().configure();
         factory = cfg.buildSessionFactory();
     }
 
-    public EntityManager getEntityManager() {
+    @Override
+    public EntityManager getObject() {
         EntityManager entityManager = threadLocal.get();
         if (entityManager == null) {
             entityManager = factory.createEntityManager();

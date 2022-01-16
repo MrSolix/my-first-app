@@ -39,8 +39,8 @@ public class Teacher extends Person {
         setRole(Role.TEACHER);
     }
 
-    public void setSalary(double salary) {
-        if (salary >= 0) {
+    public void setSalary(Double salary) {
+        if (salary != null && salary >= 0) {
             this.salary = salary;
         } else {
             this.salary = 0.0;
