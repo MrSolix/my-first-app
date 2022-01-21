@@ -12,13 +12,14 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
+import static by.dutov.jee.repository.ConstantsClass.ERROR_FROM_FIND;
+import static by.dutov.jee.repository.ConstantsClass.ERROR_FROM_FIND_ALL;
+import static by.dutov.jee.repository.ConstantsClass.ERROR_FROM_REMOVE;
+import static by.dutov.jee.repository.ConstantsClass.ERROR_FROM_SAVE;
+import static by.dutov.jee.repository.ConstantsClass.ERROR_FROM_UPDATE;
+
 @Slf4j
 public abstract class AbstractPersonDaoJpa implements PersonDAOInterface {
-    public static final String ERROR_FROM_REMOVE = "Error from remove";
-    public static final String ERROR_FROM_UPDATE = "Error from update";
-    public static final String ERROR_FROM_SAVE = "Error from save";
-    public static final String ERROR_FROM_FIND = "Error from find";
-    public static final String ERROR_FROM_FIND_ALL = "Error from findAll";
     protected final EntityManagerHelper helper;
 
     public AbstractPersonDaoJpa(EntityManagerHelper entityManagerHelper) {

@@ -101,4 +101,18 @@ public class ConstantsClass {
     public static final String U_NAME = "u_name";
     public static final String U_AGE = "u_age";
     public static final String U_ROLE = "u_role";
+
+
+    //JPA
+    public static final String REMOVE_TEACHER_FROM_GROUP = "update Group g set g.teacher = null where g.id = :id and g.teacher.id = :teacher_id";
+
+
+    //ERRORS
+    public static final String PERSON_NOT_FOUND = "Person not found";
+    public static final String GROUP_NOT_FOUND = "Group not found";
+    public static final String ERROR_FROM_REMOVE = "Error from remove";
+    public static final String ERROR_FROM_UPDATE = "Error from update";
+    public static final String ERROR_FROM_SAVE = "Error from save";
+    public static final String ERROR_FROM_FIND = "Error from find";
+    public static final String ERROR_FROM_FIND_ALL = "Error from findAll";
 }

@@ -3,12 +3,14 @@ package by.dutov.jee.service.person;
 import by.dutov.jee.people.Person;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
+@Transactional
 public class PersonService implements PersonServiceInterface {
 
     private final PersonDaoInstance personDaoInstance;
@@ -19,11 +21,13 @@ public class PersonService implements PersonServiceInterface {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public Optional<Person> find(Integer id) {
         return personDaoInstance.getRepository().find(id);
     }
 
     @Override
+    @Transactional(readOnly = true)
     public Optional<Person> find(String name) {
         return personDaoInstance.getRepository().find(name);
     }
@@ -40,6 +44,7 @@ public class PersonService implements PersonServiceInterface {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public List<Person> findAll() {
         return personDaoInstance.getRepository().findAll();
     }

@@ -25,11 +25,12 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 
+import static by.dutov.jee.repository.ConstantsClass.PERSON_NOT_FOUND;
+import static by.dutov.jee.repository.ConstantsClass.REMOVE_TEACHER_FROM_GROUP;
+
 @Slf4j
 @Repository("jpaPerson")
 public class PersonDaoJpa extends AbstractPersonDaoJpa implements DAOInterface<Person> {
-    public static final String PERSON_NOT_FOUND = "Person not found";
-    public static final String REMOVE_TEACHER_FROM_GROUP = "update Group g set g.teacher = null where g.id = :id and g.teacher.id = :teacher_id";
     private Class<? extends Person> classType;
     private String findAllJpql;
     private String namedQueryByName;
