@@ -230,7 +230,7 @@ public class GroupDAOPostgres implements GroupDAOInterface {
         ResultSet rs = null;
         try {
             con = repositoryDataSource.getConnection();
-            ps = con.prepareStatement(SELECT_GROUP_ALL_FIELDS_FOR_TEACHER);
+            ps = con.prepareStatement(SELECT_ID_GROUP);
             rs = ps.executeQuery();
             result = resultSetToGroup(rs);
             repositoryDataSource.commitSingle(con);

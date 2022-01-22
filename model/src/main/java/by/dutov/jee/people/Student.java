@@ -37,10 +37,7 @@ import java.util.Set;
 public class Student extends Person {
     @ToString.Include
     @EqualsAndHashCode.Include
-    @ManyToMany(cascade =
-            {CascadeType.MERGE,
-            CascadeType.PERSIST,
-            CascadeType.REFRESH})
+    @ManyToMany
     @JoinTable(
             name = "group_student",
             joinColumns = @JoinColumn(name = "student_id"),
@@ -50,7 +47,7 @@ public class Student extends Person {
     @EqualsAndHashCode.Include
     @OneToMany(
             mappedBy = "student",
-            cascade = {CascadeType.REFRESH, CascadeType.MERGE, CascadeType.PERSIST, CascadeType.REMOVE},
+            cascade = {CascadeType.REFRESH, CascadeType.MERGE, CascadeType.PERSIST},
             orphanRemoval = true
     )
     private List<Grade> grades = new ArrayList<>();

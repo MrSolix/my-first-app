@@ -1,7 +1,7 @@
-package by.dutov.jee.repository.person.orm;
+package by.dutov.jee.repository.person.jpa;
 
 import by.dutov.jee.people.Admin;
-import by.dutov.jee.repository.ConstantsClass;
+import by.dutov.jee.people.Person;
 import org.springframework.stereotype.Repository;
 
 import static by.dutov.jee.repository.ConstantsClass.GET_ADMIN_BY_ID;
@@ -9,10 +9,11 @@ import static by.dutov.jee.repository.ConstantsClass.GET_ADMIN_BY_NAME;
 import static by.dutov.jee.repository.ConstantsClass.GET_ALL_ADMINS;
 
 @Repository
-public class AdminDaoSpringOrm extends AbstractPersonDaoSpringOrm {
+public class AdminDaoJpa extends AbstractPersonDaoJpa {
 
-    public AdminDaoSpringOrm() {
-        clazz = Admin.class;
+    @Override
+    protected Class<? extends Person> getType() {
+        return Admin.class;
     }
 
     @Override

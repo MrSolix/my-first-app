@@ -4,11 +4,7 @@ import by.dutov.jee.group.Group;
 import by.dutov.jee.people.Person;
 import by.dutov.jee.people.Role;
 import by.dutov.jee.people.Student;
-import by.dutov.jee.people.Teacher;
 import by.dutov.jee.people.grades.Grade;
-import by.dutov.jee.repository.ConstantsClass;
-import by.dutov.jee.repository.group.postgres.GroupDAOPostgres;
-import by.dutov.jee.repository.person.postgres.ConnectionType;
 import by.dutov.jee.repository.person.postgres.PersonDAOPostgres;
 import by.dutov.jee.service.exceptions.DataBaseException;
 import lombok.extern.slf4j.Slf4j;
@@ -16,10 +12,6 @@ import org.springframework.jdbc.support.rowset.SqlRowSet;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
@@ -29,15 +21,13 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
-import static by.dutov.jee.repository.AbstractGeneralTransaction.connectionType;
 import static by.dutov.jee.repository.ConstantsClass.G_GRADE;
 import static by.dutov.jee.repository.ConstantsClass.G_ID;
 import static by.dutov.jee.repository.ConstantsClass.G_THEME_NAME;
 import static by.dutov.jee.repository.ConstantsClass.INSERT_GRADES_BY_STUDENT_ID;
 import static by.dutov.jee.repository.ConstantsClass.INSERT_STUDENT_IN_GROUP;
-import static by.dutov.jee.repository.ConstantsClass.SELECT_GRADES_BY_USERNAME;
+import static by.dutov.jee.repository.ConstantsClass.SELECT_GRADES_BY_USER_ID;
 import static by.dutov.jee.repository.ConstantsClass.SELECT_GROUP_BY_STUDENT_ID;
-import static by.dutov.jee.repository.ConstantsClass.SELECT_GROUP_BY_TEACHER_ID;
 import static by.dutov.jee.repository.ConstantsClass.UPDATE_GRADES_BY_STUDENT_ID;
 import static by.dutov.jee.repository.ConstantsClass.U_AGE;
 import static by.dutov.jee.repository.ConstantsClass.U_ID;
@@ -88,7 +78,7 @@ public class StudentDAOTemplate extends AbstractPersonDAOTemplate {
             if (person.isPresent()) {
                 Person user = person.get();
                 Student student = (Student) user;
-                student.setGrades(getGrades(user.getUserName()));
+                student.setGrades(getGrades(user.getId()));
                 Set<Group> groups = getGroup(student.getId());
                 student.setGroups(groups);
                 return Optional.of(student);
@@ -100,10 +90,10 @@ public class StudentDAOTemplate extends AbstractPersonDAOTemplate {
         }
     }
 
-    private List<Grade> getGrades(String name) {
+    private List<Grade> getGrades(Integer id) {
         List<Grade> grades = new ArrayList<>();
         try {
-            SqlRowSet rs = jdbcTemplate.queryForRowSet(SELECT_GRADES_BY_USERNAME, name);
+            SqlRowSet rs = jdbcTemplate.queryForRowSet(SELECT_GRADES_BY_USER_ID, id);
             while (rs.next()) {
                 int gId = rs.getInt(G_ID);
                 String tName = rs.getString(G_THEME_NAME);
@@ -184,7 +174,7 @@ public class StudentDAOTemplate extends AbstractPersonDAOTemplate {
     }
 
     private List<Grade> saveGrades(Student oldStudent, Student student) {
-        List<Grade> grades = getGrades(oldStudent.getUserName());
+        List<Grade> grades = getGrades(oldStudent.getId());
         List<Grade> studentGrades = student.getGrades();
         Set<Grade> allGrades = new HashSet<>(grades);
         allGrades.removeAll(studentGrades);

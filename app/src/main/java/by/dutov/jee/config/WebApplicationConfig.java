@@ -1,11 +1,7 @@
 package by.dutov.jee.config;
 
-import by.dutov.jee.filters.AdminAccessFilter;
 import by.dutov.jee.filters.ContentCachingFilter;
 import by.dutov.jee.filters.EncodingFilter;
-import by.dutov.jee.filters.LoginFilter;
-import by.dutov.jee.filters.StudentAccessFilter;
-import by.dutov.jee.filters.TeacherAccessFilter;
 import org.springframework.web.servlet.support.AbstractAnnotationConfigDispatcherServletInitializer;
 
 import javax.servlet.Filter;

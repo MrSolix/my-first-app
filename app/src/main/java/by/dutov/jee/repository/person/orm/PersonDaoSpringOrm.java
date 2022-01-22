@@ -9,6 +9,7 @@ import by.dutov.jee.service.exceptions.DataBaseException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -87,6 +88,9 @@ public class PersonDaoSpringOrm implements PersonDAOInterface {
 
     @Override
     public List<Person> findAll() {
-        return studentDaoSpringOrm.findAll();
+        List<Person> result = new ArrayList<>();
+        result.addAll(studentDaoSpringOrm.findAll());
+        result.addAll(teacherDaoSpringOrm.findAll());
+        return result;
     }
 }

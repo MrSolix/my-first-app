@@ -40,7 +40,7 @@ import static by.dutov.jee.repository.ConstantsClass.G_ID;
 import static by.dutov.jee.repository.ConstantsClass.G_THEME_NAME;
 import static by.dutov.jee.repository.ConstantsClass.INSERT_GRADES_BY_STUDENT_ID;
 import static by.dutov.jee.repository.ConstantsClass.INSERT_USER;
-import static by.dutov.jee.repository.ConstantsClass.SELECT_GRADES_BY_USERNAME;
+import static by.dutov.jee.repository.ConstantsClass.SELECT_GRADES_BY_USER_ID;
 import static by.dutov.jee.repository.ConstantsClass.SELECT_GROUP_BY_STUDENT_ID;
 import static by.dutov.jee.repository.ConstantsClass.SELECT_GROUP_BY_TEACHER_ID;
 import static by.dutov.jee.repository.ConstantsClass.SELECT_SALARY_BY_TEACHER_ID;
@@ -201,7 +201,7 @@ public class PersonDAOPostgres extends AbstractPersonDAOPostgres implements DAOI
     }
 
     private List<Grade> saveGrades(Student oldStudent, Student student, Connection con, PreparedStatement ps) throws SQLException {
-        List<Grade> grades = getGrades(oldStudent.getUserName());
+        List<Grade> grades = getGrades(oldStudent.getId());
         List<Grade> studentGrades = student.getGrades();
         Set<Grade> allGrades = new HashSet<>(grades);
         allGrades.removeAll(studentGrades);
@@ -426,7 +426,7 @@ public class PersonDAOPostgres extends AbstractPersonDAOPostgres implements DAOI
             Person user = person.get();
             if (Role.STUDENT.equals(user.getRole())) {
                 Student student = (Student) user;
-                student.setGrades(getGrades(user.getUserName()));
+                student.setGrades(getGrades(user.getId()));
                 Set<Group> groups = getGroup(student.getId(), SELECT_GROUP_BY_STUDENT_ID);
                 student.setGroups(groups);
                 repositoryDataSource.commitMany(con);
@@ -479,14 +479,14 @@ public class PersonDAOPostgres extends AbstractPersonDAOPostgres implements DAOI
         return values.isEmpty() ? new HashSet<>() : new HashSet<>(values);
     }
 
-    private List<Grade> getGrades(String name) {
+    private List<Grade> getGrades(Integer id) {
         Connection con = null;
         PreparedStatement ps = null;
         ResultSet rs = null;
         try {
             con = repositoryDataSource.getConnection();
-            ps = con.prepareStatement(SELECT_GRADES_BY_USERNAME);
-            ps.setString(1, name);
+            ps = con.prepareStatement(SELECT_GRADES_BY_USER_ID);
+            ps.setInt(1, id);
             rs = ps.executeQuery();
             List<Grade> grades = new ArrayList<>();
             while (rs.next()) {
@@ -547,7 +547,7 @@ public class PersonDAOPostgres extends AbstractPersonDAOPostgres implements DAOI
 
     private void removeGrades(Connection con, PreparedStatement ps,
                               Student student) throws SQLException {
-        List<Grade> grades = getGrades(student.getUserName());
+        List<Grade> grades = getGrades(student.getId());
         if (!grades.isEmpty()) {
             ps = con.prepareStatement(DELETE_GRADES_BY_STUDENT_ID);
             ps.setInt(1, student.getId());

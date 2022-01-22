@@ -1,13 +1,13 @@
-package by.dutov.jee.repository.person.orm;
+package by.dutov.jee.repository.person.jpa;
 
 import by.dutov.jee.group.Group;
 import by.dutov.jee.people.Person;
 import by.dutov.jee.people.Student;
-import by.dutov.jee.people.Teacher;
 import by.dutov.jee.people.grades.Grade;
-import org.springframework.stereotype.Component;
+import by.dutov.jee.service.exceptions.DataBaseException;
 import org.springframework.stereotype.Repository;
 
+import javax.persistence.EntityManager;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -18,17 +18,24 @@ import java.util.Set;
 import static by.dutov.jee.repository.ConstantsClass.GET_ALL_STUDENTS;
 import static by.dutov.jee.repository.ConstantsClass.GET_STUDENT_BY_ID;
 import static by.dutov.jee.repository.ConstantsClass.GET_STUDENT_BY_NAME;
+import static by.dutov.jee.repository.ConstantsClass.PERSON_NOT_FOUND;
 
 @Repository
-public class StudentDaoSpringOrm extends AbstractPersonDaoSpringOrm {
+public class StudentDaoJpa extends AbstractPersonDaoJpa {
 
-
-
-    public StudentDaoSpringOrm() {
-        clazz = Student.class;
+    @Override
+    public Person update(Integer id, Person person) {
+        EntityManager em = helper.getObject();
+        Optional<Person> oldStudent = super.find(id);
+        if (oldStudent.isPresent()) {
+            Student student = updateStudent(((Student) oldStudent.get()), ((Student) person));
+            em.merge(student);
+            return student;
+        }
+        throw new DataBaseException(PERSON_NOT_FOUND);
     }
 
-    public Student update(Student oldStudent, Student student) {
+    private Student updateStudent(Student oldStudent, Student student) {
         Set<Group> groups = student.getGroups();
         List<Grade> grades = student.getGrades();
         if (groups != null && !groups.isEmpty()) {
@@ -37,14 +44,14 @@ public class StudentDaoSpringOrm extends AbstractPersonDaoSpringOrm {
         if (grades != null && !grades.isEmpty()) {
             saveGrades(oldStudent, grades);
         }
-        return em.merge(oldStudent);
+        return oldStudent;
     }
 
     private void saveGroups(Student oldStudent, Set<Group> studentGroups) {
         List<Group> oldGroups = new ArrayList<>(oldStudent.getGroups());
         for (Group g : studentGroups) {
             if (!oldGroups.contains(g)) {
-                Optional<Group> group = groupDaoSpringOrm.find(g.getId());
+                Optional<Group> group = groupDaoJpa.find(g.getId());
                 group.ifPresent(oldStudent::addGroup);
             }
         }
@@ -118,6 +125,7 @@ public class StudentDaoSpringOrm extends AbstractPersonDaoSpringOrm {
     @Override
     public Person remove(Person person) {
         Student student = (Student) person;
+        EntityManager em = helper.getObject();
         for (int i = 0; i < student.getGroups().size(); i++) {
             Optional<Group> first = student.getGroups().stream().findFirst();
             first.ifPresent(student::removeGroup);
@@ -127,6 +135,11 @@ public class StudentDaoSpringOrm extends AbstractPersonDaoSpringOrm {
             em.remove(grade);
         }
         return super.remove(student);
+    }
+
+    @Override
+    protected Class<? extends Person> getType() {
+        return Student.class;
     }
 
     @Override

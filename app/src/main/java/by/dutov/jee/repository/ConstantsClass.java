@@ -44,7 +44,7 @@ public class ConstantsClass {
     public static final String SELECT_USER_BY_NAME_AND_ROLE = SELECT_USER + WHERE_USER_NAME + WHERE_USER_ROLE;
     public static final String SELECT_USER_BY_ID = SELECT_USER + WHERE_USER_ID;
     public static final String SELECT_USER_BY_ID_AND_ROLE = SELECT_USER + WHERE_USER_ID + WHERE_USER_ROLE;
-    public static final String SELECT_GRADES_BY_USERNAME = SELECT_GRADES + WHERE_USER_NAME;
+    public static final String SELECT_GRADES_BY_USER_ID = SELECT_GRADES + WHERE_USER_ID;
     public static final String SELECT_SALARY_BY_TEACHER_ID = SELECT_SALARY + WHERE_TEACHER_ID;
     public static final String SELECT_GROUP_BY_TEACHER_ID = SELECT_GROUP_FOR_TEACHER + WHERE_USER_ID;
     public static final String SELECT_GROUP_BY_STUDENT_ID = SELECT_GROUP_FOR_STUDENT + WHERE_USER_ID;
@@ -105,6 +105,15 @@ public class ConstantsClass {
 
     //JPA
     public static final String REMOVE_TEACHER_FROM_GROUP = "update Group g set g.teacher = null where g.id = :id and g.teacher.id = :teacher_id";
+    public static final String GET_ALL_STUDENTS = "from Student u where u.role = 'STUDENT'";
+    public static final String GET_STUDENT_BY_NAME = "findStudentByName";
+    public static final String GET_STUDENT_BY_ID = "findStudentById";
+    public static final String GET_ALL_TEACHERS = "from Teacher u where u.role = 'TEACHER'";
+    public static final String GET_TEACHER_BY_NAME = "findTeacherByName";
+    public static final String GET_TEACHER_BY_ID = "findTeacherById";
+    public static final String GET_ALL_ADMINS = "from Admin u where u.role = 'ADMIN'";
+    public static final String GET_ADMIN_BY_NAME = "findAdminByName";
+    public static final String GET_ADMIN_BY_ID = "findAdminById";
 
 
     //ERRORS
