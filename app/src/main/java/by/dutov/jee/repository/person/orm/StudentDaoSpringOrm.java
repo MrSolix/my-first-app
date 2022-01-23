@@ -5,9 +5,11 @@ import by.dutov.jee.people.Person;
 import by.dutov.jee.people.Student;
 import by.dutov.jee.people.Teacher;
 import by.dutov.jee.people.grades.Grade;
+import by.dutov.jee.service.exceptions.DataBaseException;
 import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Repository;
 
+import javax.persistence.EntityManager;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -18,6 +20,7 @@ import java.util.Set;
 import static by.dutov.jee.repository.ConstantsClass.GET_ALL_STUDENTS;
 import static by.dutov.jee.repository.ConstantsClass.GET_STUDENT_BY_ID;
 import static by.dutov.jee.repository.ConstantsClass.GET_STUDENT_BY_NAME;
+import static by.dutov.jee.repository.ConstantsClass.PERSON_NOT_FOUND;
 
 @Repository
 public class StudentDaoSpringOrm extends AbstractPersonDaoSpringOrm {
@@ -28,7 +31,18 @@ public class StudentDaoSpringOrm extends AbstractPersonDaoSpringOrm {
         clazz = Student.class;
     }
 
-    public Student update(Student oldStudent, Student student) {
+    @Override
+    public Person update(Integer id, Person person) {
+        Optional<Person> oldStudent = super.find(id);
+        if (oldStudent.isPresent()) {
+            Student student = updateStudent(((Student) oldStudent.get()), ((Student) person));
+            em.merge(student);
+            return student;
+        }
+        throw new DataBaseException(PERSON_NOT_FOUND);
+    }
+
+    public Student updateStudent(Student oldStudent, Student student) {
         Set<Group> groups = student.getGroups();
         List<Grade> grades = student.getGrades();
         if (groups != null && !groups.isEmpty()) {

@@ -3,6 +3,7 @@ package by.dutov.jee.repository.person.orm;
 import by.dutov.jee.group.Group;
 import by.dutov.jee.people.Person;
 import by.dutov.jee.people.Teacher;
+import by.dutov.jee.service.exceptions.DataBaseException;
 import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Repository;
 
@@ -13,6 +14,7 @@ import java.util.Optional;
 import static by.dutov.jee.repository.ConstantsClass.GET_ALL_TEACHERS;
 import static by.dutov.jee.repository.ConstantsClass.GET_TEACHER_BY_ID;
 import static by.dutov.jee.repository.ConstantsClass.GET_TEACHER_BY_NAME;
+import static by.dutov.jee.repository.ConstantsClass.PERSON_NOT_FOUND;
 import static by.dutov.jee.repository.ConstantsClass.REMOVE_TEACHER_FROM_GROUP;
 
 @Repository
@@ -36,7 +38,18 @@ public class TeacherDaoSpringOrm extends AbstractPersonDaoSpringOrm {
         return super.remove(teacher);
     }
 
-    public Teacher update(Teacher oldTeacher, Teacher teacher) {
+    @Override
+    public Person update(Integer id, Person person) {
+        Optional<Person> oldTeacher = super.find(id);
+        if (oldTeacher.isPresent()) {
+            Teacher teacher = updateTeacher(((Teacher) oldTeacher.get()), ((Teacher) person));
+            em.merge(teacher);
+            return teacher;
+        }
+        throw new DataBaseException(PERSON_NOT_FOUND);
+    }
+
+    public Teacher updateTeacher(Teacher oldTeacher, Teacher teacher) {
         Group group = teacher.getGroup();
         Double salary = teacher.getSalary();
         if (group != null) {

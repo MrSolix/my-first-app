@@ -7,16 +7,19 @@ import by.dutov.jee.people.Teacher;
 import by.dutov.jee.repository.person.PersonDAOInterface;
 import by.dutov.jee.service.exceptions.DataBaseException;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Repository;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
+import static by.dutov.jee.repository.ConstantsClass.ERROR_FROM_SAVE;
 import static by.dutov.jee.repository.ConstantsClass.PERSON_NOT_FOUND;
 
 @Repository("ormPerson")
 @RequiredArgsConstructor
+@Slf4j
 public class PersonDaoSpringOrm implements PersonDAOInterface {
 
     private final StudentDaoSpringOrm studentDaoSpringOrm;
@@ -31,7 +34,8 @@ public class PersonDaoSpringOrm implements PersonDAOInterface {
         if (Role.TEACHER.equals(person.getRole())) {
             return teacherDaoSpringOrm.save(person);
         }
-        return adminDaoSpringOrm.save(person);
+        log.error(ERROR_FROM_SAVE);
+        throw new DataBaseException(ERROR_FROM_SAVE);
     }
 
     @Override
@@ -62,17 +66,11 @@ public class PersonDaoSpringOrm implements PersonDAOInterface {
 
     @Override
     public Person update(Integer id, Person person) {
-        Optional<Person> optionalPerson = find(id);
-        if (optionalPerson.isPresent()) {
-            Person oldPerson = optionalPerson.get();
-            if (Role.STUDENT.equals(oldPerson.getRole())) {
-                return studentDaoSpringOrm.update(((Student) oldPerson), ((Student) person));
-            }
-            if (Role.TEACHER.equals(oldPerson.getRole())) {
-                return teacherDaoSpringOrm.update(((Teacher) oldPerson), ((Teacher) person));
-            }
+        try {
+            return studentDaoSpringOrm.update(id, person);
+        } catch (DataBaseException e) {
+            return teacherDaoSpringOrm.update(id, person);
         }
-        throw new DataBaseException(PERSON_NOT_FOUND);
     }
 
     @Override

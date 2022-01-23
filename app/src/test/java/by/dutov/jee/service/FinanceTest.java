@@ -1,25 +1,31 @@
 package by.dutov.jee.service;
 
+import by.dutov.jee.config.ApplicationConfigTest;
 import by.dutov.jee.people.Teacher;
 import by.dutov.jee.service.facade.Finance;
 import org.junit.Before;
 import org.junit.Test;
-import org.springframework.context.ConfigurableApplicationContext;
-import org.springframework.context.annotation.AnnotationConfigApplicationContext;
+import org.junit.runner.RunWith;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
+import org.springframework.test.context.web.WebAppConfiguration;
 
 import java.time.LocalDate;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 
+@RunWith(SpringJUnit4ClassRunner.class)
+@ContextConfiguration(classes = {ApplicationConfigTest.class})
+@WebAppConfiguration
 public class FinanceTest {
     private Teacher teacher;
+    @Autowired
     private Finance finance;
 
     @Before
     public void setUp() {
-        ConfigurableApplicationContext ctx = new AnnotationConfigApplicationContext(Finance.class);
-        finance = ctx.getBean("finance", Finance.class);
         teacher = new Teacher()
                 .withId(3)
                 .withUserName("teacher")
@@ -36,10 +42,10 @@ public class FinanceTest {
     @Test
     public void AverageSalary_WithMinRangeEqualsOneAndMaxRangeEqualsThree_ShouldReturnTwoHundred() {
         //expected
-        double expected = 200.0;
+        double expected = 100.0;
 
         //actual
-        double actual = finance.averageSalary(1, 3, teacher);
+        double actual = finance.averageSalary(1, 1, teacher);
 
         //assert
         assertEquals(expected, actual, 0);
