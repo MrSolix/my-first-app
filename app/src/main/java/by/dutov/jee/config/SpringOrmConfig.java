@@ -44,13 +44,12 @@ public class SpringOrmConfig {
         properties.setProperty("hibernate.dbcp.maxIdle", "10");
         properties.setProperty("hibernate.dbcp.minIdle", "5");
         properties.setProperty("hibernate.dbcp.maxWaitMillis", "-1");
-        properties.setProperty("hibernate.enable_lazy_load_no_trans", "true");
 
         return properties;
     }
 
     @Bean
-    public JpaTransactionManager transactionManager(@Autowired LocalContainerEntityManagerFactoryBean factoryBean) {
+    public JpaTransactionManager jpaTransactionManager(@Autowired LocalContainerEntityManagerFactoryBean factoryBean) {
         return new JpaTransactionManager(factoryBean.getObject());
     }
 

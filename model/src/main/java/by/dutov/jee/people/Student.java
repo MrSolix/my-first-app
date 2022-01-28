@@ -11,6 +11,7 @@ import lombok.ToString;
 
 import javax.persistence.CascadeType;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.JoinColumn;
 import javax.persistence.JoinTable;
 import javax.persistence.ManyToMany;
@@ -37,12 +38,12 @@ import java.util.Set;
 public class Student extends Person {
     @ToString.Include
     @EqualsAndHashCode.Include
-    @ManyToMany
+    @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(
             name = "group_student",
             joinColumns = @JoinColumn(name = "student_id"),
             inverseJoinColumns = @JoinColumn(name = "group_id"))
-    private Set<Group> groups = new HashSet<>();
+    private Set<Group> groups;
     @ToString.Include
     @EqualsAndHashCode.Include
     @OneToMany(
@@ -50,7 +51,7 @@ public class Student extends Person {
             cascade = {CascadeType.REFRESH, CascadeType.MERGE, CascadeType.PERSIST},
             orphanRemoval = true
     )
-    private List<Grade> grades = new ArrayList<>();
+    private List<Grade> grades;
 
     {
         setRole(Role.STUDENT);

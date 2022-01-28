@@ -1,6 +1,5 @@
 package by.dutov.jee.repository.person.template;
 
-import by.dutov.jee.people.Admin;
 import by.dutov.jee.people.Person;
 import by.dutov.jee.people.Role;
 import by.dutov.jee.people.Student;

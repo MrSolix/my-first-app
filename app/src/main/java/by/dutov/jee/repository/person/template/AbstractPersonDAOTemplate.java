@@ -1,31 +1,19 @@
 package by.dutov.jee.repository.person.template;
 
-import by.dutov.jee.aspect.TemplateTransaction;
 import by.dutov.jee.group.Group;
 import by.dutov.jee.people.Person;
-import by.dutov.jee.repository.ConstantsClass;
-import by.dutov.jee.repository.group.postgres.GroupDAOPostgres;
 import by.dutov.jee.repository.group.template.GroupDaoTemplate;
 import by.dutov.jee.repository.person.PersonDAOInterface;
 import by.dutov.jee.service.exceptions.DataBaseException;
-import by.dutov.jee.service.group.GroupDaoInstance;
 import lombok.RequiredArgsConstructor;
-import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.dao.DataAccessException;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.jdbc.core.PreparedStatementCallback;
-import org.springframework.jdbc.core.PreparedStatementSetter;
 import org.springframework.jdbc.core.RowMapper;
-import org.springframework.jdbc.support.rowset.SqlRowSet;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.sql.PreparedStatement;
-import java.sql.SQLException;
-import java.sql.Types;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;

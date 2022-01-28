@@ -138,7 +138,7 @@ public class PersonDAOPostgres extends AbstractPersonDAOPostgres implements DAOI
             Person newPerson = setPersonFields(oldPerson, person);
             super.update(newPerson.getId(), newPerson);
             if (Role.STUDENT.equals(newPerson.getRole())) {
-                return updateStudent(((Student) oldPerson), ((Student) newPerson), ((Student) person), con, ps);
+                return updateStudent(((Student) newPerson), ((Student) person), con, ps);
             }
             if (Role.TEACHER.equals(newPerson.getRole())) {
                 return updateTeacher(((Teacher) newPerson), ((Teacher) person), con, ps);
@@ -186,7 +186,7 @@ public class PersonDAOPostgres extends AbstractPersonDAOPostgres implements DAOI
         }
     }
 
-    private Student updateStudent(Student oldStudent, Student newStudent, Student student, Connection con, PreparedStatement ps) throws SQLException {
+    private Student updateStudent(Student newStudent, Student student, Connection con, PreparedStatement ps) throws SQLException {
         Set<Group> groups = student.getGroups();
         List<Grade> grades = student.getGrades();
         if (groups != null && !groups.isEmpty()) {
@@ -194,14 +194,14 @@ public class PersonDAOPostgres extends AbstractPersonDAOPostgres implements DAOI
             groups.forEach(group -> groupDAOPostgres.saveStudentInGroup(group, newStudent));
         }
         if (grades != null && !grades.isEmpty()) {
-            List<Grade> newGrades = saveGrades(oldStudent, student, con, ps);
+            List<Grade> newGrades = saveGrades(newStudent, student, con, ps);
             newStudent.setGrades(newGrades);
         }
         return newStudent;
     }
 
-    private List<Grade> saveGrades(Student oldStudent, Student student, Connection con, PreparedStatement ps) throws SQLException {
-        List<Grade> grades = getGrades(oldStudent.getId());
+    private List<Grade> saveGrades(Student newStudent, Student student, Connection con, PreparedStatement ps) throws SQLException {
+        List<Grade> grades = getGrades(newStudent.getId());
         List<Grade> studentGrades = student.getGrades();
         Set<Grade> allGrades = new HashSet<>(grades);
         allGrades.removeAll(studentGrades);

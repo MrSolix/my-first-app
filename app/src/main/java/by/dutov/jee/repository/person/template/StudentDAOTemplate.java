@@ -42,7 +42,6 @@ public class StudentDAOTemplate extends AbstractPersonDAOTemplate {
 
     private final PersonDAOPostgres personDAOPostgres;
 
-
     public StudentDAOTemplate(PersonDAOPostgres personDAOPostgres) {
         this.personDAOPostgres = personDAOPostgres;
         this.rowMapper = (rs, rowNum) -> new Student()
