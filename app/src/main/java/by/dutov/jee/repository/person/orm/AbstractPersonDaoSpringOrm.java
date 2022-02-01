@@ -12,6 +12,7 @@ import javax.persistence.EntityManager;
 import javax.persistence.NoResultException;
 import javax.persistence.PersistenceContext;
 import javax.persistence.TypedQuery;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -74,7 +75,7 @@ public abstract class AbstractPersonDaoSpringOrm implements PersonDAOInterface {
 
     @Override
     public List<Person> findAll() {
-        TypedQuery<Person> query = em.createQuery(findAllJpql(), Person.class);
+        TypedQuery<Person> query = em.createNamedQuery(findAllJpql(), Person.class);
         return query.getResultList();
     }
 

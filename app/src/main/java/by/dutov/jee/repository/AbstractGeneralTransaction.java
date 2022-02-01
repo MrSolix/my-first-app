@@ -1,6 +1,5 @@
 package by.dutov.jee.repository;
 
-import by.dutov.jee.repository.person.postgres.ConnectionType;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j

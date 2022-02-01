@@ -1,9 +1,7 @@
 package by.dutov.jee.repository.person.orm;
 
+import by.dutov.jee.auth.Role;
 import by.dutov.jee.people.Person;
-import by.dutov.jee.people.Role;
-import by.dutov.jee.people.Student;
-import by.dutov.jee.people.Teacher;
 import by.dutov.jee.repository.person.PersonDAOInterface;
 import by.dutov.jee.service.exceptions.DataBaseException;
 import lombok.RequiredArgsConstructor;
@@ -28,10 +26,10 @@ public class PersonDaoSpringOrm implements PersonDAOInterface {
 
     @Override
     public Person save(Person person) {
-        if (Role.STUDENT.equals(person.getRole())) {
+        if (person.getRolesName(person.getRoles()).contains(Role.ROLE_STUDENT)) {
             return studentDaoSpringOrm.save(person);
         }
-        if (Role.TEACHER.equals(person.getRole())) {
+        if (person.getRolesName(person.getRoles()).contains(Role.ROLE_TEACHER)) {
             return teacherDaoSpringOrm.save(person);
         }
         log.error(ERROR_FROM_SAVE);
@@ -75,10 +73,10 @@ public class PersonDaoSpringOrm implements PersonDAOInterface {
 
     @Override
     public Person remove(Person person) {
-        if (Role.STUDENT.equals(person.getRole())) {
+        if (person.getRolesName(person.getRoles()).contains(Role.ROLE_STUDENT)) {
             return studentDaoSpringOrm.remove(person);
         }
-        if (Role.TEACHER.equals(person.getRole())) {
+        if (person.getRolesName(person.getRoles()).contains(Role.ROLE_TEACHER)) {
             return teacherDaoSpringOrm.remove(person);
         }
         throw new DataBaseException(PERSON_NOT_FOUND);

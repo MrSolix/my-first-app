@@ -1,8 +1,8 @@
 package by.dutov.jee.repository.person.jpa;
 
 import by.dutov.jee.aspect.JpaTransaction;
+import by.dutov.jee.auth.Role;
 import by.dutov.jee.people.Person;
-import by.dutov.jee.people.Role;
 import by.dutov.jee.repository.person.PersonDAOInterface;
 import by.dutov.jee.service.exceptions.DataBaseException;
 import lombok.RequiredArgsConstructor;
@@ -27,10 +27,10 @@ public class PersonDaoJpa implements PersonDAOInterface {
     @Override
     @JpaTransaction
     public Person save(Person person) {
-        if (Role.STUDENT.equals(person.getRole())) {
+        if (person.getRolesName(person.getRoles()).contains(Role.ROLE_STUDENT)) {
             return studentDaoJpa.save(person);
         }
-        if (Role.TEACHER.equals(person.getRole())) {
+        if (person.getRolesName(person.getRoles()).contains(Role.ROLE_TEACHER)) {
             return teacherDaoJpa.save(person);
         }
         log.error(ERROR_FROM_SAVE);
@@ -68,10 +68,10 @@ public class PersonDaoJpa implements PersonDAOInterface {
     @Override
     @JpaTransaction
     public Person remove(Person person) {
-        if (Role.STUDENT.equals(person.getRole())) {
+        if (person.getRolesName(person.getRoles()).contains(Role.ROLE_STUDENT)) {
             return studentDaoJpa.remove(person);
         }
-        if (Role.TEACHER.equals(person.getRole())) {
+        if (person.getRolesName(person.getRoles()).contains(Role.ROLE_TEACHER)) {
             return teacherDaoJpa.remove(person);
         }
         throw new DataBaseException(PERSON_NOT_FOUND);

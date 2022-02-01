@@ -1,5 +1,6 @@
 package by.dutov.jee.people;
 
+import by.dutov.jee.auth.Role;
 import by.dutov.jee.group.Group;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -8,6 +9,7 @@ import lombok.ToString;
 
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
+import javax.persistence.DiscriminatorValue;
 import javax.persistence.Entity;
 import javax.persistence.NamedQuery;
 import javax.persistence.OneToOne;
@@ -20,12 +22,12 @@ import javax.persistence.Table;
 @NoArgsConstructor
 @EqualsAndHashCode(callSuper = true)
 @ToString(callSuper = true)
-@Table(name = "users")
 @Entity
 @SecondaryTable(name = "salaries", pkJoinColumns = @PrimaryKeyJoinColumn(name = "teacher_id"))
-@NamedQuery(name = "findTeacherByName", query = "from Teacher u where u.userName = :name and u.role = 'TEACHER'")
-@NamedQuery(name = "findTeacherById", query = "from Teacher u where u.id = :id and u.role = 'TEACHER'")
-@NamedQuery(name = "findAllTeachers", query = "from Teacher u where u.role = 'TEACHER'")
+@NamedQuery(name = "findTeacherByName", query = "from Teacher u join u.roles r where u.userName = :name and r.name = 'TEACHER'")
+@NamedQuery(name = "findTeacherById", query = "from Teacher u join u.roles r where u.id = :id and r.name = 'TEACHER'")
+@NamedQuery(name = "findAllTeachers", query = "from Teacher u join u.roles r where r.name = 'TEACHER'")
+@DiscriminatorValue("teacher")
 public class Teacher extends Person {
     @ToString.Include
     @EqualsAndHashCode.Include
@@ -36,7 +38,10 @@ public class Teacher extends Person {
     private Double salary;
 
     {
-        setRole(Role.TEACHER);
+        addRole(new Role()
+                .withId(2)
+                .withName("TEACHER")
+                .addPerson(this));
     }
 
     public void setSalary(Double salary) {
@@ -58,17 +63,7 @@ public class Teacher extends Person {
     }
 
     public Teacher withPassword(String password){
-        addPassword(password, this);
-        return this;
-    }
-
-    public Teacher withBytePass(byte[] pass){
-        setPassword(pass);
-        return this;
-    }
-
-    public Teacher withSalt(byte[] salt){
-        setSalt(salt);
+        setPassword(password);
         return this;
     }
 
@@ -79,11 +74,6 @@ public class Teacher extends Person {
 
     public Teacher withAge(int age){
         setAge(age);
-        return this;
-    }
-
-    public Teacher withRole(Role role){
-        setRole(role);
         return this;
     }
 
@@ -117,7 +107,7 @@ public class Teacher extends Person {
     public String infoGet() {
         return "Name: \"" + getName() +
                 "\"<br>Age: \"" + getAge() +
-                "\"<br>Role: \"" + getRole() +
+                "\"<br>Role: \"" + getRoles() +
                 "\"<br>Group №: " + (group != null ? group.getId() : 0) +
                 "<br>Salary: " + getSalary();
     }

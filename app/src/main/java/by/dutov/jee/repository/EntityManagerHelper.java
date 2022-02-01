@@ -1,22 +1,19 @@
 package by.dutov.jee.repository;
 
-import by.dutov.jee.repository.person.postgres.ConnectionType;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.hibernate.SessionFactory;
 import org.hibernate.cfg.Configuration;
 import org.springframework.stereotype.Component;
 
 import javax.persistence.EntityManager;
+import javax.persistence.EntityManagerFactory;
 
 @Component("jpaEntityManager")
 @Slf4j
+@RequiredArgsConstructor
 public class EntityManagerHelper extends AbstractGeneralTransaction<EntityManager> {
-    private final SessionFactory factory;
-
-    public EntityManagerHelper() {
-        Configuration cfg = new Configuration().configure();
-        factory = cfg.buildSessionFactory();
-    }
+    private final EntityManagerFactory factory;
 
     @Override
     public EntityManager getObject() {

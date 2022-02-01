@@ -1,36 +1,22 @@
 package by.dutov.jee.service.facade;
 
-import by.dutov.jee.group.Group;
+import by.dutov.jee.auth.Role;
 import by.dutov.jee.people.Person;
-import by.dutov.jee.people.Role;
 import by.dutov.jee.people.Student;
 import by.dutov.jee.people.Teacher;
-import by.dutov.jee.people.grades.Grade;
-import by.dutov.jee.repository.person.PersonDAOInterface;
-import by.dutov.jee.service.encrypt.PasswordEncryptionService;
 import by.dutov.jee.service.exceptions.DataBaseException;
-import by.dutov.jee.service.person.PersonDaoInstance;
 import by.dutov.jee.service.person.PersonService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.view.InternalResourceView;
 
-import javax.servlet.DispatcherType;
-import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import java.io.IOException;
-import java.security.NoSuchAlgorithmException;
-import java.security.spec.InvalidKeySpecException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Set;
-
-import static by.dutov.jee.service.encrypt.PasswordEncryptionService.generateSalt;
-import static by.dutov.jee.service.encrypt.PasswordEncryptionService.getEncryptedPassword;
+import java.util.Collection;
 
 @Slf4j
 @Service
@@ -38,6 +24,7 @@ import static by.dutov.jee.service.encrypt.PasswordEncryptionService.getEncrypte
 public class UpdateService {
     private final CheckingService checkingService;
     private final PersonService personService;
+    private final BCryptPasswordEncoder passwordEncoder;
 
     public ModelAndView updateUser(ModelAndView modelAndView,
                                    String userLogin, HttpServletRequest req) {
@@ -53,7 +40,7 @@ public class UpdateService {
             modelAndView.setStatus(HttpStatus.NOT_FOUND);
             return modelAndView;
         }
-        log.info("User is finded");
+        log.info("User found");
         boolean isLogin = false;
         boolean isPass = false;
         boolean isName = false;
@@ -73,11 +60,10 @@ public class UpdateService {
         }
         Integer userId = person.getId();
         String userName = person.getUserName();
-        byte[] password = person.getPassword();
-        byte[] salt = person.getSalt();
+        String password = person.getPassword();
         String name = person.getName();
         int age = person.getAge();
-        Role role = person.getRole();
+        Collection<Role> roles = person.getRoles();
         if (!isLogin && !isPass && !isName && !isAge) {
             log.info("Remained unchanged");
             modelAndView.addObject("errorMessage", "Remained unchanged");
@@ -90,13 +76,7 @@ public class UpdateService {
         }
         if (isPass) {
             log.info("password changed");
-            String pass = req.getParameter("password");
-            try {
-                salt = generateSalt();
-                password = getEncryptedPassword(pass, salt);
-            } catch (NoSuchAlgorithmException | InvalidKeySpecException e) {
-                log.error(e.getMessage());
-            }
+            password = passwordEncoder.encode(req.getParameter("password"));
         }
         if (isName) {
             log.info("name changed");
@@ -108,23 +88,21 @@ public class UpdateService {
             age = checkingService.isEmpty(ageParam) ? 0 : Integer.parseInt(ageParam);
         }
         try {
-            if (role.equals(Role.STUDENT)) {
+            if (person.getRolesName(roles).contains(Role.ROLE_STUDENT)) {
                 personService.save(
                         new Student()
                                 .withId(userId)
                                 .withUserName(userName)
-                                .withBytePass(password)
-                                .withSalt(salt)
+                                .withPassword(password)
                                 .withName(name)
                                 .withAge(age)
                 );
-            } else if (role.equals(Role.TEACHER)) {
+            } else if (person.getRolesName(roles).contains(Role.ROLE_TEACHER)) {
                 personService.save(
                         new Teacher()
                                 .withId(userId)
                                 .withUserName(userName)
-                                .withBytePass(password)
-                                .withSalt(salt)
+                                .withPassword(password)
                                 .withName(name)
                                 .withAge(age)
                 );

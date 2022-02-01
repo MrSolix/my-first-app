@@ -1,6 +1,7 @@
 package by.dutov.jee.people;
 
 
+import by.dutov.jee.auth.Role;
 import by.dutov.jee.group.Group;
 import by.dutov.jee.people.grades.Grade;
 import lombok.AllArgsConstructor;
@@ -10,6 +11,7 @@ import lombok.NoArgsConstructor;
 import lombok.ToString;
 
 import javax.persistence.CascadeType;
+import javax.persistence.DiscriminatorValue;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.JoinColumn;
@@ -30,11 +32,11 @@ import java.util.Set;
 @AllArgsConstructor
 @EqualsAndHashCode(callSuper = true)
 @ToString(callSuper = true)
-@Table(name = "users")
 @Entity
-@NamedQuery(name = "findStudentByName", query = "from Student u where u.userName = :name and u.role = 'STUDENT'")
-@NamedQuery(name = "findStudentById", query = "from Student u where u.id = :id and u.role = 'STUDENT'")
-@NamedQuery(name = "findAllStudents", query = "from Student u where u.role = 'STUDENT'")
+@NamedQuery(name = "findStudentByName", query = "from Student u join u.roles r where u.userName = :name and r.name = 'STUDENT'")
+@NamedQuery(name = "findStudentById", query = "from Student u join u.roles r where u.id = :id and r.name = 'STUDENT'")
+@NamedQuery(name = "findAllStudents", query = "from Student u join u.roles r where r.name = 'STUDENT'")
+@DiscriminatorValue("student")
 public class Student extends Person {
     @ToString.Include
     @EqualsAndHashCode.Include
@@ -54,7 +56,10 @@ public class Student extends Person {
     private List<Grade> grades;
 
     {
-        setRole(Role.STUDENT);
+        addRole(new Role()
+                .withId(1)
+                .withName("STUDENT")
+                .addPerson(this));
     }
 
     public Student withGroups(Set<Group> groups) {
@@ -73,17 +78,7 @@ public class Student extends Person {
     }
 
     public Student withPassword(String password) {
-        addPassword(password, this);
-        return this;
-    }
-
-    public Student withBytePass(byte[] pass) {
-        setPassword(pass);
-        return this;
-    }
-
-    public Student withSalt(byte[] salt) {
-        setSalt(salt);
+        setPassword(password);
         return this;
     }
 
@@ -94,11 +89,6 @@ public class Student extends Person {
 
     public Student withAge(int age) {
         setAge(age);
-        return this;
-    }
-
-    public Student withRole(Role role) {
-        setRole(role);
         return this;
     }
 
@@ -138,7 +128,7 @@ public class Student extends Person {
     public String infoGet() {
         return "Name: \"" + getName() +
                 "\"<br>Age: \"" + getAge() +
-                "\"<br>Role: \"" + getRole() +
+                "\"<br>Role: \"" + getRoles() +
                 "\"<br>Group(s) №: " + groupNumbersInString() +
                 "<br>Grades: " + stringOfGrades(grades);
     }

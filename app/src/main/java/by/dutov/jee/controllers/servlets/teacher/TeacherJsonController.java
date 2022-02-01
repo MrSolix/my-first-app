@@ -1,7 +1,7 @@
 package by.dutov.jee.controllers.servlets.teacher;
 
+import by.dutov.jee.auth.Role;
 import by.dutov.jee.people.Person;
-import by.dutov.jee.people.Role;
 import by.dutov.jee.people.Teacher;
 import by.dutov.jee.service.person.PersonService;
 import lombok.RequiredArgsConstructor;
@@ -35,7 +35,7 @@ public class TeacherJsonController {
         List<Teacher> teachers = new ArrayList<>();
         for (Person person :
                 all) {
-            if (Role.TEACHER.equals(person.getRole())) {
+            if (person.getRolesName(person.getRoles()).contains(Role.ROLE_TEACHER)) {
                 teachers.add((Teacher) person);
             }
         }
@@ -47,7 +47,7 @@ public class TeacherJsonController {
         Optional<Person> personOptional = personService.find(id);
         if (personOptional.isPresent()) {
             Person person = personOptional.get();
-            if (Role.TEACHER.equals(person.getRole())) {
+            if (person.getRolesName(person.getRoles()).contains(Role.ROLE_TEACHER)) {
                 return ResponseEntity.ok(((Teacher) person));
             }
         }
@@ -56,7 +56,7 @@ public class TeacherJsonController {
 
     @PostMapping
     public ResponseEntity<Teacher> saveTeacher(@RequestBody Teacher teacher) {
-        if (Role.TEACHER.equals(teacher.getRole())) {
+        if (teacher.getRolesName(teacher.getRoles()).contains(Role.ROLE_TEACHER)) {
             return ResponseEntity.ok((Teacher) personService.save(teacher));
         }
         return ResponseEntity.badRequest().build();
@@ -70,7 +70,7 @@ public class TeacherJsonController {
                         .badRequest()
                         .body("Teacher id must be equal with id in path: " + id + " != " + teacher.getId());
             }
-            if (!Role.TEACHER.equals(teacher.getRole())) {
+            if (!teacher.getRolesName(teacher.getRoles()).contains(Role.ROLE_TEACHER)) {
                 return ResponseEntity
                         .badRequest()
                         .body("Person is not teacher");
@@ -82,9 +82,11 @@ public class TeacherJsonController {
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Teacher> deleteTeacher(@PathVariable int id) {
-        Optional<Person> person = personService.find(id);
-        if (person.isPresent() && Role.TEACHER.equals(person.get().getRole())) {
-            return ResponseEntity.of(Optional.of(((Teacher) personService.remove(person.get()))));
+        Optional<Person> optionalPerson = personService.find(id);
+        if (optionalPerson.isPresent()) {
+            Person person = optionalPerson.get();
+            if (person.getRolesName(person.getRoles()).contains(Role.ROLE_TEACHER))
+            return ResponseEntity.of(Optional.of(((Teacher) personService.remove(person))));
         }
         return ResponseEntity.notFound().build();
     }

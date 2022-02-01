@@ -147,7 +147,7 @@ public abstract class AbstractPersonDaoJpa implements PersonDAOInterface {
             em = helper.getObject();
             helper.begin(em);
 
-            TypedQuery<Person> query = em.createQuery(findAllJpql(), Person.class);
+            TypedQuery<Person> query = em.createNamedQuery(findAllJpql(), Person.class);
             entities = query.getResultList();
 
             helper.commitSingle(em);

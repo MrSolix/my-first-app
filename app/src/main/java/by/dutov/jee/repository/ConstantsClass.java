@@ -105,13 +105,13 @@ public class ConstantsClass {
 
     //JPA
     public static final String REMOVE_TEACHER_FROM_GROUP = "update Group g set g.teacher = null where g.id = :id and g.teacher.id = :teacher_id";
-    public static final String GET_ALL_STUDENTS = "from Student u where u.role = 'STUDENT'";
+    public static final String GET_ALL_STUDENTS = "findAllStudents";
     public static final String GET_STUDENT_BY_NAME = "findStudentByName";
     public static final String GET_STUDENT_BY_ID = "findStudentById";
-    public static final String GET_ALL_TEACHERS = "from Teacher u where u.role = 'TEACHER'";
+    public static final String GET_ALL_TEACHERS = "findAllTeachers";
     public static final String GET_TEACHER_BY_NAME = "findTeacherByName";
     public static final String GET_TEACHER_BY_ID = "findTeacherById";
-    public static final String GET_ALL_ADMINS = "from Admin u where u.role = 'ADMIN'";
+    public static final String GET_ALL_ADMINS = "findAllAdmins";
     public static final String GET_ADMIN_BY_NAME = "findAdminByName";
     public static final String GET_ADMIN_BY_ID = "findAdminById";
 

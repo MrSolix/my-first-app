@@ -1,7 +1,7 @@
 package by.dutov.jee.service.facade;
 
+import by.dutov.jee.auth.Role;
 import by.dutov.jee.people.Person;
-import by.dutov.jee.people.Role;
 import by.dutov.jee.people.Teacher;
 import by.dutov.jee.service.person.PersonService;
 import lombok.extern.slf4j.Slf4j;
@@ -36,7 +36,7 @@ public class Finance {
     private void init() {
         List<? extends Person> all = personService.findAll();
         for (Person p : all) {
-            if (p.getRole().equals(Role.TEACHER)) {
+            if (p.getRolesName(p.getRoles()).contains(Role.ROLE_TEACHER)) {
                 Optional<? extends Person> user = personService.find(p.getId());
                 if (user.isPresent()) {
                     Teacher teacher = (Teacher) user.get();
@@ -87,7 +87,7 @@ public class Finance {
         modelAndView.setView(internalResourceView);
         modelAndView.setViewName("/admin/salaryPage");
         Optional<? extends Person> person = personService.find(userName);
-        if (person.isEmpty() || !Role.TEACHER.equals(person.get().getRole())) {
+        if (person.isEmpty() || !person.get().getRolesName(person.get().getRoles()).contains(Role.ROLE_TEACHER)) {
             log.info("person == null or person role != \"TEACHER\"");
             modelAndView.addObject("errorStringInSalaryPage",
                     "the teacher's login is incorrect");
@@ -117,7 +117,7 @@ public class Finance {
         Optional<? extends Person> person = personService.find(userName);
         log.info("Get person from db");
 
-        if (person.isEmpty() || !Role.TEACHER.equals(person.get().getRole())) {
+        if (person.isEmpty() || !person.get().getRolesName(person.get().getRoles()).contains(Role.ROLE_TEACHER)) {
             log.info("person == null or person role != \"TEACHER\"");
             modelAndView.addObject("errorStringInAvgSalaryPage",
                     "the teacher's login is incorrect");

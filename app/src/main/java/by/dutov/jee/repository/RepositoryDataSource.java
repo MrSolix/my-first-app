@@ -1,6 +1,5 @@
 package by.dutov.jee.repository;
 
-import by.dutov.jee.repository.person.postgres.ConnectionType;
 import by.dutov.jee.service.exceptions.ApplicationException;
 import com.mchange.v2.c3p0.ComboPooledDataSource;
 import lombok.NoArgsConstructor;

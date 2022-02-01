@@ -6,9 +6,16 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.EnableAspectJAutoProxy;
+import org.springframework.core.Ordered;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
+import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
+import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.web.context.AbstractSecurityWebApplicationInitializer;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
+import org.springframework.web.servlet.config.annotation.DefaultServletHandlerConfigurer;
 import org.springframework.web.servlet.config.annotation.EnableWebMvc;
+import org.springframework.web.servlet.config.annotation.ViewControllerRegistry;
+import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 import org.springframework.web.servlet.view.InternalResourceViewResolver;
 
 @Configuration
@@ -20,7 +27,9 @@ import org.springframework.web.servlet.view.InternalResourceViewResolver;
         entityManagerFactoryRef = "factoryBean",
         transactionManagerRef = "jpaTransactionManager"
 )
-public class ApplicationConfig {
+@EnableGlobalMethodSecurity(prePostEnabled = true)
+public class ApplicationConfig extends AbstractSecurityWebApplicationInitializer implements WebMvcConfigurer {
+
     @Bean
     public InternalResourceViewResolver internalResourceViewResolver(@Autowired ApplicationContext ctx) {
         InternalResourceViewResolver resolver = new InternalResourceViewResolver();
@@ -29,4 +38,11 @@ public class ApplicationConfig {
         resolver.setSuffix(".jsp");
         return resolver;
     }
+
+    @Override
+    public void configureDefaultServletHandling(DefaultServletHandlerConfigurer configurer) {
+        configurer.enable();
+    }
+
+
 }

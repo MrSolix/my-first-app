@@ -1,7 +1,7 @@
 package by.dutov.jee.controllers.servlets.student;
 
+import by.dutov.jee.auth.Role;
 import by.dutov.jee.people.Person;
-import by.dutov.jee.people.Role;
 import by.dutov.jee.people.Student;
 import by.dutov.jee.service.person.PersonService;
 import lombok.RequiredArgsConstructor;
@@ -17,8 +17,12 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 
 @RestController
 @RequestMapping(path = "/json/students", produces = MediaType.APPLICATION_JSON_VALUE)
@@ -33,8 +37,8 @@ public class StudentJsonController {
         List<Student> students = new ArrayList<>();
         for (Person person :
                 all) {
-            if (Role.STUDENT.equals(person.getRole())) {
-                students.add((Student) person);
+            if (person.getRolesName(person.getRoles()).contains(Role.ROLE_STUDENT)) {
+                students.add(((Student) person));
             }
         }
         return students;
@@ -45,7 +49,7 @@ public class StudentJsonController {
         Optional<Person> personOptional = personService.find(id);
         if (personOptional.isPresent()) {
             Person person = personOptional.get();
-            if (Role.STUDENT.equals(person.getRole())) {
+            if (person.getRolesName(person.getRoles()).contains(Role.ROLE_STUDENT)) {
                 return ResponseEntity.ok(((Student) person));
             }
         }
@@ -54,7 +58,7 @@ public class StudentJsonController {
 
     @PostMapping()
     public ResponseEntity<Student> saveStudent(@RequestBody Student student) {
-        if (Role.STUDENT.equals(student.getRole())) {
+        if (student.getRolesName(student.getRoles()).contains(Role.ROLE_STUDENT)) {
             return ResponseEntity.ok((Student) personService.save(student));
         }
         return ResponseEntity.badRequest().build();
@@ -68,7 +72,7 @@ public class StudentJsonController {
                         .badRequest()
                         .body("Student id must be equal with id in path: " + id + " != " + student.getId());
             }
-            if (!Role.STUDENT.equals(student.getRole())) {
+            if (!student.getRolesName(student.getRoles()).contains(Role.ROLE_STUDENT)) {
                 return ResponseEntity
                         .badRequest()
                         .body("Person is not student");
@@ -80,9 +84,11 @@ public class StudentJsonController {
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Student> deleteStudent(@PathVariable int id) {
-        Optional<Person> person = personService.find(id);
-        if (person.isPresent() && Role.STUDENT.equals(person.get().getRole())) {
-            return ResponseEntity.of(Optional.of(((Student) personService.remove(person.get()))));
+        Optional<Person> optionalPerson = personService.find(id);
+        if (optionalPerson.isPresent()) {
+            Person person = optionalPerson.get();
+            if (person.getRolesName(person.getRoles()).contains(Role.ROLE_STUDENT))
+            return ResponseEntity.of(Optional.of(((Student) personService.remove(person))));
         }
         return ResponseEntity.notFound().build();
     }

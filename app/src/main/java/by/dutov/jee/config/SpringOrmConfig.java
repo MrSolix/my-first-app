@@ -44,7 +44,6 @@ public class SpringOrmConfig {
         properties.setProperty("hibernate.dbcp.maxIdle", "10");
         properties.setProperty("hibernate.dbcp.minIdle", "5");
         properties.setProperty("hibernate.dbcp.maxWaitMillis", "-1");
-
         return properties;
     }
 

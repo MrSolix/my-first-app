@@ -14,7 +14,7 @@ public class LogoutServlet {
 
     @GetMapping("/main/logout")
     public void logout(HttpServletRequest req, HttpServletResponse resp) throws IOException {
-        log.info("Logouted");
+        log.info("You have been logged out.");
         req.getSession().invalidate();
         resp.sendRedirect(req.getContextPath() + "/");
     }

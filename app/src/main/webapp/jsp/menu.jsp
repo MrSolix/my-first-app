@@ -1,28 +1,27 @@
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
+<%@ taglib prefix="sec" uri="http://www.springframework.org/security/tags" %>
 <c:set var="student" value="STUDENT"/>
 <c:set var="teacher" value="TEACHER"/>
 <c:set var="admin" value="ADMIN"/>
-<c:choose>
-    <c:when test="${loginedUser.role.getType().equals(admin)}">
-<a href="${pageContext.request.contextPath}/admin/admin">
-    Admin Page
-</a>
-||
-    </c:when>
-    <c:when test="${loginedUser.role.getType().equals(teacher)}">
-<a href="${pageContext.request.contextPath}/teacher/teacher">
-    Teacher Page
-</a>
-||
-    </c:when>
-    <c:when test="${loginedUser.role.getType().equals(student)}">
-<a href="${pageContext.request.contextPath}/student/student">
-    Student Page
-</a>
-||
-    </c:when>
-</c:choose>
+<sec:authorize access="hasRole('ADMIN')">
+    <a href="${pageContext.request.contextPath}/admin">
+        Admin Page
+    </a>
+    ||
+</sec:authorize>
+<sec:authorize access="hasRole('TEACHER')">
+    <a href="${pageContext.request.contextPath}/teacher">
+        Teacher Page
+    </a>
+    ||
+</sec:authorize>
+<sec:authorize access="hasRole('STUDENT')">
+    <a href="${pageContext.request.contextPath}/student">
+        Student Page
+    </a>
+    ||
+</sec:authorize>
 <a href="${pageContext.request.contextPath}/main/home">
     Home Page
 </a>
@@ -31,18 +30,18 @@
     User Info
 </a>
 ||
-<c:if test="${loginedUser == null}">
-<a href="${pageContext.request.contextPath}/registration">
-    Registration
-</a>
-||
-</c:if>
-<a href="${pageContext.request.contextPath}/login">
-    Login
-</a>
-||
-<a href="${pageContext.request.contextPath}/main/logout">
-    Logout
-</a>
-
-<span style="color:red">[ ${loginedUser.userName} ]</span>
+<sec:authorize access="!isAuthenticated()">
+    <a href="${pageContext.request.contextPath}/registration">
+        Registration
+    </a>
+    ||
+    <a href="${pageContext.request.contextPath}/login">
+        Login
+    </a>
+</sec:authorize>
+<sec:authorize access="isAuthenticated()">
+    <a href="${pageContext.request.contextPath}/logout">
+        Logout
+    </a>
+    <span style="color:red">[ <sec:authentication property="name"/> ]</span>
+</sec:authorize>

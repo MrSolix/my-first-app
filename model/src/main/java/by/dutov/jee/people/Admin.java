@@ -1,10 +1,12 @@
 package by.dutov.jee.people;
 
+import by.dutov.jee.auth.Role;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
 
+import javax.persistence.DiscriminatorValue;
 import javax.persistence.Entity;
 import javax.persistence.NamedQuery;
 import javax.persistence.Table;
@@ -13,14 +15,18 @@ import javax.persistence.Table;
 @NoArgsConstructor
 @ToString(callSuper = true)
 @EqualsAndHashCode(callSuper = true)
-@Table(name = "users")
 @Entity
-@NamedQuery(name = "findAdminByName", query = "from Admin u where u.userName = :name and u.role = 'ADMIN'")
-@NamedQuery(name = "findAdminById", query = "from Admin u where u.id = :id and u.role = 'ADMIN'")
+@NamedQuery(name = "findAdminByName", query = "from Admin u join u.roles r where u.userName = :name and r.name = 'ADMIN'")
+@NamedQuery(name = "findAdminById", query = "from Admin u join u.roles r where u.id = :id and r.name = 'ADMIN'")
+@NamedQuery(name = "findAllAdmins", query = "from Admin u join u.roles r where r.name = 'ADMIN'")
+@DiscriminatorValue("admin")
 public class Admin extends Person{
 
     {
-        setRole(Role.ADMIN);
+        addRole(new Role()
+                .withId(3)
+                .withName("ADMIN")
+                .addPerson(this));
     }
 
     public Admin withId(Integer id){
@@ -34,17 +40,7 @@ public class Admin extends Person{
     }
 
     public Admin withPassword(String password){
-        addPassword(password, this);
-        return this;
-    }
-
-    public Admin withBytePass(byte[] pass){
-        setPassword(pass);
-        return this;
-    }
-
-    public Admin withSalt(byte[] salt){
-        setSalt(salt);
+        setPassword(password);
         return this;
     }
 
@@ -58,16 +54,11 @@ public class Admin extends Person{
         return this;
     }
 
-    public Admin withRole(Role role){
-        setRole(role);
-        return this;
-    }
-
     @Override
     public String infoGet() {
         return "Name: \"" + getName() +
                 "\"<br>Age: \"" + getAge() +
-                "\"<br>Role: \"" + getRole() +
+                "\"<br>Role: \"" + getRoles() +
                 "\"";
     }
 }

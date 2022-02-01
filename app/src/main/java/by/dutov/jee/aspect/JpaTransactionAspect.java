@@ -1,7 +1,7 @@
 package by.dutov.jee.aspect;
 
 import by.dutov.jee.repository.EntityManagerHelper;
-import by.dutov.jee.repository.person.postgres.ConnectionType;
+import by.dutov.jee.repository.ConnectionType;
 import by.dutov.jee.service.AbstractDaoInstance;
 import by.dutov.jee.service.exceptions.DataBaseException;
 import lombok.RequiredArgsConstructor;
@@ -12,9 +12,7 @@ import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
 import org.springframework.stereotype.Component;
 
-import javax.annotation.PostConstruct;
 import javax.persistence.EntityManager;
-import java.util.Map;
 import java.util.Optional;
 
 import static by.dutov.jee.repository.AbstractGeneralTransaction.connectionType;

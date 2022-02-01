@@ -1,4 +1,4 @@
-package by.dutov.jee.repository.person.postgres;
+package by.dutov.jee.repository;
 
 public enum ConnectionType {
     MANY, SINGLE;
