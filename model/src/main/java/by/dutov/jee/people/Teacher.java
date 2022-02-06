@@ -24,9 +24,9 @@ import javax.persistence.Table;
 @ToString(callSuper = true)
 @Entity
 @SecondaryTable(name = "salaries", pkJoinColumns = @PrimaryKeyJoinColumn(name = "teacher_id"))
-@NamedQuery(name = "findTeacherByName", query = "from Teacher u join u.roles r where u.userName = :name and r.name = 'TEACHER'")
-@NamedQuery(name = "findTeacherById", query = "from Teacher u join u.roles r where u.id = :id and r.name = 'TEACHER'")
-@NamedQuery(name = "findAllTeachers", query = "from Teacher u join u.roles r where r.name = 'TEACHER'")
+@NamedQuery(name = "findTeacherByName", query = "select u from Teacher u join u.roles r where u.userName = :name and r.name = 'TEACHER'")
+@NamedQuery(name = "findTeacherById", query = "select u from Teacher u join u.roles r where u.id = :id and r.name = 'TEACHER'")
+@NamedQuery(name = "findAllTeachers", query = "select u from Teacher u join u.roles r where r.name = 'TEACHER'")
 @DiscriminatorValue("teacher")
 public class Teacher extends Person {
     @ToString.Include

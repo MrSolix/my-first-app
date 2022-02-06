@@ -33,9 +33,9 @@ import java.util.Set;
 @EqualsAndHashCode(callSuper = true)
 @ToString(callSuper = true)
 @Entity
-@NamedQuery(name = "findStudentByName", query = "from Student u join u.roles r where u.userName = :name and r.name = 'STUDENT'")
-@NamedQuery(name = "findStudentById", query = "from Student u join u.roles r where u.id = :id and r.name = 'STUDENT'")
-@NamedQuery(name = "findAllStudents", query = "from Student u join u.roles r where r.name = 'STUDENT'")
+@NamedQuery(name = "findStudentByName", query = "select u from Student u join u.roles r where u.userName = :name and r.name = 'STUDENT'")
+@NamedQuery(name = "findStudentById", query = "select u from Student u join u.roles r where u.id = :id and r.name = 'STUDENT'")
+@NamedQuery(name = "findAllStudents", query = "select u from Student u join u.roles r where r.name = 'STUDENT'")
 @DiscriminatorValue("student")
 public class Student extends Person {
     @ToString.Include

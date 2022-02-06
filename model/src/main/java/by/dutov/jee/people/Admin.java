@@ -16,9 +16,9 @@ import javax.persistence.Table;
 @ToString(callSuper = true)
 @EqualsAndHashCode(callSuper = true)
 @Entity
-@NamedQuery(name = "findAdminByName", query = "from Admin u join u.roles r where u.userName = :name and r.name = 'ADMIN'")
-@NamedQuery(name = "findAdminById", query = "from Admin u join u.roles r where u.id = :id and r.name = 'ADMIN'")
-@NamedQuery(name = "findAllAdmins", query = "from Admin u join u.roles r where r.name = 'ADMIN'")
+@NamedQuery(name = "findAdminByName", query = "select u from Admin u join u.roles r where u.userName = :name and r.name = 'ADMIN'")
+@NamedQuery(name = "findAdminById", query = "select u from Admin u join u.roles r where u.id = :id and r.name = 'ADMIN'")
+@NamedQuery(name = "findAllAdmins", query = "select u from Admin u join u.roles r where r.name = 'ADMIN'")
 @DiscriminatorValue("admin")
 public class Admin extends Person{
 
