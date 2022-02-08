@@ -25,9 +25,9 @@ public class DeleteService {
         modelAndView.setViewName("/admin/deleteUserPage");
         Person person = checkingService.checkUser(userLogin);
         if (person == null || person.getRolesName(person.getRoles()).contains(Role.ROLE_ADMIN)) {
-            log.info("User with that userName is not find");
+            log.info("User not found");
             modelAndView.addObject("errorMessage",
-                    "User with that userName is not find");
+                    "User not found");
             modelAndView.setStatus(HttpStatus.NOT_FOUND);
             return modelAndView;
         }
