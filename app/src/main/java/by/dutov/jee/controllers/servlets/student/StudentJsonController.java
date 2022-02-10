@@ -17,12 +17,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
-import java.util.Set;
 
 @RestController
 @RequestMapping(path = "/json/students", produces = MediaType.APPLICATION_JSON_VALUE)
@@ -88,7 +84,7 @@ public class StudentJsonController {
         if (optionalPerson.isPresent()) {
             Person person = optionalPerson.get();
             if (person.getRolesName(person.getRoles()).contains(Role.ROLE_STUDENT))
-            return ResponseEntity.of(Optional.of(((Student) personService.remove(person))));
+                return ResponseEntity.of(Optional.of(((Student) personService.remove(person))));
         }
         return ResponseEntity.notFound().build();
     }

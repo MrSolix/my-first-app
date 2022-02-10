@@ -86,7 +86,7 @@ public class TeacherJsonController {
         if (optionalPerson.isPresent()) {
             Person person = optionalPerson.get();
             if (person.getRolesName(person.getRoles()).contains(Role.ROLE_TEACHER))
-            return ResponseEntity.of(Optional.of(((Teacher) personService.remove(person))));
+                return ResponseEntity.of(Optional.of(((Teacher) personService.remove(person))));
         }
         return ResponseEntity.notFound().build();
     }

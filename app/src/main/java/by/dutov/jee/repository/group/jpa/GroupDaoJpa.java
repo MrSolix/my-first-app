@@ -21,7 +21,6 @@ import static by.dutov.jee.repository.ConstantsClass.ERROR_FROM_REMOVE;
 import static by.dutov.jee.repository.ConstantsClass.ERROR_FROM_SAVE;
 import static by.dutov.jee.repository.ConstantsClass.ERROR_FROM_UPDATE;
 
-
 @Slf4j
 @Repository("jpaGroup")
 @Lazy

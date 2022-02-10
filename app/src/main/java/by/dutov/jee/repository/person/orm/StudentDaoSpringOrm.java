@@ -3,13 +3,10 @@ package by.dutov.jee.repository.person.orm;
 import by.dutov.jee.group.Group;
 import by.dutov.jee.people.Person;
 import by.dutov.jee.people.Student;
-import by.dutov.jee.people.Teacher;
 import by.dutov.jee.people.grades.Grade;
 import by.dutov.jee.service.exceptions.DataBaseException;
-import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Repository;
 
-import javax.persistence.EntityManager;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -24,8 +21,6 @@ import static by.dutov.jee.repository.ConstantsClass.PERSON_NOT_FOUND;
 
 @Repository
 public class StudentDaoSpringOrm extends AbstractPersonDaoSpringOrm {
-
-
 
     public StudentDaoSpringOrm() {
         clazz = Student.class;

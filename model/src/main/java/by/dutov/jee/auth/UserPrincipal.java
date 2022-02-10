@@ -1,7 +1,6 @@
 package by.dutov.jee.auth;
 
 import by.dutov.jee.people.Person;
-import by.dutov.jee.people.Printable;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;

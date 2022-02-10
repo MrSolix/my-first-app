@@ -7,7 +7,6 @@ import by.dutov.jee.repository.person.PersonDAOInterface;
 import by.dutov.jee.service.exceptions.DataBaseException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Repository;
 
 import javax.persistence.EntityManager;
@@ -26,10 +25,18 @@ import static by.dutov.jee.repository.ConstantsClass.ERROR_FROM_UPDATE;
 @Repository
 public abstract class AbstractPersonDaoJpa implements PersonDAOInterface {
 
-    @Autowired
     protected EntityManagerHelper helper;
-    @Autowired
     protected GroupDaoJpa groupDaoJpa;
+
+    @Autowired
+    public void setHelper(EntityManagerHelper helper) {
+        this.helper = helper;
+    }
+
+    @Autowired
+    public void setGroupDaoJpa(GroupDaoJpa groupDaoJpa) {
+        this.groupDaoJpa = groupDaoJpa;
+    }
 
     @Override
     public Person save(Person person) {

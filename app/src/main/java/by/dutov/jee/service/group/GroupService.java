@@ -1,7 +1,6 @@
 package by.dutov.jee.service.group;
 
 import by.dutov.jee.group.Group;
-import by.dutov.jee.repository.group.GroupDAOInterface;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 

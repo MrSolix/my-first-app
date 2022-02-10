@@ -10,8 +10,6 @@ import org.springframework.stereotype.Component;
 import java.util.List;
 import java.util.Optional;
 
-import static by.dutov.jee.repository.ConstantsClass.GET_ALL_TEACHERS;
-
 @Component
 public interface SpringDataTeacherRepository extends JpaRepository<Teacher, Integer> {
     String SELECT_TEACHER_BY_NAME = "from Teacher t join t.roles r where t.userName = ?1 and r.name = 'TEACHER'";

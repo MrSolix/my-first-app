@@ -29,5 +29,5 @@ public interface SpringDataStudentRepository extends JpaRepository<Student, Inte
     @Query("update Student s set s.userName = ?1, s.password = ?2," +
             " s.name = ?3, s.age = ?4 where s.id = ?5")
     void update(String userName, String password,
-                   String name, Integer age, Integer id);
+                String name, Integer age, Integer id);
 }

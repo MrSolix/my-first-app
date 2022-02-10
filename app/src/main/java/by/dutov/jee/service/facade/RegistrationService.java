@@ -8,10 +8,8 @@ import by.dutov.jee.service.exceptions.DataBaseException;
 import by.dutov.jee.service.person.PersonService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.view.InternalResourceView;
@@ -27,7 +25,7 @@ public class RegistrationService {
 
     public ModelAndView registrationUser(ModelAndView modelAndView,
                                          String userName, String password,
-                                         String name, String ageStr, String role){
+                                         String name, String ageStr, String role) {
 
         InternalResourceView internalResourceView = new InternalResourceView();
         internalResourceView.setAlwaysInclude(true);

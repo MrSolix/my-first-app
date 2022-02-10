@@ -2,8 +2,6 @@ package by.dutov.jee.repository;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.hibernate.SessionFactory;
-import org.hibernate.cfg.Configuration;
 import org.springframework.stereotype.Component;
 
 import javax.persistence.EntityManager;

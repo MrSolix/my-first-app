@@ -1,7 +1,6 @@
 package by.dutov.jee.repository.person.orm;
 
 import by.dutov.jee.people.Person;
-import by.dutov.jee.repository.ConstantsClass;
 import by.dutov.jee.repository.group.orm.GroupDaoSpringOrm;
 import by.dutov.jee.repository.person.PersonDAOInterface;
 import lombok.extern.slf4j.Slf4j;
@@ -12,7 +11,6 @@ import javax.persistence.EntityManager;
 import javax.persistence.NoResultException;
 import javax.persistence.PersistenceContext;
 import javax.persistence.TypedQuery;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -22,11 +20,15 @@ import static by.dutov.jee.repository.ConstantsClass.PERSON_NOT_FOUND;
 @Slf4j
 public abstract class AbstractPersonDaoSpringOrm implements PersonDAOInterface {
 
-    @Autowired
     protected GroupDaoSpringOrm groupDaoSpringOrm;
     protected Class<? extends Person> clazz;
     @PersistenceContext
     protected EntityManager em;
+
+    @Autowired
+    public void setGroupDaoSpringOrm(GroupDaoSpringOrm groupDaoSpringOrm) {
+        this.groupDaoSpringOrm = groupDaoSpringOrm;
+    }
 
     @Override
     public Optional<Person> find(String name) {

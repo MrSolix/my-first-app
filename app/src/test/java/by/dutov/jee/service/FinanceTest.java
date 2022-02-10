@@ -64,7 +64,7 @@ public class FinanceTest {
     }
 
     @Test
-    public void AverageSalary_NO_NULL(){
+    public void AverageSalary_NO_NULL() {
         double actual = finance.averageSalary(1, 2, null);
 
         assertNotNull(actual);

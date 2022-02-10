@@ -15,17 +15,17 @@ public class WebApplicationConfig extends AbstractAnnotationConfigDispatcherServ
 
     @Override
     protected Class<?>[] getServletConfigClasses() {
-        return new Class[] {ApplicationConfig.class};
+        return new Class[]{ApplicationConfig.class};
     }
 
     @Override
     protected String[] getServletMappings() {
-        return new String[] {"/"};
+        return new String[]{"/"};
     }
 
     @Override
     protected Filter[] getServletFilters() {
-        return new Filter[] {
+        return new Filter[]{
                 new EncodingFilter(),
                 new ContentCachingFilter()
         };

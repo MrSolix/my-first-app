@@ -1,7 +1,7 @@
 package by.dutov.jee.aspect;
 
-import by.dutov.jee.repository.EntityManagerHelper;
 import by.dutov.jee.repository.ConnectionType;
+import by.dutov.jee.repository.EntityManagerHelper;
 import by.dutov.jee.service.AbstractDaoInstance;
 import by.dutov.jee.service.exceptions.DataBaseException;
 import lombok.RequiredArgsConstructor;
@@ -40,7 +40,7 @@ public class JpaTransactionAspect extends AbstractDaoInstance {
             result = jp.proceed();
 
             if (result instanceof Optional) {
-               if (((Optional) result).isEmpty()) {
+                if (((Optional) result).isEmpty()) {
                     return Optional.empty();
                 }
             }

@@ -25,16 +25,4 @@ public class CommandServletUtils {
         }
     }
 
-//    public static void filteredAccess(HttpServletRequest request, HttpServletResponse response, FilterChain chain, String who) throws ServletException, IOException {
-//        log.info("Worked {} filter", who);
-//
-//        Person loginedUser = AppUtils.getLoginedUser(request.getSession());
-//
-//        if (loginedUser == null || !Role.getStrByType(loginedUser.getRole()).equals(who)) {
-//            log.info("Access denied");
-//            CommandServletUtils.dispatcher(request, response,
-//                    "/jsp/main/homePage.jsp", DispatcherType.FORWARD);
-//        }
-//        chain.doFilter(request, response);
-//    }
 }

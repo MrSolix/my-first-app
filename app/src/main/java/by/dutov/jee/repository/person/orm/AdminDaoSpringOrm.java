@@ -1,7 +1,6 @@
 package by.dutov.jee.repository.person.orm;
 
 import by.dutov.jee.people.Admin;
-import by.dutov.jee.repository.ConstantsClass;
 import org.springframework.stereotype.Repository;
 
 import static by.dutov.jee.repository.ConstantsClass.GET_ADMIN_BY_ID;

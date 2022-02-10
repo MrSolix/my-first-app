@@ -4,11 +4,9 @@ import by.dutov.jee.group.Group;
 import by.dutov.jee.people.Person;
 import by.dutov.jee.people.Teacher;
 import by.dutov.jee.service.exceptions.DataBaseException;
-import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Repository;
 
 import javax.persistence.Query;
-
 import java.util.Optional;
 
 import static by.dutov.jee.repository.ConstantsClass.GET_ALL_TEACHERS;

@@ -9,7 +9,6 @@ import lombok.ToString;
 import javax.persistence.DiscriminatorValue;
 import javax.persistence.Entity;
 import javax.persistence.NamedQuery;
-import javax.persistence.Table;
 
 @Data
 @NoArgsConstructor
@@ -20,7 +19,7 @@ import javax.persistence.Table;
 @NamedQuery(name = "findAdminById", query = "select u from Admin u join u.roles r where u.id = :id and r.name = 'ADMIN'")
 @NamedQuery(name = "findAllAdmins", query = "select u from Admin u join u.roles r where r.name = 'ADMIN'")
 @DiscriminatorValue("admin")
-public class Admin extends Person{
+public class Admin extends Person {
 
     {
         addRole(new Role()
@@ -29,27 +28,27 @@ public class Admin extends Person{
                 .addPerson(this));
     }
 
-    public Admin withId(Integer id){
+    public Admin withId(Integer id) {
         setId(id);
         return this;
     }
 
-    public Admin withUserName(String userName){
+    public Admin withUserName(String userName) {
         setUserName(userName);
         return this;
     }
 
-    public Admin withPassword(String password){
+    public Admin withPassword(String password) {
         setPassword(password);
         return this;
     }
 
-    public Admin withName(String name){
+    public Admin withName(String name) {
         setName(name);
         return this;
     }
 
-    public Admin withAge(int age){
+    public Admin withAge(int age) {
         setAge(age);
         return this;
     }

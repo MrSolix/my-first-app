@@ -2,13 +2,10 @@ package by.dutov.jee.repository.person.data;
 
 import by.dutov.jee.people.Admin;
 import by.dutov.jee.people.Person;
-import by.dutov.jee.people.Student;
 import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Component;
 
-import java.util.List;
 import java.util.Optional;
 
 @Component

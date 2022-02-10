@@ -12,7 +12,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 
-public class ContentCachingFilter  extends GenericFilterBean {
+public class ContentCachingFilter extends GenericFilterBean {
     @Override
     public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain) throws IOException, ServletException {
         MyContentCachingRequestWrapper reqWrapper = new MyContentCachingRequestWrapper((HttpServletRequest) request);

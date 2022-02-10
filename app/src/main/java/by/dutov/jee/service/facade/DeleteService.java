@@ -18,7 +18,7 @@ public class DeleteService {
     private final PersonService personService;
 
     public ModelAndView deleteUser(ModelAndView modelAndView,
-                           String userLogin) {
+                                   String userLogin) {
         InternalResourceView internalResourceView = new InternalResourceView();
         internalResourceView.setAlwaysInclude(true);
         modelAndView.setView(internalResourceView);

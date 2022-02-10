@@ -8,7 +8,6 @@ import by.dutov.jee.repository.ConstantsClass;
 import by.dutov.jee.repository.person.PersonDAOInterface;
 import by.dutov.jee.service.exceptions.DataBaseException;
 import lombok.RequiredArgsConstructor;
-import org.springframework.security.core.parameters.P;
 import org.springframework.stereotype.Repository;
 
 import java.util.ArrayList;
@@ -51,11 +50,11 @@ public class SpringDataPersonRepositoryImpl implements PersonDAOInterface {
 
     @Override
     public Person save(Person person) {
-        if (person.getRolesName(person.getRoles()).contains(Role.ROLE_STUDENT)){
+        if (person.getRolesName(person.getRoles()).contains(Role.ROLE_STUDENT)) {
             if (person.getId() != null) {
-                    springDataStudentRepository.update(person.getUserName(), person.getPassword(),
-                            person.getName(), person.getAge(), person.getId());
-                    return person;
+                springDataStudentRepository.update(person.getUserName(), person.getPassword(),
+                        person.getName(), person.getAge(), person.getId());
+                return person;
             }
             return springDataStudentRepository.saveAndFlush(((Student) person));
         }

@@ -23,7 +23,7 @@ public class TemplateTransactionAspect {
         Object result;
         try {
             result = jp.proceed();
-        }catch (EmptyResultDataAccessException e) {
+        } catch (EmptyResultDataAccessException e) {
             log.error("Person is not found");
             return Optional.empty();
         }

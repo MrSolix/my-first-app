@@ -15,7 +15,6 @@ import javax.persistence.NamedQuery;
 import javax.persistence.OneToOne;
 import javax.persistence.PrimaryKeyJoinColumn;
 import javax.persistence.SecondaryTable;
-import javax.persistence.Table;
 
 
 @Data
@@ -52,37 +51,37 @@ public class Teacher extends Person {
         }
     }
 
-    public Teacher withId(Integer id){
+    public Teacher withId(Integer id) {
         setId(id);
         return this;
     }
 
-    public Teacher withUserName(String userName){
+    public Teacher withUserName(String userName) {
         setUserName(userName);
         return this;
     }
 
-    public Teacher withPassword(String password){
+    public Teacher withPassword(String password) {
         setPassword(password);
         return this;
     }
 
-    public Teacher withName(String name){
+    public Teacher withName(String name) {
         setName(name);
         return this;
     }
 
-    public Teacher withAge(int age){
+    public Teacher withAge(int age) {
         setAge(age);
         return this;
     }
 
-    public Teacher withSalary(double salary){
+    public Teacher withSalary(double salary) {
         setSalary(salary);
         return this;
     }
 
-    public Teacher withGroup(Group group){
+    public Teacher withGroup(Group group) {
         setGroup(group);
         return this;
     }
