@@ -1,35 +1,38 @@
 package by.dutov.jee.controllers.servlets.admin;
 
-import by.dutov.jee.service.Finance;
-import by.dutov.jee.utils.CommandServletUtils;
+import by.dutov.jee.service.facade.Finance;
 import lombok.extern.slf4j.Slf4j;
-
-import javax.servlet.DispatcherType;
-import javax.servlet.ServletException;
-import javax.servlet.annotation.WebServlet;
-import javax.servlet.http.HttpServlet;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import java.io.IOException;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.servlet.ModelAndView;
 
 @Slf4j
-@WebServlet("/admin/salary")
-public class SalaryServlet extends HttpServlet {
+@Controller
+@RequestMapping("/admin/salary")
+public class SalaryServlet{
+    private final Finance finance;
 
-    @Override
-    protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        log.info("Entered Salary Page");
-        CommandServletUtils.dispatcher(req, resp, "/admin/salaryPage.jsp", DispatcherType.FORWARD);
+    @Autowired
+    public SalaryServlet(Finance finance) {
+        this.finance = finance;
     }
 
-    @Override
-    protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+    @GetMapping
+    public String redirectSalaryPage() {
+        return "/admin/salaryPage";
+    }
+
+    @PostMapping
+    public ModelAndView getSalary(@RequestParam("userName") String userName) {
+        ModelAndView modelAndView = new ModelAndView();
         log.info("Get parameters");
-        String userName = req.getParameter("userName");
         log.info("userName = {}", userName);
         log.info("Get person from db");
-        Finance.getInstance().getSalary(req, resp, userName);
-        CommandServletUtils.dispatcher(req, resp, "/admin/salaryPage.jsp", DispatcherType.INCLUDE);
+        return finance.getSalary(modelAndView, userName);
     }
 
 }

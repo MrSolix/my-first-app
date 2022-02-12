@@ -1,37 +1,68 @@
 package by.dutov.jee.people;
 
 
+import by.dutov.jee.auth.Role;
 import by.dutov.jee.group.Group;
-import com.fasterxml.jackson.annotation.JsonIdentityInfo;
-import com.fasterxml.jackson.annotation.ObjectIdGenerators;
+import by.dutov.jee.people.grades.Grade;
+import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
+import org.hibernate.annotations.LazyCollection;
+import org.hibernate.annotations.LazyCollectionOption;
 
+import javax.persistence.CascadeType;
+import javax.persistence.DiscriminatorValue;
+import javax.persistence.Entity;
+import javax.persistence.FetchType;
+import javax.persistence.JoinColumn;
+import javax.persistence.JoinTable;
+import javax.persistence.ManyToMany;
+import javax.persistence.NamedQuery;
+import javax.persistence.OneToMany;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 @Data
 @NoArgsConstructor
+@AllArgsConstructor
 @EqualsAndHashCode(callSuper = true)
 @ToString(callSuper = true)
-@JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property = "id")
+@Entity
+@NamedQuery(name = "findStudentByName", query = "select u from Student u join u.roles r where u.userName = :name and r.name = 'STUDENT'")
+@NamedQuery(name = "findStudentById", query = "select u from Student u join u.roles r where u.id = :id and r.name = 'STUDENT'")
+@NamedQuery(name = "findAllStudents", query = "select u from Student u join u.roles r where r.name = 'STUDENT'")
+@DiscriminatorValue("student")
 public class Student extends Person {
-    @ToString.Exclude
-//    @JsonBackReference
-    private List<Group> groups;
-    private Map<String, List<Integer>> grades;
+    @ToString.Include
+    @EqualsAndHashCode.Include
+    @LazyCollection(LazyCollectionOption.FALSE)
+    @ManyToMany(fetch = FetchType.EAGER)
+    @JoinTable(
+            name = "group_student",
+            joinColumns = @JoinColumn(name = "student_id"),
+            inverseJoinColumns = @JoinColumn(name = "group_id"))
+    private Set<Group> groups;
+    @ToString.Include
+    @EqualsAndHashCode.Include
+    @LazyCollection(LazyCollectionOption.FALSE)
+    @OneToMany(mappedBy = "student",
+            cascade = {CascadeType.REFRESH, CascadeType.MERGE, CascadeType.PERSIST},
+            orphanRemoval = true)
+    private List<Grade> grades;
 
     {
-        groups = new ArrayList<>();
-        grades = new HashMap<>();
+        addRole(new Role()
+                .withId(1)
+                .withName("STUDENT")
+                .addPerson(this));
     }
 
-    public Student withGroups(List<Group> groups){
+    public Student withGroups(Set<Group> groups) {
         setGroups(groups);
         return this;
     }
@@ -47,17 +78,7 @@ public class Student extends Person {
     }
 
     public Student withPassword(String password) {
-        addPassword(password, this);
-        return this;
-    }
-
-    public Student withBytePass(byte[] pass) {
-        setPassword(pass);
-        return this;
-    }
-
-    public Student withSalt(byte[] salt) {
-        setSalt(salt);
+        setPassword(password);
         return this;
     }
 
@@ -71,75 +92,74 @@ public class Student extends Person {
         return this;
     }
 
-    public Student withRole(Role role) {
-        setRole(role);
+    public void addGroup(Group group) {
+        groups.add(group);
+    }
+
+    public void removeGroup(Group group) {
+        groups.remove(group);
+        group.getStudents().remove(this);
+    }
+
+    public Student withGrades(List<Grade> grades) {
+        setGrades(grades);
         return this;
     }
 
-    public Student addGroup(Group group) {
-        if (!groups.contains(group)) {
-            groups.add(group);
+    public void setGrades(List<Grade> grades) {
+        if (grades != null) {
+            this.grades.clear();
+            this.grades.addAll(grades);
+            grades.forEach(grade -> grade.setStudent(this));
         }
-        return this;
     }
 
-    public Student withGrades(Map<String, List<Integer>> grades) {
-        this.grades = grades;
-        return this;
+    public void addGrade(Grade grade) {
+        grades.add(grade);
+        grade.setStudent(this);
     }
 
-    public void addThemeAndGrades(String name, Integer... grades) {
-        this.grades.put(name, Arrays.asList(grades));
-    }
-
-    public Student addGrade(String name, Integer grade) {
-        if (this.grades.containsKey(name)) {
-            this.grades.get(name).add(grade);
-        } else {
-            this.grades.put(name, Arrays.asList(grade));
-        }
-        return this;
+    public void removeGrade(Grade grade) {
+        grades.remove(grade);
+        grade.setStudent(null);
     }
 
     @Override
-    public String getInfo() {
+    public String infoGet() {
         return "Name: \"" + getName() +
                 "\"<br>Age: \"" + getAge() +
-                "\"<br>Role: \"" + getRole() +
+                "\"<br>Role: \"" + getRoles() +
                 "\"<br>Group(s) №: " + groupNumbersInString() +
                 "<br>Grades: " + stringOfGrades(grades);
     }
 
     private String groupNumbersInString() {
-        String result = "";
+        StringBuilder result = new StringBuilder();
         int count = 0;
         for (Group group : groups) {
-            result += group.getId();
+            result.append(group.getId());
             if (count != groups.size() - 1) {
-                result += ", ";
+                result.append(", ");
             } else {
-                result += ";";
+                result.append(";");
             }
             count++;
         }
-        return result;
+        return result.toString();
     }
 
-    private String stringOfGrades(Map<String, List<Integer>> grades) {
-        String result = "";
-        for (String s : grades.keySet()) {
-            result += "<br>&nbsp;&nbsp;&nbsp;&nbsp" + s + ": ";
-            List<Integer> integers = grades.get(s);
-            for (int i = 0; i < integers.size(); i++) {
-                result += integers.get(i);
-                if (i != integers.size() - 1) {
-                    result += ", ";
-                } else {
-                    result += ";";
-                }
-            }
+    private String stringOfGrades(List<Grade> grades) {
+        StringBuilder result = new StringBuilder();
+        Map<String, List<Integer>> map = new LinkedHashMap<>();
+        for (Grade grade : grades) {
+            map.putIfAbsent(grade.getThemeName(), new ArrayList<>());
+            map.get(grade.getThemeName()).add(grade.getGrade());
         }
-        return result;
+        Set<String> strings = map.keySet();
+        for (String s : strings) {
+            result.append("<br>&nbsp;&nbsp;&nbsp;&nbsp").append(s).append(": ").append(map.get(s));
+        }
+        return result.toString();
     }
 
 

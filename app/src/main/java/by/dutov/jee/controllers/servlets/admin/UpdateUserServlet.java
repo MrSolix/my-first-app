@@ -1,31 +1,38 @@
 package by.dutov.jee.controllers.servlets.admin;
 
-import by.dutov.jee.service.UpdateService;
-import by.dutov.jee.utils.CommandServletUtils;
+import by.dutov.jee.service.facade.UpdateService;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.servlet.ModelAndView;
 
-import javax.servlet.DispatcherType;
-import javax.servlet.ServletException;
-import javax.servlet.annotation.WebServlet;
-import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import java.io.IOException;
 
 @Slf4j
-@WebServlet("/admin/update-user")
-public class UpdateUserServlet extends HttpServlet {
-    @Override
-    protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        CommandServletUtils.dispatcher(req, resp, "/admin/updateUserPage.jsp", DispatcherType.FORWARD);
+@Controller
+@RequestMapping("/admin/update-user")
+public class UpdateUserServlet {
+    private final UpdateService updateService;
+
+    @Autowired
+    public UpdateUserServlet(UpdateService updateService) {
+        this.updateService = updateService;
     }
 
-    @Override
-    protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        UpdateService updateService = UpdateService.getInstance();
+    @GetMapping
+    public String redirectUpdateUserPage() {
+        return "/admin/updateUserPage";
+    }
+
+    @PostMapping
+    public ModelAndView updateUser(@RequestParam("userLogin") String userLogin, HttpServletRequest req) {
+        ModelAndView modelAndView = new ModelAndView();
         log.info("Entered Update User Page");
         log.info("Get parameter");
-        String userLogin = req.getParameter("userLogin");
-        updateService.updateUser(req, resp, userLogin);
+        return updateService.updateUser(modelAndView, userLogin, req);
     }
 }

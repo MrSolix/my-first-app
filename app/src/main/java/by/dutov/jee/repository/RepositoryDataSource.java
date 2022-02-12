@@ -1,55 +1,112 @@
 package by.dutov.jee.repository;
 
 import by.dutov.jee.service.exceptions.ApplicationException;
+import com.mchange.v2.c3p0.ComboPooledDataSource;
+import lombok.NoArgsConstructor;
+import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.PropertySource;
+import org.springframework.stereotype.Component;
 
+import javax.annotation.PostConstruct;
 import javax.sql.DataSource;
+import java.beans.PropertyVetoException;
 import java.io.PrintWriter;
 import java.sql.Connection;
-import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.sql.SQLFeatureNotSupportedException;
 import java.util.logging.Logger;
 
+@NoArgsConstructor
 @Slf4j
-public class RepositoryDataSource implements DataSource {
-    private final String driver;
-    private final String uri;
-    private final String user;
-    private final String password;
+@Component
+@PropertySource("classpath:app.properties")
+public class RepositoryDataSource extends AbstractGeneralTransaction<Connection> implements DataSource {
+    @Value("${postgres.driver}")
+    private String driver;
+    @Value("${postgres.uri}")
+    private String uri;
+    @Value("${postgres.user}")
+    private String user;
+    @Value("${postgres.password}")
+    private String password;
+    private static ComboPooledDataSource ds;
 
-    private static volatile RepositoryDataSource instance;
-
-    public RepositoryDataSource(String driver, String uri, String user, String password) {
-        this.driver = driver;
-        this.uri = uri;
-        this.user = user;
-        this.password = password;
+    @PostConstruct
+    private void init() {
+        ds = new ComboPooledDataSource();
         try {
-            Class.forName(this.driver);
-        } catch (ClassNotFoundException e) {
-            log.error(e.getMessage(), e);
-            throw new ApplicationException(e);
+            ds.setDriverClass(driver);
+        } catch (PropertyVetoException e) {
+            log.info(e.getMessage());
+            throw new ApplicationException("Ошибка с подключением драйвера в pool connection", e);
         }
+        ds.setJdbcUrl(uri);
+        ds.setUser(user);
+        ds.setPassword(password);
+        ds.setMinPoolSize(5);
+        ds.setAcquireIncrement(5);
+        ds.setMaxPoolSize(20);
     }
-
-    public static RepositoryDataSource getInstance(String driver, String uri, String user, String password){
-        if (instance == null){
-            synchronized (RepositoryDataSource.class){
-                if (instance == null){
-                    instance = new RepositoryDataSource(driver, uri, user, password);
-                }
-            }
-        }
-        return instance;
-    }
-
 
     @Override
-    public Connection getConnection() throws SQLException {
-        Connection con = DriverManager.getConnection(this.uri, this.user, this.password);
-        con.setAutoCommit(false);
-        return con;
+    public void commitSingle(Connection connection) throws SQLException {
+        if (ConnectionType.SINGLE.equals(connectionType)) {
+            connection.commit();
+        }
+    }
+
+    public void commitMany(Connection connection) throws SQLException {
+        connection.commit();
+        connectionType = ConnectionType.SINGLE;
+    }
+
+    @Override
+    public void rollBack(Connection con) {
+        if (con != null) {
+            try {
+                con.rollback();
+            } catch (SQLException e) {
+                log.error("Failed to rollback ", e);
+            }
+        }
+    }
+
+    @Override
+    public Connection getConnection() {
+        return getObject();
+    }
+
+    @Override
+    @SneakyThrows
+    public Connection getObject() {
+        Connection connection = threadLocal.get();
+        if (connection == null) {
+            connection = ds.getConnection();
+            threadLocal.set(connection);
+        }
+        connection.setAutoCommit(false);
+        return connection;
+    }
+
+    @Override
+    public void remove() {
+        if (threadLocal.get() != null) {
+            threadLocal.remove();
+        }
+    }
+
+    @Override
+    public void close(Connection con) {
+        try {
+            if (con != null) {
+                con.close();
+                remove();
+            }
+        } catch (Exception e) {
+            log.error("Couldn't close and remove connection", e);
+        }
     }
 
     @Override

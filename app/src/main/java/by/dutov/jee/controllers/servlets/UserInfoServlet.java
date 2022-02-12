@@ -1,23 +1,30 @@
+
 package by.dutov.jee.controllers.servlets;
 
-import by.dutov.jee.utils.CommandServletUtils;
+import by.dutov.jee.people.Person;
+import by.dutov.jee.service.person.PersonService;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.servlet.ModelAndView;
 
-import javax.servlet.DispatcherType;
-import javax.servlet.ServletException;
-import javax.servlet.annotation.WebServlet;
-import javax.servlet.http.HttpServlet;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import java.io.IOException;
+import java.security.Principal;
+import java.util.Optional;
 
 @Slf4j
-@WebServlet("/main/user-info")
-public class UserInfoServlet extends HttpServlet {
+@Controller
+@RequiredArgsConstructor
+public class UserInfoServlet {
+    private final PersonService personService;
 
-    @Override
-    protected void service(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+    @GetMapping("/main/user-info")
+    public ModelAndView userInfo(Principal principal) {
         log.info("Entered User Info Page");
-        CommandServletUtils.dispatcher(req, resp, "/userInfoPage.jsp", DispatcherType.FORWARD);
+        ModelAndView modelAndView = new ModelAndView();
+        modelAndView.setViewName("/main/userInfoPage");
+        Optional<Person> optionalPerson = personService.find(principal.getName());
+        optionalPerson.ifPresent(person -> modelAndView.addObject("user", person));
+        return modelAndView;
     }
 }

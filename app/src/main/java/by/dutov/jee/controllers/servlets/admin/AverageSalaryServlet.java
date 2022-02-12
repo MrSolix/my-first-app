@@ -1,32 +1,38 @@
 package by.dutov.jee.controllers.servlets.admin;
 
-import by.dutov.jee.service.Finance;
-import by.dutov.jee.utils.CommandServletUtils;
+import by.dutov.jee.service.facade.Finance;
 import lombok.extern.slf4j.Slf4j;
-
-import javax.servlet.DispatcherType;
-import javax.servlet.ServletException;
-import javax.servlet.annotation.WebServlet;
-import javax.servlet.http.HttpServlet;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import java.io.IOException;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.servlet.ModelAndView;
 
 @Slf4j
-@WebServlet("/admin/average-salary")
-public class AverageSalaryServlet extends HttpServlet {
+@Controller
+@RequestMapping("/admin/average-salary")
+public class AverageSalaryServlet {
+    private final Finance finance;
 
-    @Override
-    protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        log.info("Entered Average Salary Page");
-        CommandServletUtils.dispatcher(req, resp, "/admin/averageSalaryPage.jsp", DispatcherType.FORWARD);
+    @Autowired
+    public AverageSalaryServlet(Finance finance) {
+        this.finance = finance;
     }
 
-    @Override
-    protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+    @GetMapping
+    public String redirectAverageSalaryPage() {
+        return "/admin/averageSalaryPage";
+    }
+
+    @PostMapping
+    public ModelAndView averageSalary(@RequestParam("userName") String userName, @RequestParam("minRange") String min,
+            @RequestParam("maxRange") String max) {
+        ModelAndView modelAndView = new ModelAndView();
         log.info("Get parameters");
-        String userName = req.getParameter("userName");
-        Finance.getInstance().getAverageSalary(req, userName);
-        CommandServletUtils.dispatcher(req, resp, "/admin/averageSalaryPage.jsp", DispatcherType.INCLUDE);
+        log.info("userName = {}", userName);
+        log.info("Get person from db");
+        return finance.getAverageSalary(modelAndView, min, max, userName);
     }
 }

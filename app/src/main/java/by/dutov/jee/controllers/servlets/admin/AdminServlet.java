@@ -1,23 +1,18 @@
 package by.dutov.jee.controllers.servlets.admin;
 
-import by.dutov.jee.utils.CommandServletUtils;
 import lombok.extern.slf4j.Slf4j;
-
-import javax.servlet.DispatcherType;
-import javax.servlet.ServletException;
-import javax.servlet.annotation.WebServlet;
-import javax.servlet.http.HttpServlet;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import java.io.IOException;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.GetMapping;
 
 @Slf4j
-@WebServlet("/admin/admin")
-public class AdminServlet extends HttpServlet {
+@Controller
+public class AdminServlet {
 
-    @Override
-    protected void service(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+    @GetMapping("/admin")
+    @PreAuthorize("hasRole('ADMIN')")
+    public String redirectAdminPage() {
         log.info("Entered admin page.");
-        CommandServletUtils.dispatcher(req, resp, "/admin/adminPage.jsp", DispatcherType.FORWARD);
+        return "/admin/adminPage";
     }
 }

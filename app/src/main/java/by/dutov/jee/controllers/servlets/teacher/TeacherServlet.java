@@ -1,24 +1,18 @@
 package by.dutov.jee.controllers.servlets.teacher;
 
-import by.dutov.jee.utils.CommandServletUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.GetMapping;
 
-import javax.servlet.DispatcherType;
-import javax.servlet.ServletException;
-import javax.servlet.annotation.WebServlet;
-import javax.servlet.http.HttpServlet;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import java.io.IOException;
+@Slf4j
+@Controller
+public class TeacherServlet {
 
-@WebServlet("/teacher/teacher")
-public class TeacherServlet extends HttpServlet {
-    private static final Logger LOG = LoggerFactory.getLogger(TeacherServlet.class);
-
-    @Override
-    protected void service(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        LOG.info("Entered Teacher Page");
-        CommandServletUtils.dispatcher(req, resp, "/teacher/teacherPage.jsp", DispatcherType.FORWARD);
+    @GetMapping("/teacher")
+    @PreAuthorize("hasRole('TEACHER')")
+    public String redirectTeacherPage() {
+        log.info("Entered Teacher Page");
+        return "/teacher/teacherPage";
     }
 }

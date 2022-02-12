@@ -4,28 +4,45 @@ package by.dutov.jee.group;
 import by.dutov.jee.AbstractEntity;
 import by.dutov.jee.people.Student;
 import by.dutov.jee.people.Teacher;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
 
-import java.util.ArrayList;
-import java.util.List;
+import javax.persistence.CascadeType;
+import javax.persistence.Entity;
+import javax.persistence.FetchType;
+import javax.persistence.JoinColumn;
+import javax.persistence.JoinTable;
+import javax.persistence.ManyToMany;
+import javax.persistence.OneToOne;
+import javax.persistence.Table;
+import java.util.HashSet;
+import java.util.Set;
 
 @Data
 @NoArgsConstructor
 @EqualsAndHashCode(callSuper = true)
 @ToString(callSuper = true)
+@Entity
+@Table(name = "\"group\"")
 public class Group extends AbstractEntity {
-    @ToString.Include
-    @EqualsAndHashCode.Include
+    @ToString.Exclude
+    @EqualsAndHashCode.Exclude
+    @OneToOne(cascade = {CascadeType.MERGE, CascadeType.REFRESH})
+    @JsonIgnore
     private Teacher teacher;
-    @ToString.Include
-    private List<Student> students;
+    @ToString.Exclude
+    @EqualsAndHashCode.Exclude
+    @ManyToMany(fetch = FetchType.EAGER)
+    @JoinTable(
+            name = "group_student",
+            joinColumns = @JoinColumn(name = "group_id"),
+            inverseJoinColumns = @JoinColumn(name = "student_id"))
+    @JsonIgnore
+    private Set<Student> students;
 
-    {
-        students = new ArrayList<>();
-    }
 
     public Group withId(Integer id) {
         setId(id);
@@ -40,7 +57,7 @@ public class Group extends AbstractEntity {
         return this;
     }
 
-    public Group withStudents(List<Student> students) {
+    public Group withStudents(Set<Student> students) {
         setStudents(students);
         for (Student s : students) {
             s.addGroup(this);
@@ -49,9 +66,19 @@ public class Group extends AbstractEntity {
     }
 
     public Group addStudent(Student student) {
-        if (!students.contains(student) && student != null){
+        if (!students.contains(student) && student != null) {
             students.add(student);
         }
         return this;
+    }
+
+    public void removeStudent(Student student) {
+        students.remove(student);
+        student.getGroups().remove(this);
+    }
+
+    public void removeTeacher(Teacher teacher) {
+        this.teacher = null;
+        teacher.setGroup(null);
     }
 }
