@@ -36,6 +36,7 @@ public class StudentDaoJpa extends AbstractPersonDaoJpa {
     }
 
     private Student updateStudent(Student oldStudent, Student student) {
+        setPersonFields(oldStudent, student);
         Set<Group> groups = student.getGroups();
         List<Grade> grades = student.getGrades();
         if (groups != null && !groups.isEmpty()) {
@@ -43,6 +44,26 @@ public class StudentDaoJpa extends AbstractPersonDaoJpa {
         }
         if (grades != null && !grades.isEmpty()) {
             saveGrades(oldStudent, grades);
+        }
+        return oldStudent;
+    }
+
+    private Student setPersonFields(Student oldStudent, Student student) {
+        String userName = student.getUserName();
+        String password = student.getPassword();
+        String name = student.getName();
+        Integer age = student.getAge();
+        if (userName != null) {
+            oldStudent.setUserName(userName);
+        }
+        if (password != null) {
+            oldStudent.setPassword(password);
+        }
+        if (name != null) {
+            oldStudent.setName(name);
+        }
+        if (age != null) {
+            oldStudent.setAge(age);
         }
         return oldStudent;
     }

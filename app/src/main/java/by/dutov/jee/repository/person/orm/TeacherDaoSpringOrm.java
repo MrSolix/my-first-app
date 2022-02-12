@@ -2,6 +2,7 @@ package by.dutov.jee.repository.person.orm;
 
 import by.dutov.jee.group.Group;
 import by.dutov.jee.people.Person;
+import by.dutov.jee.people.Student;
 import by.dutov.jee.people.Teacher;
 import by.dutov.jee.service.exceptions.DataBaseException;
 import org.springframework.stereotype.Repository;
@@ -48,6 +49,7 @@ public class TeacherDaoSpringOrm extends AbstractPersonDaoSpringOrm {
     }
 
     public Teacher updateTeacher(Teacher oldTeacher, Teacher teacher) {
+        setPersonFields(oldTeacher, teacher);
         Group group = teacher.getGroup();
         Double salary = teacher.getSalary();
         if (group != null) {
@@ -57,6 +59,26 @@ public class TeacherDaoSpringOrm extends AbstractPersonDaoSpringOrm {
             saveSalary(oldTeacher, teacher);
         }
         return em.merge(oldTeacher);
+    }
+
+    private Teacher setPersonFields(Teacher oldTeacher, Teacher teacher) {
+        String userName = teacher.getUserName();
+        String password = teacher.getPassword();
+        String name = teacher.getName();
+        Integer age = teacher.getAge();
+        if (userName != null) {
+            oldTeacher.setUserName(userName);
+        }
+        if (password != null) {
+            oldTeacher.setPassword(password);
+        }
+        if (name != null) {
+            oldTeacher.setName(name);
+        }
+        if (age != null) {
+            oldTeacher.setAge(age);
+        }
+        return oldTeacher;
     }
 
     private void saveSalary(Teacher oldTeacher, Teacher teacher) {

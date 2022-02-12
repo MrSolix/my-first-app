@@ -32,6 +32,7 @@ public class TeacherDaoJpa extends AbstractPersonDaoJpa {
     }
 
     private Teacher updateTeacher(Teacher oldTeacher, Teacher teacher) {
+        setPersonFields(oldTeacher, teacher);
         Group group = teacher.getGroup();
         Double salary = teacher.getSalary();
         if (group != null) {
@@ -39,6 +40,26 @@ public class TeacherDaoJpa extends AbstractPersonDaoJpa {
         }
         if (salary != null) {
             saveSalary(oldTeacher, teacher);
+        }
+        return oldTeacher;
+    }
+
+    private Teacher setPersonFields(Teacher oldTeacher, Teacher teacher) {
+        String userName = teacher.getUserName();
+        String password = teacher.getPassword();
+        String name = teacher.getName();
+        Integer age = teacher.getAge();
+        if (userName != null) {
+            oldTeacher.setUserName(userName);
+        }
+        if (password != null) {
+            oldTeacher.setPassword(password);
+        }
+        if (name != null) {
+            oldTeacher.setName(name);
+        }
+        if (age != null) {
+            oldTeacher.setAge(age);
         }
         return oldTeacher;
     }

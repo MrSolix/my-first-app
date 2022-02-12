@@ -9,6 +9,8 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
+import org.hibernate.annotations.LazyCollection;
+import org.hibernate.annotations.LazyCollectionOption;
 
 import javax.persistence.CascadeType;
 import javax.persistence.DiscriminatorValue;
@@ -38,6 +40,7 @@ import java.util.Set;
 public class Student extends Person {
     @ToString.Include
     @EqualsAndHashCode.Include
+    @LazyCollection(LazyCollectionOption.FALSE)
     @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(
             name = "group_student",
@@ -46,11 +49,10 @@ public class Student extends Person {
     private Set<Group> groups;
     @ToString.Include
     @EqualsAndHashCode.Include
-    @OneToMany(
-            mappedBy = "student",
+    @LazyCollection(LazyCollectionOption.FALSE)
+    @OneToMany(mappedBy = "student",
             cascade = {CascadeType.REFRESH, CascadeType.MERGE, CascadeType.PERSIST},
-            orphanRemoval = true
-    )
+            orphanRemoval = true)
     private List<Grade> grades;
 
     {
